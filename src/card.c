@@ -1,4 +1,5 @@
 #include "card.h"
+#include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,39 +22,22 @@ void swap_cards(Card *c1, Card *c2) {
     *c2 = tmp;
 }
 
-/*
-    The card value works in a fun way.
-    The msb is the flip bit if it is 1 the card is flipped.
-    after that the 7th bit it the color bit, if it is 1 color it red.
-    then we got the 2 bits used for the suit.
-    The other 4 bits are used to calculate the value 3-15 (that makes it 1-13).
-*/
-void print_card(Card card) {
-    switch (VALUE_INDEX(card)) {
-    case 0:
-        // A definir
-        return;
-    case 1:
-        // A definir
-        return;
-    case 2:
-        // A definir
-        return;
-    }
-
-    if (IS_FLIPPED(card)) {
+void print_card(Card c) {
+    if (c.values.flip) {
         printf("\U0001F0A0");
         return;
     }
+    const uint8_t val_idx = (c.values.value >= 3) ? c.values.value - 3 : 0;
 
     // TODO: Implement way to paint the card red
+    // probably using ansi escape codes
     // if (IS_RED(card));
 
-    printf("%s", CARDS[SUIT_INDEX(card)][VALUE_INDEX(card - 3)]);
+    printf("%s", CARDS[c.values.suite][val_idx]);
 }
 
 Deck *create_deck(uint8_t size) {
-    Deck *deck = malloc(sizeof(Deck) + size);
+    Deck *deck = malloc(sizeof(Deck) + (sizeof(Card) * size));
     if (deck == NULL)
         return NULL;
     deck->top = 0;
@@ -65,9 +49,7 @@ void eliminate_deck(Deck *deck) { free(deck); }
 
 // if deck is empty it returns 0
 Card pop(Deck *deck) {
-    if (deck->top <= 0) {
-        return 0;
-    }
+    assert(deck->top > 0);
     return deck->cards[--deck->top];
 }
 
@@ -89,13 +71,17 @@ void print_deck(Deck *deck) {
     putchar('\n');
 }
 
-// Rewrite this later
+// I feel like there is a better way to write this thing here.
 void populate_deck(Deck *deck) {
-    Card temp_card = 3;
-    for (int i = 0; i < (deck->size); ++i) {
-        if (VALUE_INDEX(temp_card) == 0)
-            temp_card += 3;
-        push(deck, temp_card++);
+    deck->top = 0;
+    for (uint8_t s = 0; s < 4; ++s) {
+        uint8_t is_red = (s == 1 || s == 2) ? 1 : 0;
+        for (uint8_t v = 3; v <= 15; ++v) {
+            if (deck->top >= deck->size)
+                return;
+            deck->cards[deck->top++] = (Card){
+                .values = {.flip = 0, .color = is_red, .suite = s, .value = v}};
+        }
     }
 }
 
@@ -108,20 +94,22 @@ void shuffle_deck(Deck *deck) {
     }
 }
 
-// rewrite this using memcpy
+// This one here was rewritten by gemini and I need to take a look at it
+// I still should probably use memcpy here
 void deal(Deck *d1, Deck *d2, uint8_t q) {
-    Card temp;
-    for (; q > 0 && d2->top < d2->size; --q) {
-        temp = pop(d1);
-        if (temp)
-            push(d2, temp);
+    uint8_t available = (d1->top < q) ? d1->top : q;
+    uint8_t space_left = d2->size - d2->top;
+    uint8_t transfer_count = (available < space_left) ? available : space_left;
+
+    while (transfer_count--) {
+        d2->cards[d2->top++] = d1->cards[--d1->top];
     }
 }
 
-Card top_card(Deck *d1) { return d1->top ? d1->cards[d1->top - 1] : 0; }
+Card top_card(Deck *d1) { return d1->top ? d1->cards[d1->top - 1] : (Card){0}; }
 
 void flip_all(Deck *d1) {
     for (int8_t i = 0; i < d1->top; ++i) {
-        d1->cards[i] = FLIP_CARD(d1->cards[i]);
+        d1->cards[i].values.flip = !d1->cards[i].values.flip;
     }
 }
