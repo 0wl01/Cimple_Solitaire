@@ -29,7 +29,7 @@ typedef struct {
 extern const char *const SUIT[];
 extern const char *const CARDS[4][13];
 
-#define FLIP_CARD(card) (card) + 0x80
+#define FLIP_CARD(card) (card).card + 0x80
 #define IS_EMPTY(deck) !((deck)->top)
 
 Deck *create_deck(uint8_t size);
