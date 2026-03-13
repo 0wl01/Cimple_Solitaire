@@ -1,5 +1,5 @@
 /**
- * @file card_deck.h
+ * @file card.h
  * @brief Definitions and macros for playing cards and decks.
  */
 
