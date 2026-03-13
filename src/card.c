@@ -39,7 +39,7 @@ Card pop(Deck *deck) {
     return deck->cards[--deck->top];
 }
 
-uint8_t push(Deck *deck, Card card) {
+uint8_t push(Deck *deck, const Card card) {
     if (deck->top == deck->size) {
         // Deck is full
         return -1;
@@ -64,14 +64,14 @@ void populate_deck(Deck *deck) {
 }
 
 void shuffle_deck(Deck *deck) {
-    for (int i = 1; i < deck->top; ++i) {
+    for (uint8_t i = 1; i < deck->top; ++i) {
         swap_cards(deck->cards + i, deck->cards + arc4random_uniform(i + 1));
     }
 }
 
 // This one here was rewritten by gemini and I need to take a look at it
 // I still should probably use memcpy here
-void deal(Deck *d1, Deck *d2, uint8_t q) {
+void deal(Deck *restrict d1, Deck *restrict d2, uint8_t q) {
     uint8_t available = (d1->top < q) ? d1->top : q;
     uint8_t space_left = d2->size - d2->top;
     uint8_t transfer_count = (available < space_left) ? available : space_left;
@@ -81,7 +81,9 @@ void deal(Deck *d1, Deck *d2, uint8_t q) {
     }
 }
 
-Card top_card(Deck *d1) { return d1->top ? d1->cards[d1->top - 1] : (Card){0}; }
+Card top_card(Deck const *d1) {
+    return d1->top ? d1->cards[d1->top - 1] : (Card){0};
+}
 
 Card flip_card(Card c) {
     c.values.flip = c.values.flip ^ 1;
@@ -95,7 +97,7 @@ void flip_all(Deck *d1) {
 }
 
 // deal from d1 to d2 and flip the card
-void flip_deal(Deck *d1, Deck *d2) {
+void flip_deal(Deck *restrict d1, Deck *restrict d2) {
 
     Card c = pop(d1);
     if (push(d2, flip_card(c)) == 0)
@@ -105,7 +107,7 @@ void flip_deal(Deck *d1, Deck *d2) {
     push(d1, c);
 }
 
-void print_card(Card c) {
+void print_card(const Card c) {
     if (c.values.flip) {
         printf("\U0001F0A0");
         return;
@@ -119,7 +121,7 @@ void print_card(Card c) {
     printf("%s", CARDS[c.values.suite][val_idx]);
 }
 
-void print_deck(Deck *deck) {
+void print_deck(Deck const *deck) {
     for (int8_t i = deck->top - 1; i >= 0; --i) {
         printf("(%d: ", i);
         print_card(deck->cards[i]);

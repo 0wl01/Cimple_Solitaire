@@ -31,16 +31,16 @@ extern const char *const CARDS[4][13];
 
 #define IS_EMPTY(deck) !((deck)->top)
 
-Deck *create_deck(uint8_t size);
+Deck *create_deck(const uint8_t size);
 void eliminate_deck(Deck *deck);
 Card pop(Deck *deck);
-uint8_t push(Deck *deck, Card card);
-void print_card(Card card);
-void print_deck(Deck *deck);
+uint8_t push(Deck *deck, const Card card);
+void print_card(const Card card);
+void print_deck(const Deck *deck);
 void populate_deck(Deck *deck);
 void shuffle_deck(Deck *deck);
-void deal(Deck *d1, Deck *d2, uint8_t q);
-Card top_card(Deck *d1);
+void deal(Deck *restrict d1, Deck *restrict d2, uint8_t q);
+Card top_card(Deck const *d1);
 Card flip_card(Card c);
 void flip_all(Deck *d1);
-void flip_deal(Deck *d1, Deck *d2);
+void flip_deal(Deck *restrict d1, Deck *restrict d2);
