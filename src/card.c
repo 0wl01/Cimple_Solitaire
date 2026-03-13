@@ -4,7 +4,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+// Should I be using size_t in my loops?
+
 // lookup tables for card symbols and suits
+// Maybe if the red suits were index 1 and 3 i could use the 2^0 bit to check
+// the color
 const char *const SUIT[] = {"♠", "♥", "♦", "♣"};
 const char *const CARDS[4][13] = {
     {"🂡", "🂢", "🂣", "🂤", "🂥", "🂦", "🂧", "🂨", "🂩", "🂪", "🂫", "🂭",
@@ -17,6 +21,7 @@ const char *const CARDS[4][13] = {
      "🃞"} // 3: Clubs
 };
 
+// This functions is used to create our variable sized stacks of cards.
 Deck *create_deck(uint8_t size) {
     Deck *deck = malloc(sizeof(Deck) + (sizeof(Card) * size));
     if (deck == NULL)
@@ -26,14 +31,19 @@ Deck *create_deck(uint8_t size) {
     return deck;
 }
 
+// A function to free memory of uneeded decks in the game.
 void eliminate_deck(Deck *deck) { free(deck); }
 
-// if deck is empty it returns 0
+// This is a basic pop function to a stack.
+// It returns the card popped.
+// if deck is empty it returns 0.
 Card pop(Deck *deck) {
     assert(deck->top > 0);
     return deck->cards[--deck->top];
 }
 
+// This is a basic push function to a stack.
+// Returns the exit code 0 for sucess.
 uint8_t push(Deck *deck, const Card card) {
     if (deck->top == deck->size) {
         // Deck is full
@@ -44,6 +54,7 @@ uint8_t push(Deck *deck, const Card card) {
     return 0;
 }
 
+// Fills a stack of cards with Cards.
 // I feel like there is a better way to write this thing here.
 void populate_deck(Deck *deck) {
     deck->top = 0;
@@ -58,6 +69,7 @@ void populate_deck(Deck *deck) {
     }
 }
 
+// shuffles the deck array using the Fisher-yater shuffle.
 void shuffle_deck(Deck *deck) {
     for (uint8_t i = 1; i < deck->top; ++i) {
         uint8_t ran_num = arc4random_uniform(i + 1);
@@ -70,11 +82,12 @@ void shuffle_deck(Deck *deck) {
     }
 }
 
-// This one here was rewritten by gemini and I need to take a look at it
+// Simple function that takes elements from a deck to another.
+// It inverses position and only takes what is available
 // I still should probably use memcpy here
 void deal(Deck *restrict d1, Deck *restrict d2, uint8_t q) {
-    uint8_t available = (d1->top < q) ? d1->top : q;
-    uint8_t space_left = d2->size - d2->top;
+    const uint8_t available = (d1->top < q) ? d1->top : q;
+    const uint8_t space_left = d2->size - d2->top;
     uint8_t transfer_count = (available < space_left) ? available : space_left;
 
     while (transfer_count--) {
@@ -82,18 +95,23 @@ void deal(Deck *restrict d1, Deck *restrict d2, uint8_t q) {
     }
 }
 
+// A function that returns the top card of a card stack
+// or returns 0 if the stack is empty.
 Card top_card(Deck const *d1) {
     return d1->top ? d1->cards[d1->top - 1] : (Card){0};
 }
 
+// Flips a card by changing the flip bit.
 Card flip_card(Card c) {
-    c.values.flip = c.values.flip ^ 1;
+    c.values.flip ^= 1;
     return c;
 }
 
+// flips all cards in a stack.
 void flip_all(Deck *d1) {
-    for (int8_t i = 0; i < d1->top; ++i) {
-        d1->cards[i].values.flip = !d1->cards[i].values.flip;
+    Card *end = d1->cards + d1->top;
+    for (Card *c = d1->cards; c < end; ++c) {
+        c->values.flip ^= 1;
     }
 }
 
@@ -108,6 +126,7 @@ void flip_deal(Deck *restrict d1, Deck *restrict d2) {
     push(d1, c);
 }
 
+// debug function to print a card.
 void print_card(const Card c) {
     if (c.values.flip) {
         printf("\U0001F0A0");
@@ -122,6 +141,7 @@ void print_card(const Card c) {
     printf("%s", CARDS[c.values.suit][val_idx]);
 }
 
+// debug function to print a deck.
 void print_deck(Deck const *deck) {
     for (int8_t i = deck->top - 1; i >= 0; --i) {
         printf("(%d: ", i);
