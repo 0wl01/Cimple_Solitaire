@@ -12,14 +12,10 @@
 // the color
 const char *const SUIT[] = {"♠", "♥", "♦", "♣"};
 const char *const CARDS[4][13] = {
-    {"🂡", "🂢", "🂣", "🂤", "🂥", "🂦", "🂧", "🂨", "🂩", "🂪", "🂫", "🂭",
-     "🂮"}, // 0: Spades
-    {"🂱", "🂲", "🂳", "🂴", "🂵", "🂶", "🂷", "🂸", "🂹", "🂺", "🂻", "🂽",
-     "🂾"}, // 1: Hearts
-    {"🃁", "🃂", "🃃", "🃄", "🃅", "🃆", "🃇", "🃈", "🃉", "🃊", "🃋", "🃍",
-     "🃎"}, // 2: Diamonds
-    {"🃑", "🃒", "🃓", "🃔", "🃕", "🃖", "🃗", "🃘", "🃙", "🃚", "🃛", "🃝",
-     "🃞"} // 3: Clubs
+    {"🂡", "🂢", "🂣", "🂤", "🂥", "🂦", "🂧", "🂨", "🂩", "🂪", "🂫", "🂭", "🂮"}, // 0: Spades
+    {"🂱", "🂲", "🂳", "🂴", "🂵", "🂶", "🂷", "🂸", "🂹", "🂺", "🂻", "🂽", "🂾"}, // 1: Hearts
+    {"🃁", "🃂", "🃃", "🃄", "🃅", "🃆", "🃇", "🃈", "🃉", "🃊", "🃋", "🃍", "🃎"}, // 2: Diamonds
+    {"🃑", "🃒", "🃓", "🃔", "🃕", "🃖", "🃗", "🃘", "🃙", "🃚", "🃛", "🃝", "🃞"}  // 3: Clubs
 };
 
 // This functions is used to create our variable sized stacks of cards.
@@ -64,8 +60,7 @@ void populate_deck(Deck *deck) {
         for (uint8_t v = 3; v <= 15; ++v) {
             if (deck->top >= deck->size)
                 return;
-            deck->cards[deck->top++] = (Card){
-                .values = {.flip = 0, .color = is_red, .suit = s, .value = v}};
+            deck->cards[deck->top++] = (Card){.values = {.flip = 0, .color = is_red, .suit = s, .value = v}};
         }
     }
 }
@@ -98,9 +93,7 @@ void deal(Deck *restrict d1, Deck *restrict d2, uint8_t q) {
 
 // A function that returns the top card of a card stack
 // or returns 0 if the stack is empty.
-Card top_card(Deck const *d1) {
-    return d1->top ? d1->cards[d1->top - 1] : (Card){0};
-}
+Card top_card(Deck const *d1) { return d1->top ? d1->cards[d1->top - 1] : (Card){0}; }
 
 // Flips a card by changing the flip bit.
 Card flip_card(Card c) {
