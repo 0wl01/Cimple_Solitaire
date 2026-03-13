@@ -5,6 +5,7 @@
 #include <stdlib.h>
 
 // Should I be using size_t in my loops?
+// Search about realloc and check if applicable in this code.
 
 // lookup tables for card symbols and suits
 // Maybe if the red suits were index 1 and 3 i could use the 2^0 bit to check
@@ -116,14 +117,14 @@ void flip_all(Deck *d1) {
 }
 
 // deal from d1 to d2 and flip the card
-void flip_deal(Deck *restrict d1, Deck *restrict d2) {
+void flip_deal(Deck *restrict d1, Deck *restrict d2, uint8_t q) {
+    const uint8_t available = (d1->top < q) ? d1->top : q;
+    const uint8_t space_left = d2->size - d2->top;
+    uint8_t transfer_count = (available < space_left) ? available : space_left;
 
-    Card c = pop(d1);
-    if (push(d2, flip_card(c)) == 0)
-        return;
-    // Deck d2 is full
-    // Send card back
-    push(d1, c);
+    while (transfer_count--) {
+        d2->cards[d2->top++] = flip_card(d1->cards[--d1->top]);
+    }
 }
 
 // debug function to print a card.
