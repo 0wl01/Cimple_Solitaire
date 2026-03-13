@@ -1,10 +1,11 @@
 #include "golf.h"
 #include <stdint.h>
+#include <stdio.h>
 
 #define COLUMNS 7
 #define COLUMN_SIZE 5
 
-const uint8_t deal_lookup[16] = {
+static const uint8_t deal_lookup[16] = {
     0x00, // 0 is reserved to represent empty space.
     0x00, // TBD
     0x00, // TBD
@@ -12,24 +13,20 @@ const uint8_t deal_lookup[16] = {
     0xB9, 0xCA, 0xDB, 0xEC, 0xFD, 0x3E,
 };
 
-void init_columns(Deck *columns[]) {
+static void init_columns(Deck *columns[]) {
     for (uint8_t i = 0; i < COLUMNS; ++i) {
         columns[i] = create_deck(COLUMN_SIZE);
     }
 }
 
 // is this the best way to write this?
-int8_t can_deal(Deck *d1, Deck *d2) {
-    uint8_t possible_stacks = deal_lookup[VALUE_INDEX(top_card(d1))];
-    return VALUE_INDEX(top_card(d2)) == (possible_stacks & 0x0F) ||
-           VALUE_INDEX(top_card(d2)) == ((possible_stacks >> 4) & 0x0F);
-}
-
-// deal from d1 to d2 and flip the card
-void flip_deal(Deck *d1, Deck *d2) {
-
-    deal(d1, d2, 1);
-    d2->cards[d2->top - 1] = FLIP_CARD(top_card(d2));
+// Check if can deal from d1 to d2.
+static int8_t can_deal(Deck *d1, Deck *d2) {
+    Card c1 = top_card(d1);
+    Card c2 = top_card(d2);
+    uint8_t possible_stacks = deal_lookup[c1.values.value];
+    return c2.values.value == (possible_stacks & 0x0F) ||
+           c2.values.value == ((possible_stacks >> 4) & 0x0F);
 }
 
 // TODO
@@ -39,6 +36,8 @@ void start_game() {
     Deck *columns[COLUMNS];
 
     populate_deck(stock);
+    print_deck(stock);
+    printf("\n");
     init_columns(columns);
     shuffle_deck(stock);
 

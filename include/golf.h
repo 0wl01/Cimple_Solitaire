@@ -9,9 +9,5 @@
  *
  * I'm using a lookup table because this is O(1) complexity.
  */
-extern const uint8_t deal_lookup[16];
 
-void init_columns(Deck *columns[]);
-int8_t can_deal(Deck *d1, Deck *d2);
-void flip_deal(Deck *d1, Deck *d2);
 void start_game();

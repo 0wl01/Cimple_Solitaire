@@ -29,7 +29,6 @@ typedef struct {
 extern const char *const SUIT[];
 extern const char *const CARDS[4][13];
 
-#define FLIP_CARD(card) (card).card + 0x80
 #define IS_EMPTY(deck) !((deck)->top)
 
 Deck *create_deck(uint8_t size);
@@ -43,4 +42,6 @@ void populate_deck(Deck *deck);
 void shuffle_deck(Deck *deck);
 void deal(Deck *d1, Deck *d2, uint8_t q);
 Card top_card(Deck *d1);
+Card flip_card(Card c);
 void flip_all(Deck *d1);
+void flip_deal(Deck *d1, Deck *d2);

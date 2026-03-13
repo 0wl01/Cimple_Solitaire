@@ -16,24 +16,10 @@ const char *const CARDS[4][13] = {
      "🃞"} // 3: Clubs
 };
 
-void swap_cards(Card *c1, Card *c2) {
+inline void swap_cards(Card *c1, Card *c2) {
     Card tmp = *c1;
     *c1 = *c2;
     *c2 = tmp;
-}
-
-void print_card(Card c) {
-    if (c.values.flip) {
-        printf("\U0001F0A0");
-        return;
-    }
-    const uint8_t val_idx = (c.values.value >= 3) ? c.values.value - 3 : 0;
-
-    // TODO: Implement way to paint the card red
-    // probably using ansi escape codes
-    // if (IS_RED(card));
-
-    printf("%s", CARDS[c.values.suite][val_idx]);
 }
 
 Deck *create_deck(uint8_t size) {
@@ -45,15 +31,15 @@ Deck *create_deck(uint8_t size) {
     return deck;
 }
 
-void eliminate_deck(Deck *deck) { free(deck); }
+inline void eliminate_deck(Deck *deck) { free(deck); }
 
 // if deck is empty it returns 0
-Card pop(Deck *deck) {
+inline Card pop(Deck *deck) {
     assert(deck->top > 0);
     return deck->cards[--deck->top];
 }
 
-uint8_t push(Deck *deck, Card card) {
+inline uint8_t push(Deck *deck, Card card) {
     if (deck->top == deck->size) {
         // Deck is full
         return -1;
@@ -61,14 +47,6 @@ uint8_t push(Deck *deck, Card card) {
     deck->cards[(deck->top)] = card;
     deck->top = deck->top + 1;
     return 0;
-}
-
-void print_deck(Deck *deck) {
-    for (int8_t i = deck->top - 1; i >= 0; --i) {
-        print_card(deck->cards[i]);
-        printf(", ");
-    }
-    putchar('\n');
 }
 
 // I feel like there is a better way to write this thing here.
@@ -106,10 +84,51 @@ void deal(Deck *d1, Deck *d2, uint8_t q) {
     }
 }
 
-Card top_card(Deck *d1) { return d1->top ? d1->cards[d1->top - 1] : (Card){0}; }
+inline Card top_card(Deck *d1) {
+    return d1->top ? d1->cards[d1->top - 1] : (Card){0};
+}
+
+inline Card flip_card(Card c) {
+    c.values.flip = c.values.flip ^ 1;
+    return c;
+}
 
 void flip_all(Deck *d1) {
     for (int8_t i = 0; i < d1->top; ++i) {
         d1->cards[i].values.flip = !d1->cards[i].values.flip;
     }
+}
+
+// deal from d1 to d2 and flip the card
+void flip_deal(Deck *d1, Deck *d2) {
+
+    Card c = pop(d1);
+    if (push(d2, flip_card(c)) == 0)
+        return;
+    // Deck d2 is full
+    // Send card back
+    push(d1, c);
+}
+
+void print_card(Card c) {
+    if (c.values.flip) {
+        printf("\U0001F0A0");
+        return;
+    }
+    const uint8_t val_idx = (c.values.value >= 3) ? c.values.value - 3 : 0;
+
+    // TODO: Implement way to paint the card red
+    // probably using ansi escape codes
+    // if (IS_RED(card));
+
+    printf("%s", CARDS[c.values.suite][val_idx]);
+}
+
+void print_deck(Deck *deck) {
+    for (int8_t i = deck->top - 1; i >= 0; --i) {
+        printf("(%d: ", i);
+        print_card(deck->cards[i]);
+        printf("%d), ", deck->cards[i].values.value);
+    }
+    putchar('\n');
 }

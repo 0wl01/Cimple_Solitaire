@@ -1,0 +1,189 @@
+#include <CUnit/Basic.h>
+#include <CUnit/CUnit.h>
+#include <stdlib.h>
+
+// Include the header from your project's include directory
+#include "../include/card.h"
+
+/* Suite initialization and cleanup functions */
+int init_suite_card(void) { return 0; }
+
+int clean_suite_card(void) { return 0; }
+
+/* --- TESTS --- */
+
+void test_create_and_eliminate_deck(void) {
+    Deck *d = create_deck(52);
+    CU_ASSERT_PTR_NOT_NULL(d);
+    CU_ASSERT_EQUAL(d->size, 52);
+    CU_ASSERT_EQUAL(d->top, 0);
+    CU_ASSERT_TRUE(IS_EMPTY(d));
+
+    eliminate_deck(d);
+}
+
+void test_push_and_pop(void) {
+    Deck *d = create_deck(2);
+    Card c1 = {.values = {.flip = 0, .color = 1, .suite = 1, .value = 10}};
+    Card c2 = {.values = {.flip = 1, .color = 0, .suite = 0, .value = 14}};
+
+    // Test successful pushes
+    CU_ASSERT_EQUAL(push(d, c1), 0);
+    CU_ASSERT_EQUAL(d->top, 1);
+    CU_ASSERT_FALSE(IS_EMPTY(d));
+
+    CU_ASSERT_EQUAL(push(d, c2), 0);
+    CU_ASSERT_EQUAL(d->top, 2);
+
+    // Test pushing to a full deck
+    Card c3 = {.card = 0xFF};
+    CU_ASSERT_EQUAL(push(d, c3), (uint8_t)-1); // Should fail and return -1
+
+    // Test pop (should pop c2 first, LIFO)
+    Card popped = pop(d);
+    CU_ASSERT_EQUAL(popped.card, c2.card);
+    CU_ASSERT_EQUAL(popped.values.flip, 1);
+    CU_ASSERT_EQUAL(d->top, 1);
+
+    eliminate_deck(d);
+}
+
+void test_swap_cards(void) {
+    Card c1 = {.card = 0xAA};
+    Card c2 = {.card = 0x55};
+
+    swap_cards(&c1, &c2);
+
+    CU_ASSERT_EQUAL(c1.card, 0x55);
+    CU_ASSERT_EQUAL(c2.card, 0xAA);
+}
+
+void test_populate_deck(void) {
+    Deck *d = create_deck(52);
+    populate_deck(d);
+
+    CU_ASSERT_EQUAL(d->top, 52);
+
+    // Test first card (Should be Spades (0), Black (0), Value 3)
+    CU_ASSERT_EQUAL(d->cards[0].values.suite, 0);
+    CU_ASSERT_EQUAL(d->cards[0].values.color, 0);
+    CU_ASSERT_EQUAL(d->cards[0].values.value, 3);
+    CU_ASSERT_EQUAL(d->cards[0].values.flip, 0);
+
+    // Test a middle card (Should be Hearts (1), Red (1), Value 10)
+    CU_ASSERT_EQUAL(d->cards[22].values.suite, 1);
+    CU_ASSERT_EQUAL(d->cards[22].values.color, 1);
+    CU_ASSERT_EQUAL(d->cards[22].values.value, 12);
+
+    // Test last card (Should be Clubs (3), Black (0), Value 15) -> index 51
+    CU_ASSERT_EQUAL(d->cards[51].values.suite, 3);
+    CU_ASSERT_EQUAL(d->cards[51].values.color, 0);
+    CU_ASSERT_EQUAL(d->cards[51].values.value, 15);
+
+    eliminate_deck(d);
+}
+
+void test_deal(void) {
+    Deck *d1 = create_deck(10);
+    Deck *d2 = create_deck(5);
+
+    populate_deck(d1); // d1 has 10 cards now
+
+    // Deal 3 cards from d1 to d2
+    deal(d1, d2, 3);
+    CU_ASSERT_EQUAL(d1->top, 7);
+    CU_ASSERT_EQUAL(d2->top, 3);
+
+    // The top card of d1 (index 9) should now be the bottom card of d2 (index
+    // 0) because dealing flips the order (LIFO stack transfer) d1's original
+    // index 9 was Spades (0), Value 12
+    CU_ASSERT_EQUAL(d2->cards[0].values.suite, 0);
+    CU_ASSERT_EQUAL(d2->cards[0].values.value, 12);
+
+    // Attempt to deal 5 more cards (but d2 only has 2 spaces left)
+    deal(d1, d2, 5);
+    CU_ASSERT_EQUAL(d1->top, 5); // Only 2 cards should be removed
+    CU_ASSERT_EQUAL(d2->top, 5); // d2 should be completely full
+
+    eliminate_deck(d1);
+    eliminate_deck(d2);
+}
+
+void test_top_card(void) {
+    Deck *d = create_deck(5);
+
+    // Test empty deck returns {0} safely
+    Card empty_top = top_card(d);
+    CU_ASSERT_EQUAL(empty_top.card, 0);
+
+    // Test normal top card
+    Card c1 = {.values = {.value = 7}};
+    push(d, c1);
+
+    Card top = top_card(d);
+    CU_ASSERT_EQUAL(top.card, c1.card);
+    CU_ASSERT_EQUAL(d->top, 1); // Ensure top_card doesn't pop it!
+
+    eliminate_deck(d);
+}
+
+void test_flip_all(void) {
+    Deck *d = create_deck(3);
+    populate_deck(d); // Contains 3 unflipped cards
+
+    CU_ASSERT_EQUAL(d->cards[0].values.flip, 0);
+    CU_ASSERT_EQUAL(d->cards[2].values.flip, 0);
+
+    flip_all(d);
+
+    CU_ASSERT_EQUAL(d->cards[0].values.flip, 1);
+    CU_ASSERT_EQUAL(d->cards[2].values.flip, 1);
+
+    // Test toggle off
+    flip_all(d);
+    CU_ASSERT_EQUAL(d->cards[0].values.flip, 0);
+
+    eliminate_deck(d);
+}
+
+/* --- MAIN TEST RUNNER --- */
+
+int main(void) {
+    CU_pSuite pSuite = NULL;
+
+    // Initialize the CUnit test registry
+    if (CUE_SUCCESS != CU_initialize_registry()) {
+        return CU_get_error();
+    }
+
+    // Add a suite to the registry
+    pSuite = CU_add_suite("Card_Test_Suite", init_suite_card, clean_suite_card);
+    if (NULL == pSuite) {
+        CU_cleanup_registry();
+        return CU_get_error();
+    }
+
+    // Add the tests to the suite
+    if ((NULL == CU_add_test(pSuite, "test of create/eliminate deck",
+                             test_create_and_eliminate_deck)) ||
+        (NULL ==
+         CU_add_test(pSuite, "test of push and pop", test_push_and_pop)) ||
+        (NULL == CU_add_test(pSuite, "test of swap_cards", test_swap_cards)) ||
+        (NULL ==
+         CU_add_test(pSuite, "test of populate_deck", test_populate_deck)) ||
+        (NULL == CU_add_test(pSuite, "test of deal", test_deal)) ||
+        (NULL == CU_add_test(pSuite, "test of top_card", test_top_card)) ||
+        (NULL == CU_add_test(pSuite, "test of flip_all", test_flip_all))) {
+        CU_cleanup_registry();
+        return CU_get_error();
+    }
+
+    // Run all tests using the basic interface
+    CU_basic_set_mode(CU_BRM_VERBOSE);
+    CU_basic_run_tests();
+
+    int fails = CU_get_number_of_failures();
+
+    CU_cleanup_registry();
+    return fails > 0 ? 1 : 0; // Return non-zero if tests fail
+}
