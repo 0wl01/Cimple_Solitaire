@@ -35,7 +35,6 @@ Deck *create_deck(uint8_t size);
 void eliminate_deck(Deck *deck);
 Card pop(Deck *deck);
 uint8_t push(Deck *deck, Card card);
-void swap_cards(Card *c1, Card *c2);
 void print_card(Card card);
 void print_deck(Deck *deck);
 void populate_deck(Deck *deck);

@@ -16,7 +16,7 @@ const char *const CARDS[4][13] = {
      "🃞"} // 3: Clubs
 };
 
-inline void swap_cards(Card *c1, Card *c2) {
+static void swap_cards(Card *c1, Card *c2) {
     Card tmp = *c1;
     *c1 = *c2;
     *c2 = tmp;
@@ -31,15 +31,15 @@ Deck *create_deck(uint8_t size) {
     return deck;
 }
 
-inline void eliminate_deck(Deck *deck) { free(deck); }
+void eliminate_deck(Deck *deck) { free(deck); }
 
 // if deck is empty it returns 0
-inline Card pop(Deck *deck) {
+Card pop(Deck *deck) {
     assert(deck->top > 0);
     return deck->cards[--deck->top];
 }
 
-inline uint8_t push(Deck *deck, Card card) {
+uint8_t push(Deck *deck, Card card) {
     if (deck->top == deck->size) {
         // Deck is full
         return -1;
@@ -64,11 +64,8 @@ void populate_deck(Deck *deck) {
 }
 
 void shuffle_deck(Deck *deck) {
-    uint8_t random_int;
     for (int i = 1; i < deck->top; ++i) {
-        arc4random_buf(&random_int, 1);
-        random_int = random_int % (i + 1);
-        swap_cards(deck->cards + i, deck->cards + random_int);
+        swap_cards(deck->cards + i, deck->cards + arc4random_uniform(i + 1));
     }
 }
 
@@ -84,11 +81,9 @@ void deal(Deck *d1, Deck *d2, uint8_t q) {
     }
 }
 
-inline Card top_card(Deck *d1) {
-    return d1->top ? d1->cards[d1->top - 1] : (Card){0};
-}
+Card top_card(Deck *d1) { return d1->top ? d1->cards[d1->top - 1] : (Card){0}; }
 
-inline Card flip_card(Card c) {
+Card flip_card(Card c) {
     c.values.flip = c.values.flip ^ 1;
     return c;
 }
