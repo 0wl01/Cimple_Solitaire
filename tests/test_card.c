@@ -24,8 +24,8 @@ void test_create_and_eliminate_deck(void) {
 
 void test_push_and_pop(void) {
     Deck *d = create_deck(2);
-    Card c1 = {.values = {.flip = 0, .color = 1, .suite = 1, .value = 10}};
-    Card c2 = {.values = {.flip = 1, .color = 0, .suite = 0, .value = 14}};
+    Card c1 = {.values = {.flip = 0, .color = 1, .suit = 1, .value = 10}};
+    Card c2 = {.values = {.flip = 1, .color = 0, .suit = 0, .value = 14}};
 
     // Test successful pushes
     CU_ASSERT_EQUAL(push(d, c1), 0);
@@ -55,18 +55,18 @@ void test_populate_deck(void) {
     CU_ASSERT_EQUAL(d->top, 52);
 
     // Test first card (Should be Spades (0), Black (0), Value 3)
-    CU_ASSERT_EQUAL(d->cards[0].values.suite, 0);
+    CU_ASSERT_EQUAL(d->cards[0].values.suit, 0);
     CU_ASSERT_EQUAL(d->cards[0].values.color, 0);
     CU_ASSERT_EQUAL(d->cards[0].values.value, 3);
     CU_ASSERT_EQUAL(d->cards[0].values.flip, 0);
 
     // Test a middle card (Should be Hearts (1), Red (1), Value 10)
-    CU_ASSERT_EQUAL(d->cards[22].values.suite, 1);
+    CU_ASSERT_EQUAL(d->cards[22].values.suit, 1);
     CU_ASSERT_EQUAL(d->cards[22].values.color, 1);
     CU_ASSERT_EQUAL(d->cards[22].values.value, 12);
 
     // Test last card (Should be Clubs (3), Black (0), Value 15) -> index 51
-    CU_ASSERT_EQUAL(d->cards[51].values.suite, 3);
+    CU_ASSERT_EQUAL(d->cards[51].values.suit, 3);
     CU_ASSERT_EQUAL(d->cards[51].values.color, 0);
     CU_ASSERT_EQUAL(d->cards[51].values.value, 15);
 
@@ -87,7 +87,7 @@ void test_deal(void) {
     // The top card of d1 (index 9) should now be the bottom card of d2 (index
     // 0) because dealing flips the order (LIFO stack transfer) d1's original
     // index 9 was Spades (0), Value 12
-    CU_ASSERT_EQUAL(d2->cards[0].values.suite, 0);
+    CU_ASSERT_EQUAL(d2->cards[0].values.suit, 0);
     CU_ASSERT_EQUAL(d2->cards[0].values.value, 12);
 
     // Attempt to deal 5 more cards (but d2 only has 2 spaces left)
