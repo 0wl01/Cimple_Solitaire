@@ -15,7 +15,7 @@ typedef union {
     struct {
         uint8_t flip : 1;
         uint8_t color : 1;
-        uint8_t suite : 2;
+        uint8_t suit : 2;
         uint8_t value : 4;
     } values;
 } Card;

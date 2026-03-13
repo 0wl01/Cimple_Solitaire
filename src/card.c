@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+// lookup tables for card symbols and suits
 const char *const SUIT[] = {"♠", "♥", "♦", "♣"};
 const char *const CARDS[4][13] = {
     {"🂡", "🂢", "🂣", "🂤", "🂥", "🂦", "🂧", "🂨", "🂩", "🂪", "🂫", "🂭",
@@ -15,12 +16,6 @@ const char *const CARDS[4][13] = {
     {"🃑", "🃒", "🃓", "🃔", "🃕", "🃖", "🃗", "🃘", "🃙", "🃚", "🃛", "🃝",
      "🃞"} // 3: Clubs
 };
-
-static void swap_cards(Card *c1, Card *c2) {
-    Card tmp = *c1;
-    *c1 = *c2;
-    *c2 = tmp;
-}
 
 Deck *create_deck(uint8_t size) {
     Deck *deck = malloc(sizeof(Deck) + (sizeof(Card) * size));
@@ -58,14 +53,20 @@ void populate_deck(Deck *deck) {
             if (deck->top >= deck->size)
                 return;
             deck->cards[deck->top++] = (Card){
-                .values = {.flip = 0, .color = is_red, .suite = s, .value = v}};
+                .values = {.flip = 0, .color = is_red, .suit = s, .value = v}};
         }
     }
 }
 
 void shuffle_deck(Deck *deck) {
     for (uint8_t i = 1; i < deck->top; ++i) {
-        swap_cards(deck->cards + i, deck->cards + arc4random_uniform(i + 1));
+        uint8_t ran_num = arc4random_uniform(i + 1);
+        if (ran_num == i)
+            continue;
+        // Swap cards
+        Card temp = deck->cards[i];
+        deck->cards[i] = deck->cards[ran_num];
+        deck->cards[ran_num] = temp;
     }
 }
 
@@ -118,7 +119,7 @@ void print_card(const Card c) {
     // probably using ansi escape codes
     // if (IS_RED(card));
 
-    printf("%s", CARDS[c.values.suite][val_idx]);
+    printf("%s", CARDS[c.values.suit][val_idx]);
 }
 
 void print_deck(Deck const *deck) {

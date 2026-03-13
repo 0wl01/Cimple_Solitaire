@@ -48,16 +48,6 @@ void test_push_and_pop(void) {
     eliminate_deck(d);
 }
 
-void test_swap_cards(void) {
-    Card c1 = {.card = 0xAA};
-    Card c2 = {.card = 0x55};
-
-    swap_cards(&c1, &c2);
-
-    CU_ASSERT_EQUAL(c1.card, 0x55);
-    CU_ASSERT_EQUAL(c2.card, 0xAA);
-}
-
 void test_populate_deck(void) {
     Deck *d = create_deck(52);
     populate_deck(d);
@@ -168,7 +158,6 @@ int main(void) {
                              test_create_and_eliminate_deck)) ||
         (NULL ==
          CU_add_test(pSuite, "test of push and pop", test_push_and_pop)) ||
-        (NULL == CU_add_test(pSuite, "test of swap_cards", test_swap_cards)) ||
         (NULL ==
          CU_add_test(pSuite, "test of populate_deck", test_populate_deck)) ||
         (NULL == CU_add_test(pSuite, "test of deal", test_deal)) ||
