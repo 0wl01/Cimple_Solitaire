@@ -70,15 +70,13 @@ void start_game() {
     Deck *columns[COLUMNS];
 
     populate_deck(stock);
-    print_deck(stock);
-    printf("\n");
-    init_columns(columns);
     shuffle_deck(stock);
+    init_columns(columns);
 
-    for (uint8_t i = 0; i < COLUMNS; ++i)
+    for (uint8_t i = 0; i < COLUMNS; ++i) {
         deal(stock, columns[i], COLUMN_SIZE);
-    flip_all(stock);
-    for (uint8_t i = 0; i < COLUMNS; ++i)
         print_deck(columns[i]);
+    }
+    flip_all(stock);
     print_deck(stock);
 }
