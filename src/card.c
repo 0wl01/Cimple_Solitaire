@@ -116,7 +116,9 @@ void flip_deal(Deck *restrict d1, Deck *restrict d2, uint8_t q) {
     uint8_t transfer_count = (available < space_left) ? available : space_left;
 
     while (transfer_count--) {
-        d2->cards[d2->top++] = flip_card(d1->cards[--d1->top]);
+        Card temp = d1->cards[--d1->top];
+        temp.values.flip = !temp.values.flip;
+        d2->cards[d2->top++] = temp;
     }
 }
 
@@ -124,6 +126,10 @@ void flip_deal(Deck *restrict d1, Deck *restrict d2, uint8_t q) {
 void print_card(const Card c) {
     if (c.values.flip) {
         printf("\U0001F0A0");
+        return;
+    }
+    if (c.values.value < 3) {
+        printf(" ");
         return;
     }
     const uint8_t val_idx = (c.values.value >= 3) ? c.values.value - 3 : 0;
@@ -138,9 +144,10 @@ void print_card(const Card c) {
 // debug function to print a deck.
 void print_deck(Deck const *deck) {
     for (int8_t i = deck->top - 1; i >= 0; --i) {
-        printf("(%d: ", i);
+        // printf("(%d: ", i);
         print_card(deck->cards[i]);
-        printf("%d), ", deck->cards[i].values.value);
+        printf(", ");
+        // printf("%d), ", deck->cards[i].values.value);
     }
     putchar('\n');
 }
