@@ -20,7 +20,7 @@ void print_deck(const Deck *deck);
 
 void print_decks_columns(Deck *restrict decks[], uint8_t columns);
 
-void print_end(uint8_t win);
+void print_end(const uint8_t win);
 
 void print_golf_table(golf_state *table);
 

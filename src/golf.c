@@ -46,6 +46,12 @@ static uint8_t can_deal(Deck *d1, Deck *d2) {
     return possible_stacks && (c2_val == (possible_stacks & 0x0F) || c2_val == possible_stacks >> 4 || !c2_val);
 }
 
+// TODO: Docs
+static void buy(Deck *restrict d1, Deck *restrict d2) {
+    if (can_deal(d1, d2))
+        deal(d1, d2, 1);
+}
+
 /**
  * @brief Checks if there's still a play to be made
  *
@@ -94,7 +100,7 @@ static void game_loop(char input, golf_state *table) {
         exit(0);
     } else if (input <= '7' && input >= '1') {
         input -= '1';
-        deal(table->columns[(uint8_t)input], table->waste, 1);
+        buy(table->columns[(uint8_t)input], table->waste);
     }
 }
 

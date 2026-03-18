@@ -55,11 +55,11 @@ void print_decks_columns(Deck *restrict decks[], uint8_t columns) {
     }
 }
 
-void print_end(uint8_t win) {
-    if (win)
-        printf("You Win!");
+void print_end(const uint8_t win) {
+    if (!win)
+        printf("You Win!\n");
     else
-        printf("You Lose! HAHA");
+        printf("You Lose! HAHA\n");
 }
 
 void print_golf_table(golf_state *table) {
