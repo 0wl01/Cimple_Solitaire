@@ -136,6 +136,42 @@ void test_flip_all(void) {
     eliminate_deck(d);
 }
 
+void test_flip_card(void) {
+    Card c = {.values= {.flip = 0, .color = 1, .suit= 1, .value = 10}};
+    CU_ASSERT_EQUAL(c.values.flip, 0); // initial state
+
+    c = flip_card(c);
+    CU_ASSERT_EQUAL(c.values.flip, 1); // card is now face down
+
+    c = flip_card(c);
+    CU_ASSERT_EQUAL(c.values.flip, 0); // card return to initial state
+}
+
+void test_flip_deal(void) {
+    Deck *d1 = create_deck(5);
+    Deck *d2 = create_deck(5);
+
+    Card c = {.values = {.flip = 0, .color = 1, .suit = 1, .value = 10}}; // 2 cards facing up
+    
+    // cards insert in deck 1
+    push(d1, c);
+    push(d1, c);
+
+    CU_ASSERT_EQUAL(d1->top, 2); // d1 now has 2 cards
+    CU_ASSERT_EQUAL(d2->top, 0);
+
+    flip_deal(d1, d2, 2); // move to d2 while fliping
+
+    CU_ASSERT_EQUAL(d1->top, 0);
+    CU_ASSERT_EQUAL(d2->top, 2); // d2 now has 2 cards and they should be flipped
+
+    CU_ASSERT_EQUAL(d2->cards[0].values.flip, 1);
+    CU_ASSERT_EQUAL(d2->cards[1].values.flip, 1);
+
+    eliminate_deck(d1);
+    eliminate_deck(d2);
+}
+
 /* --- MAIN TEST RUNNER --- */
 
 int main(void) {
@@ -162,6 +198,8 @@ int main(void) {
          CU_add_test(pSuite, "test of populate_deck", test_populate_deck)) ||
         (NULL == CU_add_test(pSuite, "test of deal", test_deal)) ||
         (NULL == CU_add_test(pSuite, "test of top_card", test_top_card)) ||
+        (NULL == CU_add_test(pSuite, "test of flip_card", test_flip_card)) ||
+        (NULL == CU_add_test(pSuite, "test of flip_deal", test_flip_deal)) ||
         (NULL == CU_add_test(pSuite, "test of flip_all", test_flip_all))) {
         CU_cleanup_registry();
         return CU_get_error();
