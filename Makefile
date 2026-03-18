@@ -1,6 +1,6 @@
 # Vars
 CC = gcc
-CFLAGS = -Wall -Wextra -g -flto -march=native -O3 -I include
+CFLAGS = -Wall -Wextra -pedantic -g -flto -march=native -O3 -I include
 
 # Dirs
 SRC_DIR = src

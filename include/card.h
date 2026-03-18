@@ -9,6 +9,10 @@
 #define FALSE 0
 /** @brief Boolean true value */
 #define TRUE 1
+/** @brief Default number of card columns in golf */
+#define GOLF_COLUMNS 7
+/** @brief Default size of each column in golf */
+#define GOLF_COLUMN_SIZE 5
 
 /**
  * @brief Represents a playing card.
@@ -39,10 +43,12 @@ typedef struct {
     Card cards[]; /**< The flexible array that contains all the cards */
 } Deck;
 
-/** @brief Lookup table for the suits symbols */
-extern const char *const SUIT[];
-/** @brief Lookup table for all playing cards symbols */
-extern const char *const CARDS[4][13];
+// TODO: docs
+typedef struct {
+    Deck *stock;
+    Deck *waste;
+    Deck *columns[GOLF_COLUMNS];
+} golf_state;
 
 /**
  * @brief Checks whether a given Deck is empty.
@@ -192,20 +198,4 @@ void flip_all(Deck *d1);
  */
 void flip_deal(Deck *restrict d1, Deck *restrict d2, uint8_t q);
 
-/**
- * @brief Debug function to print a Card.
- *
- * @param card Receives a Card to print.
- *
- * @see Card
- */
-void print_card(const Card card);
-
-/**
- * @brief Debug function to print an entire Deck.
- *
- * @param deck Pointer to the Deck to be printed.
- *
- * @see Deck
- */
-void print_deck(const Deck *deck);
+Deck *get_bigger_deck(Deck *restrict decks[], int8_t n);

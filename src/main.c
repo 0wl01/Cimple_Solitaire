@@ -2,8 +2,6 @@
 #include <stdio.h>
 
 int main(void) {
-    char x;
-    start_game();
-    scanf("%c", &x);
+    init_golf();
     return 0;
 }

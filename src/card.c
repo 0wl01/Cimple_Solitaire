@@ -1,22 +1,10 @@
 #include "card.h"
 #include <assert.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <stdlib.h>
 
 // Should I be using size_t in my loops?
 // Search about realloc and check if applicable in this code.
-
-// lookup tables for card symbols and suits
-// Maybe if the red suits were index 1 and 3 i could use the 2^0 bit to check
-// the color
-const char *const SUIT[] = {"♠", "♥", "♦", "♣"};
-const char *const CARDS[4][13] = {
-    {"🂡", "🂢", "🂣", "🂤", "🂥", "🂦", "🂧", "🂨", "🂩", "🂪", "🂫", "🂭", "🂮"}, // 0: Spades
-    {"🂱", "🂲", "🂳", "🂴", "🂵", "🂶", "🂷", "🂸", "🂹", "🂺", "🂻", "🂽", "🂾"}, // 1: Hearts
-    {"🃁", "🃂", "🃃", "🃄", "🃅", "🃆", "🃇", "🃈", "🃉", "🃊", "🃋", "🃍", "🃎"}, // 2: Diamonds
-    {"🃑", "🃒", "🃓", "🃔", "🃕", "🃖", "🃗", "🃘", "🃙", "🃚", "🃛", "🃝", "🃞"}  // 3: Clubs
-};
 
 // This functions is used to create our variable sized stacks of cards.
 Deck *create_deck(uint8_t size) {
@@ -69,8 +57,6 @@ void populate_deck(Deck *deck) {
 void shuffle_deck(Deck *deck) {
     for (uint8_t i = 1; i < deck->top; ++i) {
         uint8_t ran_num = arc4random_uniform(i + 1);
-        if (ran_num == i)
-            continue;
         // Swap cards
         Card temp = deck->cards[i];
         deck->cards[i] = deck->cards[ran_num];
@@ -122,32 +108,12 @@ void flip_deal(Deck *restrict d1, Deck *restrict d2, uint8_t q) {
     }
 }
 
-// debug function to print a card.
-void print_card(const Card c) {
-    if (c.values.flip) {
-        printf("\U0001F0A0");
-        return;
+// TODO: needs documentation
+Deck *get_bigger_deck(Deck *restrict decks[], int8_t n) {
+    Deck *biggest = decks[0];
+    for (--n; n >= 0; --n) {
+        if (biggest->top < decks[n]->top)
+            biggest = decks[n];
     }
-    if (c.values.value < 3) {
-        printf(" ");
-        return;
-    }
-    const uint8_t val_idx = (c.values.value >= 3) ? c.values.value - 3 : 0;
-
-    // TODO: Implement way to paint the card red
-    // probably using ansi escape codes
-    // if (IS_RED(card));
-
-    printf("%s", CARDS[c.values.suit][val_idx]);
-}
-
-// debug function to print a deck.
-void print_deck(Deck const *deck) {
-    for (int8_t i = deck->top - 1; i >= 0; --i) {
-        // printf("(%d: ", i);
-        print_card(deck->cards[i]);
-        printf(", ");
-        // printf("%d), ", deck->cards[i].values.value);
-    }
-    putchar('\n');
+    return biggest;
 }

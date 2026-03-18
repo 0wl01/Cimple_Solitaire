@@ -1,21 +1,10 @@
 #include "golf.h"
+#include "cli.h"
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/types.h>
-
-/** @brief Default number of card columns in golf */
-#define COLUMNS 7
-/** @brief Default size of each column in golf */
-#define COLUMN_SIZE 5
-
-static uint8_t playable;
-
-static struct {
-    Deck *stock;
-    Deck *waste;
-    Deck *columns[COLUMNS];
-} table;
 
 /**
  * @brief lookup table for stacking cards.
@@ -33,22 +22,6 @@ static const uint8_t deal_lookup[16] = {
     0x00, /**< 2 is reserved for TBD */
     0xF4, 0x53, 0x64, 0x75, 0x86, 0x97, 0xA8, 0xB9, 0xCA, 0xDB, 0xEC, 0xFD, 0x3E,
 };
-
-/**
- * @brief Creates the 7 columns for the game.
- *
- * Allocates 7 bytes of memory for each one of the 7 columns.
- *
- * @param columns List of Pointers to Decks
- *
- * @see Deck
- * @see create_deck()
- */
-static void init_columns(Deck *columns[]) {
-    for (uint8_t i = 0; i < COLUMNS; ++i) {
-        columns[i] = create_deck(COLUMN_SIZE);
-    }
-}
 
 /**
  * @brief Checks if can deal a card to another deck.
@@ -82,71 +55,66 @@ static uint8_t can_deal(Deck *d1, Deck *d2) {
  *
  * @return Any other number if there's at least one play to be made.
  */
-static uint8_t can_play() {
-    for (size_t i = 0; i < COLUMNS; ++i)
-        if (can_deal(table.columns[i], table.waste))
-            return 1;
-    return table.stock->top;
+static uint8_t can_play(golf_state *table) {
+    uint8_t result = table->stock->top;
+    for (size_t i = 0; i < GOLF_COLUMNS; ++i)
+        if (can_deal(table->columns[i], table->waste))
+            result = 1;
+    return result;
 }
 
-char get_input() {
-    char buffer[10];
-    fgets(buffer, 10, stdin);
-
-    return buffer[0];
-}
-
-static void render() {
-    for (size_t i = 0; i <= COLUMN_SIZE; ++i) {
-        for (size_t j = 0; j < COLUMNS; ++j) {
-            if (table.columns[j]->top > i)
-                print_card(table.columns[j]->cards[i]);
-            else
-                printf(" ");
-        }
-        printf("\n");
+/**
+ * @brief Creates the 7 columns for the game.
+ *
+ * Allocates 7 bytes of memory for each one of the 7 columns.
+ *
+ * @param columns List of Pointers to Decks
+ *
+ * @see Deck
+ * @see create_deck()
+ */
+static void init_columns(Deck *columns[]) {
+    for (uint8_t i = 0; i < GOLF_COLUMNS; ++i) {
+        columns[i] = create_deck(GOLF_COLUMN_SIZE);
     }
-    printf("\n");
-    print_card(top_card(table.stock));
-    printf(" ");
-    print_card(top_card(table.waste));
-    printf("\n");
 }
 
-static void buy(uint8_t q) {
-    if (can_deal(table.columns[q], table.waste))
-        deal(table.columns[q], table.waste, 1);
-}
-
-void do_logic(char input) {
+static void game_loop(char input, golf_state *table) {
+    const uint8_t not_playable = !can_play(table);
+    if (not_playable) {
+        print_end(not_playable);
+        exit(0);
+    }
     if (input == 's') {
-        flip_deal(table.stock, table.waste, 1);
+        flip_deal(table->stock, table->waste, 1);
+    } else if (input == '?') {
+        print_help();
+    } else if (input == 'q') {
+        exit(0);
+    } else if (input <= '7' && input >= '1') {
+        input -= '1';
+        deal(table->columns[(uint8_t)input], table->waste, 1);
     }
-    if (input > '7' || input < '1')
-        return;
-    input -= '1';
-    buy(input);
 }
 
-void game_loop() {
+static void run_golf(golf_state *table) {
     while (1) {
-
-        render();
-        do_logic(get_input());
+        print_golf_table((table));
+        game_loop(get_input(), table);
     };
 }
 
-// TODO
-void start_game() {
+void init_golf() {
+    golf_state table;
     table.stock = create_deck(52);
     table.waste = create_deck(52);
     init_columns(table.columns);
     populate_deck(table.stock);
     shuffle_deck(table.stock);
-    for (size_t i = 0; i < COLUMNS; ++i) {
-        deal(table.stock, table.columns[i], COLUMN_SIZE);
+    for (size_t i = 0; i < GOLF_COLUMNS; ++i) {
+        deal(table.stock, table.columns[i], GOLF_COLUMN_SIZE);
     }
 
     flip_all(table.stock);
-    game_loop();
+    run_golf(&table);
 }
