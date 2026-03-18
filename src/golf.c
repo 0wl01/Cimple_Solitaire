@@ -79,6 +79,7 @@ static void init_columns(Deck *columns[]) {
     }
 }
 
+// stop using exit and start returning a True or False here to be checked at the run golf
 static void game_loop(char input, golf_state *table) {
     const uint8_t not_playable = !can_play(table);
     if (not_playable) {
@@ -97,6 +98,7 @@ static void game_loop(char input, golf_state *table) {
     }
 }
 
+// change this to a do while game loop is true.
 static void run_golf(golf_state *table) {
     while (1) {
         print_golf_table((table));
