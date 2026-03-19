@@ -40,12 +40,10 @@ test: $(TEST_BIN) $(TEST_GOLF_BIN)
 	@echo "\n--- Running Golf Rules Tests ---"
 	@./$(TEST_GOLF_BIN)
 
-# Binário de Teste das Cartas
 $(TEST_BIN): $(TEST_OBJS) $(TEST_DIR)/test_card.c
 	@mkdir -p $(BIN_DIR)
 	$(CC) $(CFLAGS) $^ -o $@ -lcunit
 
-# Binário de Teste do Jogo
 $(TEST_GOLF_BIN): $(GOLF_TEST_DEPS) $(TEST_DIR)/test_golf.c
 	@mkdir -p $(BIN_DIR)
 	$(CC) $(CFLAGS) $^ -o $@ -lcunit
