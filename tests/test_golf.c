@@ -3,7 +3,6 @@
 #include <stdlib.h>
 
 // Include the header from your project's include directory
-#include "../include/card.h"
 #include "../src/golf.c"
 
 /* Suite initialization and cleanup functions */

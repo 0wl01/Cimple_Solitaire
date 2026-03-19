@@ -18,6 +18,8 @@ TARGET = $(BIN_DIR)/golf
 # Tests stuff
 TEST_OBJS = $(filter-out $(BUILD_DIR)/main.o, $(OBJS))
 TEST_BIN = $(BIN_DIR)/test_card
+TEST_GOLF_BIN = $(BIN_DIR)/test_golf
+GOLF_TEST_DEPS = $(BUILD_DIR)/card.o $(BUILD_DIR)/cli.o
 
 .PHONY = all clean run test
 
@@ -32,11 +34,19 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 	@mkdir -p $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-test: $(TEST_BIN)
-	@echo "Running tests..."
+test: $(TEST_BIN) $(TEST_GOLF_BIN)
+	@echo "--- Running Card Tests ---"
 	@./$(TEST_BIN)
+	@echo "\n--- Running Golf Rules Tests ---"
+	@./$(TEST_GOLF_BIN)
 
+# Binário de Teste das Cartas
 $(TEST_BIN): $(TEST_OBJS) $(TEST_DIR)/test_card.c
+	@mkdir -p $(BIN_DIR)
+	$(CC) $(CFLAGS) $^ -o $@ -lcunit
+
+# Binário de Teste do Jogo
+$(TEST_GOLF_BIN): $(GOLF_TEST_DEPS) $(TEST_DIR)/test_golf.c
 	@mkdir -p $(BIN_DIR)
 	$(CC) $(CFLAGS) $^ -o $@ -lcunit
 
@@ -47,4 +57,3 @@ clean:
 run: all
 	@echo "Starting..."
 	@./$(TARGET)
-
