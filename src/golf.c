@@ -89,7 +89,7 @@ static void init_columns(Deck *columns[]) {
 static void game_loop(char input, golf_state *table) {
     const uint8_t not_playable = !can_play(table);
     if (not_playable) {
-        print_end(not_playable);
+        print_end(not_playable && table->waste->top == 52);
         exit(0);
     }
     if (input == 's') {

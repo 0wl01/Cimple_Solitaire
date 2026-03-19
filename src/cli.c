@@ -17,7 +17,6 @@ const char *const CARDS[4][13] = {
 
 // TODO: Implement way to paint the card red
 // probably using ansi escape codes
-// if (IS_RED(card));
 void print_card(const Card c) {
     if (c.values.flip)
         printf("\U0001F0A0");
