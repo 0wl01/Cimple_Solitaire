@@ -55,7 +55,7 @@ void print_decks_columns(Deck *restrict decks[], uint8_t columns) {
 }
 
 void print_end(const uint8_t win) {
-    if (!win)
+    if (win)
         printf("You Win!\n");
     else
         printf("You Lose! HAHA\n");

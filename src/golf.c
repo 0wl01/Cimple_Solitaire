@@ -63,6 +63,7 @@ static void buy(Deck *restrict d1, Deck *restrict d2) {
  */
 static uint8_t can_play(golf_state *table) {
     uint8_t result = table->stock->top;
+
     for (size_t i = 0; i < GOLF_COLUMNS; ++i)
         if (can_deal(table->columns[i], table->waste))
             result = 1;
@@ -89,7 +90,7 @@ static void init_columns(Deck *columns[]) {
 static void game_loop(char input, golf_state *table) {
     const uint8_t not_playable = !can_play(table);
     if (not_playable) {
-        print_end(not_playable && table->waste->top == 52);
+        print_end(table->waste->top == 52);
         exit(0);
     }
     if (input == 's') {
