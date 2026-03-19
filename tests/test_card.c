@@ -138,7 +138,6 @@ void test_flip_all(void) {
 
 void test_flip_card(void) {
     Card c = {.values= {.flip = 0, .color = 1, .suit= 1, .value = 10}};
-    CU_ASSERT_EQUAL(c.values.flip, 0); // initial state
 
     c = flip_card(c);
     CU_ASSERT_EQUAL(c.values.flip, 1); // card is now face down
@@ -153,7 +152,7 @@ void test_flip_deal(void) {
 
     Card c = {.values = {.flip = 0, .color = 1, .suit = 1, .value = 10}}; // 2 cards facing up
     
-    // cards insert in deck 1
+    // cards inserted in deck 1
     push(d1, c);
     push(d1, c);
 

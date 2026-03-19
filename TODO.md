@@ -16,3 +16,6 @@
 
 - [ ] **Documentação Doxygen**
   - Substituir os comentários `// TODO: Docs` por blocos Doxygen `/** ... */` nas funções do `golf.c` e na `struct golf_state` do `golf.h`.
+
+- [ ] **Verificar redundâncias nos Testes**
+  - Verificar redundâncias e separar grouptests em funções singulares .
