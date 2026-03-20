@@ -19,7 +19,7 @@ void test_can_deal_rules(void) {
     Deck *d1 = create_deck(1);
     Deck *d2 = create_deck(1);
     
-    // Can a 5 (value 5) go on top of a 4 (value 4)? (Yes, +1)
+    // Can a 3 (value 5) go on top of a 2 (value 4)? (Yes, +1)
     d1->cards[0] = (Card){.values = {.value = 5}};
     d1->top = 1;
     d2->cards[0] = (Card){.values = {.value = 4}};
@@ -31,7 +31,7 @@ void test_can_deal_rules(void) {
     d2->cards[0] = (Card){.values = {.value = 3}};
     CU_ASSERT_TRUE(can_deal(d1, d2));
 
-    // Can a 10 go on top of a 5? (No)
+    // Can a 8 go on top of a 3? (No)
     d1->cards[0] = (Card){.values = {.value = 10}};
     d2->cards[0] = (Card){.values = {.value = 5}};
     CU_ASSERT_FALSE(can_deal(d1, d2));
@@ -59,6 +59,80 @@ void test_can_play_basic(void) {
     for(int i=0; i<GOLF_COLUMNS; i++) eliminate_deck(table.columns[i]);
 }
 
+/**
+ * @brief Tests the buy function with a valid card move.
+ * 
+ * Simulates a valid move by forcing a card of value 5 into a column
+ * and a card of value 4 into the waste pile. Asserts that the buy()
+ * function correctly transfers the card from the column to the waste.
+ * 
+ * @see buy()
+ */
+
+void test_buy_valid_move(void) {
+    Deck *col = create_deck(1); // cria memoria para 1 carta
+    Deck *waste = create_deck(2); // cria memoria para 2 cartas
+    
+    col->cards[0] = (Card){.values = {.value = 5}}; // enfia à força 1 carta de valor 5 para col
+    col->top = 1; // atualiza o top de col que agora tem 1 carta
+    waste->cards[0] = (Card){.values = {.value = 4}}; // enfia à força 1 carta no waste
+    waste->top = 1; // atualiza o top de waste que tem 1 carta tambem
+
+    buy(col, waste); // carta vai de col para waste
+
+    CU_ASSERT_EQUAL(col->top, 0); // col should be empty now
+    CU_ASSERT_EQUAL(waste->top, 2); // waste has two
+
+    eliminate_deck(col);
+    eliminate_deck(waste);
+}
+
+/**
+ * @brief Tests the game over state (no stock, no valid column moves).
+ */
+
+ void test_can_play_game_over(void) {
+    golf_state table;
+    table.stock = create_deck(0); // Empty Stock
+    table.waste = create_deck(1);
+    init_columns(table.columns);
+
+    table.waste->cards[0] = (Card){.values = {.value = 5}}; // Waste has a 3 card
+    table.waste->top = 1;
+
+    for(int i=0; i<GOLF_COLUMNS; i++) {
+        table.columns[i]->cards[0] = (Card){.values = {.value = 13}}; // Every column has a Valet now
+        table.columns[i]->top = 1;
+    }
+
+    CU_ASSERT_FALSE(can_play(&table)); // Game over, no move possible
+
+    clean_golf(&table);
+}
+
+/**
+ * @brief Tests if the game continues when stock is empty but a column has a valid move.
+ */
+
+void test_can_play_column_move(void) {
+    golf_state table;
+    table.stock = create_deck(0); // Empty Stock
+    table.waste = create_deck(1);
+    init_columns(table.columns);
+
+    // Lixo tem um 5
+    table.waste->cards[0] = (Card){.values = {.value = 5}}; // Waste receives a 3 Card
+    table.waste->top = 1;
+
+    // Coluna 0 tem um 4 (jogada válida num 5!)
+    table.columns[0]->cards[0] = (Card){.values = {.value = 4}}; // First Colunm receives a 2 Card
+    table.columns[0]->top = 1;
+
+    CU_ASSERT_TRUE(can_play(&table)); // 1 move is still possible!
+
+    clean_golf(&table);
+}
+
 /* --- MAIN TEST RUNNER --- */
 
 int main(void) {
@@ -79,6 +153,9 @@ int main(void) {
     // Add the tests to the suite
     if (
         (NULL == CU_add_test(pSuite, "test of can_deal rules", test_can_deal_rules)) ||
+        (NULL == CU_add_test(pSuite, "test of buy_balid move", test_buy_valid_move)) ||
+        (NULL == CU_add_test(pSuite, "test of can_play_colunm logic", test_can_play_column_move)) ||
+        (NULL == CU_add_test(pSuite, "test of can_play game over", test_can_play_game_over)) ||
         (NULL == CU_add_test(pSuite, "test of can_play logic", test_can_play_basic))
     ) {
         CU_cleanup_registry();

@@ -46,7 +46,9 @@ static uint8_t can_deal(Deck *d1, Deck *d2) {
     return possible_stacks && (c2_val == (possible_stacks & 0x0F) || c2_val == possible_stacks >> 4 || !c2_val);
 }
 
-// TODO: Docs
+/**
+ *  TODO: Docs 
+ * */
 static void buy(Deck *restrict d1, Deck *restrict d2) {
     if (can_deal(d1, d2))
         deal(d1, d2, 1);

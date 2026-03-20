@@ -99,6 +99,24 @@ void test_deal(void) {
     eliminate_deck(d2);
 }
 
+void test_buy_valid_move(void) {
+    Deck *col = create_deck(1);
+    Deck *waste = create_deck(2);
+    
+    col->cards[0] = (Card){.values = {.value = 5}};
+    col->top = 1;
+    waste->cards[0] = (Card){.values = {.value = 4}};
+    waste->top = 1;
+
+    buy(col, waste);
+
+    CU_ASSERT_EQUAL(col->top, 0); // col should be empty now
+    CU_ASSERT_EQUAL(waste->top, 2); // waste has two
+
+    eliminate_deck(col);
+    eliminate_deck(waste);
+}
+
 void test_top_card(void) {
     Deck *d = create_deck(5);
 
