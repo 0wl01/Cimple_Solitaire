@@ -15,7 +15,8 @@ int clean_suite_golf(void) { return 0; }
 /**
  * @brief Tests the logic for stacking cards based on the lookup table.
  */
-void test_can_deal_rules(void) {
+
+void test_can_deal_basic(void) {
     Deck *d1 = create_deck(1);
     Deck *d2 = create_deck(1);
     
@@ -26,12 +27,28 @@ void test_can_deal_rules(void) {
     d2->top = 1;
     CU_ASSERT_TRUE(can_deal(d1, d2));
 
+    eliminate_deck(d1);
+    eliminate_deck(d2);
+}
+
+
+void test_can_deal_cyclic(void) {
+    Deck *d1 = create_deck(1);
+    Deck *d2 = create_deck(1);
+
     // Can a King (value 15) go on top of an Ace (value 3)? (Yes, cyclic rule)
     d1->cards[0] = (Card){.values = {.value = 15}};
     d2->cards[0] = (Card){.values = {.value = 3}};
     CU_ASSERT_TRUE(can_deal(d1, d2));
 
-    // Can a 8 go on top of a 3? (No)
+    eliminate_deck(d1);
+    eliminate_deck(d2);
+}
+
+void test_cant_deal(void) {
+    Deck *d1 = create_deck(1);
+    Deck *d2 = create_deck(1);
+    // Can a 10 go on top of a 5? (No)
     d1->cards[0] = (Card){.values = {.value = 10}};
     d2->cards[0] = (Card){.values = {.value = 5}};
     CU_ASSERT_FALSE(can_deal(d1, d2));
@@ -152,10 +169,9 @@ int main(void) {
 
     // Add the tests to the suite
     if (
-        (NULL == CU_add_test(pSuite, "test of can_deal rules", test_can_deal_rules)) ||
-        (NULL == CU_add_test(pSuite, "test of buy_balid move", test_buy_valid_move)) ||
-        (NULL == CU_add_test(pSuite, "test of can_play_colunm logic", test_can_play_column_move)) ||
-        (NULL == CU_add_test(pSuite, "test of can_play game over", test_can_play_game_over)) ||
+        (NULL == CU_add_test(pSuite, "test of can_deal basic", test_can_deal_basic)) ||
+        (NULL == CU_add_test(pSuite, "test of can_deal cyclic", test_can_deal_cyclic)) ||
+        (NULL == CU_add_test(pSuite, "test of cant_deal", test_cant_deal)) ||
         (NULL == CU_add_test(pSuite, "test of can_play logic", test_can_play_basic))
     ) {
         CU_cleanup_registry();
