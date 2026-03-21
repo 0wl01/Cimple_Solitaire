@@ -38,7 +38,9 @@ void test_can_deal_cyclic(void) {
 
     // Can a King (value 15) go on top of an Ace (value 3)? (Yes, cyclic rule)
     d1->cards[0] = (Card){.values = {.value = 15}};
+    d1->top = 1;
     d2->cards[0] = (Card){.values = {.value = 3}};
+    d2->top = 1;
     CU_ASSERT_TRUE(can_deal(d1, d2));
 
     eliminate_deck(d1);
