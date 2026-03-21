@@ -6,7 +6,7 @@
 // Should I be using size_t in my loops?
 // Search about realloc and check if applicable in this code.
 
-// This functions is used to create our variable sized stacks of cards.
+/* Allocates a Deck with a flexible array member for cards. */
 Deck *create_deck(uint8_t size) {
     Deck *deck = malloc(sizeof(Deck) + (sizeof(Card) * size));
     if (deck == NULL)
@@ -111,7 +111,7 @@ void flip_deal(Deck *restrict d1, Deck *restrict d2, uint8_t q) {
     }
 }
 
-// TODO: needs documentation
+// Returns the deck with the highest 'top' value from the array.
 Deck *get_bigger_deck(Deck *restrict decks[], int8_t n) {
     Deck *biggest = decks[0];
     for (--n; n >= 0; --n) {

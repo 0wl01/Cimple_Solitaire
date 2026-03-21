@@ -47,8 +47,11 @@ static uint8_t can_deal(Deck *d1, Deck *d2) {
 }
 
 /**
- *  TODO: Docs 
- * */
+ * @brief Internal helper to handle the logic of playing a card to the waste.
+ * Checks validation via can_deal() before performing the actual deal().
+ * @param d1 Source column.
+ * @param d2 Destination waste pile.
+ */
 static void buy(Deck *restrict d1, Deck *restrict d2) {
     if (can_deal(d1, d2))
         deal(d1, d2, 1);
@@ -58,10 +61,7 @@ static void buy(Deck *restrict d1, Deck *restrict d2) {
  * @brief Checks if there's still a play to be made
  *
  * Calls @ref can_deal() to each card column and then checks if there's at least a card in stock.
- *
- * @return 0 if no play is find.
- *
- * @return Any other number if there's at least one play to be made.
+ * @return 1 (True) if there is at least one move possible, 0 (False) otherwise.
  */
 static uint8_t can_play(golf_state *table) {
     uint8_t result = table->stock->top;
@@ -77,7 +77,7 @@ static uint8_t can_play(golf_state *table) {
  *
  * Allocates 7 bytes of memory for each one of the 7 columns.
  *
- * @param columns List of Pointers to Decks
+ * @param columns Array of pointers to Decks to be initialized.
  *
  * @see Deck
  * @see create_deck()
@@ -89,6 +89,15 @@ static void init_columns(Deck *columns[]) {
 }
 
 // stop using exit and start returning a True or False here to be checked at the run golf
+/**
+ * @brief Logic engine for a single game turn.
+ * * This function checks for game-over conditions and maps user input
+ * characters to specific game actions like dealing from stock, 
+ * moving cards from columns, or quitting.
+ *
+ * @param input The command character received from the user.
+ * @param table Pointer to the active game state.
+ */
 static void game_loop(char input, golf_state *table) {
     const uint8_t not_playable = !can_play(table);
     if (not_playable) {
@@ -108,6 +117,13 @@ static void game_loop(char input, golf_state *table) {
 }
 
 // change this to a do while game loop is true.
+/**
+ * @brief Orchestrates the continuous execution of the game.
+ * * It maintains the main game loop, ensuring the table is rendered
+ * to the CLI before requesting and processing the next user input.
+ *
+ * @param table Pointer to the active game state.
+ */
 static void run_golf(golf_state *table) {
     while (1) {
         print_golf_table((table));
@@ -130,15 +146,12 @@ void init_golf() {
     run_golf(&table);
 }
 
-/**
- * @brief Frees all memory allocated for the golf game state.
- *
- * @param table Pointer to the game state structure.
- */
+// uses existing functions to remove the Stock, Waste and Colunm Decks
 void clean_golf(golf_state *table) {
     if (table != NULL) {
         eliminate_deck(table->stock);
         eliminate_deck(table->waste);
+        // Iterates through each column to free its allocated memory
         for (uint8_t i = 0; i < GOLF_COLUMNS; ++i) {
             eliminate_deck(table->columns[i]);
         }

@@ -12,6 +12,13 @@ int clean_suite_card(void) { return 0; }
 
 /* --- TESTS --- */
 
+/**
+ * @brief Tests the allocation and basic initialization of a Deck.
+ * * Verifies if create_deck() returns a non-null pointer, sets the correct 
+ * size, and starts with an empty stack (top = 0).
+ * * @see create_deck()
+ * @see eliminate_deck()
+ */
 void test_create_and_eliminate_deck(void) {
     Deck *d = create_deck(52);
     CU_ASSERT_PTR_NOT_NULL(d);
@@ -22,6 +29,12 @@ void test_create_and_eliminate_deck(void) {
     eliminate_deck(d);
 }
 
+/**
+ * @brief Tests a standard push operation on a deck with available space.
+ * * Ensures that cards are correctly added to the stack and that the 
+ * 'top' index increments as expected.
+ * * @see push()
+ */
 void test_push_normal(void) {
     Deck *d = create_deck(2);
     Card c1 = {.values = {.flip = 0, .color = 1, .suit = 1, .value = 10}};
@@ -38,6 +51,12 @@ void test_push_normal(void) {
     eliminate_deck(d);
 }
 
+/**
+ * @brief Tests pushing a card to a deck that has reached its maximum capacity.
+ * * Asserts that the function returns (uint8_t)-1 and that the deck's 
+ * top index remains unchanged.
+ * * @see push()
+ */
 void test_push_full(void) {
     Deck *d = create_deck(2);
     Card c1 = {.values = {.flip = 0, .color = 1, .suit = 1, .value = 10}};
@@ -53,13 +72,19 @@ void test_push_full(void) {
     eliminate_deck(d);
 }
 
+/**
+ * @brief Tests the Last-In, First-Out (LIFO) behavior of the pop function.
+ * * Ensures that the last card pushed is the first one retrieved and 
+ * that the 'top' index decrements correctly.
+ * * @see pop()
+ */
 void test_pop(void) {
     Deck *d = create_deck(2);
     Card c1 = {.values = {.flip = 0, .color = 1, .suit = 1, .value = 10}};
     Card c2 = {.values = {.flip = 1, .color = 0, .suit = 0, .value = 14}};
 
     push(d, c1);
-    push(d, c2); // c2 last in
+    push(d, c2); // c2 last in and d->top = 2
 
     // Test pop (should pop c2 first, LIFO)
     Card popped = pop(d);
@@ -70,6 +95,13 @@ void test_pop(void) {
     eliminate_deck(d);
 }
 
+/**
+ * @brief Validates the deck population logic and card value offsets.
+ * * Checks if the deck contains 52 cards and verifies specific card 
+ * properties (suit, color, value) at different positions to ensure 
+ * the nested loops work correctly.
+ * * @see populate_deck()
+ */
 void test_populate_deck(void) {
     Deck *d = create_deck(52);
     populate_deck(d);
@@ -95,6 +127,12 @@ void test_populate_deck(void) {
     eliminate_deck(d);
 }
 
+/**
+ * @brief Tests a standard card transfer between two decks.
+ * * Verifies that the correct number of cards is moved and that the 
+ * LIFO order is maintained during the transfer.
+ * * @see deal()
+ */
 void test_deal_normal(void) {
     Deck *d1 = create_deck(10);
     Deck *d2 = create_deck(5);
@@ -116,6 +154,12 @@ void test_deal_normal(void) {
     eliminate_deck(d2);
 }
 
+/**
+ * @brief Tests the deal function's behavior when the destination deck is full.
+ * * Ensures that the function only transfers the amount of cards that fit 
+ * in the destination, preventing memory corruption.
+ * * @see deal()
+ */
 void test_deal_overflow(void) {
     Deck *d1 = create_deck(10);
     Deck *d2 = create_deck(2);
@@ -131,6 +175,12 @@ void test_deal_overflow(void) {
     eliminate_deck(d2);
 }
 
+/**
+ * @brief Tests the safety of the top_card function on an empty deck.
+ * * Confirms that calling top_card() on a deck with no elements returns 
+ * a null-initialized Card structure instead of crashing.
+ * * @see top_card()
+ */
 void test_top_card_empty(void) {
     Deck *d = create_deck(5);
 
@@ -141,6 +191,12 @@ void test_top_card_empty(void) {
     eliminate_deck(d);
 }
 
+/**
+ * @brief Tests retrieving the top card without removing it.
+ * * Verifies that top_card() returns the correct data and that the 
+ * deck's 'top' index remains unchanged.
+ * * @see top_card()
+ */
 void test_top_card_normal(void) {
     Deck *d = create_deck(5);
 
@@ -155,6 +211,12 @@ void test_top_card_normal(void) {
     eliminate_deck(d);
 }
 
+/**
+ * @brief Tests the bulk flipping of all cards in a deck.
+ * * Ensures that the flip bit is toggled for every card in the stack 
+ * and can be toggled back.
+ * * @see flip_all()
+ */
 void test_flip_all(void) {
     Deck *d = create_deck(3);
     populate_deck(d); // Contains 3 unflipped cards
@@ -174,6 +236,12 @@ void test_flip_all(void) {
     eliminate_deck(d);
 }
 
+/**
+ * @brief Tests the individual card flipping logic.
+ * * Verifies that the XOR operation on the flip bit correctly toggles 
+ * the card's visibility state.
+ * * @see flip_card()
+ */
 void test_flip_card(void) {
     Card c = {.values= {.flip = 0, .color = 1, .suit= 1, .value = 10}};
 
@@ -184,6 +252,12 @@ void test_flip_card(void) {
     CU_ASSERT_EQUAL(c.values.flip, 0); // card return to initial state
 }
 
+/**
+ * @brief Tests the combined functionality of dealing and flipping.
+ * * Validates that cards are moved between decks and their 'flip' 
+ * state is inverted in a single operation.
+ * * @see flip_deal()
+ */
 void test_flip_deal(void) {
     Deck *d1 = create_deck(5);
     Deck *d2 = create_deck(5);
@@ -209,6 +283,12 @@ void test_flip_deal(void) {
     eliminate_deck(d2);
 }
 
+/**
+ * @brief Tests the logic for identifying the largest deck in a collection.
+ * * Compares multiple decks with different card counts to ensure the 
+ * function returns the pointer to the one with the highest occupancy.
+ * * @see get_bigger_deck()
+ */
 void test_get_bigger_deck(void) {
     Deck *decks[3];
     decks[0] = create_deck(5);
@@ -237,6 +317,12 @@ void test_get_bigger_deck(void) {
     eliminate_deck(decks[2]);
 }
 
+/**
+ * @brief Verifies the randomness and integrity of the shuffle algorithm.
+ * * Ensures that after a shuffle, the deck still contains 52 cards 
+ * but in a different order than the initial state.
+ * * @see shuffle_deck()
+ */
 void test_shuffle_deck(void) {
     Deck *d = create_deck(52);
     populate_deck(d); // Fills deck in order

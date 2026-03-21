@@ -46,11 +46,13 @@ typedef struct {
     Card cards[]; /**< The flexible array that contains all the cards */
 } Deck;
 
-// TODO: docs
+/**
+ * @brief Structure holding the complete state of a Golf solitaire game.
+ */
 typedef struct {
-    Deck *stock;
-    Deck *waste;
-    Deck *columns[GOLF_COLUMNS];
+    Deck *stock;                  /**< The draw pile (face-down cards). */
+    Deck *waste;                  /**< The discard pile (where cards are played). */
+    Deck *columns[GOLF_COLUMNS];  /**< The 7 columns of cards on the tableau. */
 } golf_state;
 
 /**
@@ -115,7 +117,7 @@ uint8_t push(Deck *deck, const Card card);
 /**
  * @brief Fills a Deck with cards.
  *
- * Fills a Deck with cards in order (Spades, Hearts, Diamonds, Clubs) 1-13.
+ * Fills a Deck with cards in order (Spades, Hearts, Diamonds, Clubs) 1-13 (value 3-15).
  * It will fill the Deck till its max capacity.
  *
  * @param deck Pointer to a Deck.
@@ -201,6 +203,14 @@ void flip_all(Deck *d1);
  */
 void flip_deal(Deck *restrict d1, Deck *restrict d2, uint8_t q);
 
+/**
+ * @brief Logic for finding the deck with the highest occupancy.
+ * * This implementation iterates through the provided array and compares
+ * the 'top' field of each Deck.
+ * * @param decks Array of pointers to Deck structures.
+ * @param n The number of decks to evaluate.
+ * @return Pointer to the Deck with the highest number of cards.
+ */
 Deck *get_bigger_deck(Deck *restrict decks[], int8_t n);
 
 #endif
