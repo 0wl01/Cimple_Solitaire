@@ -43,12 +43,15 @@ uint8_t push(Deck *deck, const Card card) {
 // I feel like there is a better way to write this thing here.
 void populate_deck(Deck *deck) {
     deck->top = 0;
-    for (uint8_t s = 0; s < 4; ++s) {
+    uint8_t is_full = 0; //control flag
+    for (uint8_t s = 0; s < 4 && !is_full; ++s) {
         uint8_t is_red = (s == 1 || s == 2) ? 1 : 0;
-        for (uint8_t v = 3; v <= 15; ++v) {
-            if (deck->top >= deck->size)
-                return;
+        for (uint8_t v = 3; v <= 15 && !is_full; ++v) {
+            if (deck->top >= deck->size) {
+            is_full = 1;
+            } else {
             deck->cards[deck->top++] = (Card){.values = {.flip = 0, .color = is_red, .suit = s, .value = v}};
+            }
         }
     }
 }
