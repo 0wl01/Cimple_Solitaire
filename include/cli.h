@@ -1,3 +1,6 @@
+#ifndef CLI_H
+#define CLI_H
+
 #include "card.h"
 
 /**
@@ -29,3 +32,5 @@ void print_prompt();
 void print_help();
 
 char get_input();
+
+#endif

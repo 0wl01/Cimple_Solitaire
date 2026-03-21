@@ -129,3 +129,18 @@ void init_golf() {
     flip_all(table.stock);
     run_golf(&table);
 }
+
+/**
+ * @brief Frees all memory allocated for the golf game state.
+ *
+ * @param table Pointer to the game state structure.
+ */
+void clean_golf(golf_state *table) {
+    if (table != NULL) {
+        eliminate_deck(table->stock);
+        eliminate_deck(table->waste);
+        for (uint8_t i = 0; i < GOLF_COLUMNS; ++i) {
+            eliminate_deck(table->columns[i]);
+        }
+    }
+}

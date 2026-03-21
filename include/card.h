@@ -1,3 +1,6 @@
+#ifndef CARD_H
+#define CARD_H
+
 /**
  * @file 
  * @brief Definitions and macros for playing cards and decks.
@@ -199,3 +202,5 @@ void flip_all(Deck *d1);
 void flip_deal(Deck *restrict d1, Deck *restrict d2, uint8_t q);
 
 Deck *get_bigger_deck(Deck *restrict decks[], int8_t n);
+
+#endif

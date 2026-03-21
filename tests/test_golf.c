@@ -199,7 +199,10 @@ int main(void) {
         (NULL == CU_add_test(pSuite, "test of can_deal basic", test_can_deal_basic)) ||
         (NULL == CU_add_test(pSuite, "test of can_deal cyclic", test_can_deal_cyclic)) ||
         (NULL == CU_add_test(pSuite, "test of cant_deal", test_cant_deal)) ||
-        (NULL == CU_add_test(pSuite, "test of can_play logic", test_can_play_basic))
+        (NULL == CU_add_test(pSuite, "test of can_play logic", test_can_play_basic)) ||
+        (NULL == CU_add_test(pSuite, "test of buy balid move", test_buy_valid_move)) ||
+        (NULL == CU_add_test(pSuite, "test of game over", test_can_play_game_over)) ||
+        (NULL == CU_add_test(pSuite, "test of column move", test_can_play_column_move))
     ) {
         CU_cleanup_registry();
         return CU_get_error();
