@@ -22,7 +22,7 @@ void test_create_and_eliminate_deck(void) {
     eliminate_deck(d);
 }
 
-void test_push_and_pop(void) {
+void test_push_normal(void) {
     Deck *d = create_deck(2);
     Card c1 = {.values = {.flip = 0, .color = 1, .suit = 1, .value = 10}};
     Card c2 = {.values = {.flip = 1, .color = 0, .suit = 0, .value = 14}};
@@ -35,9 +35,31 @@ void test_push_and_pop(void) {
     CU_ASSERT_EQUAL(push(d, c2), 0);
     CU_ASSERT_EQUAL(d->top, 2);
 
+    eliminate_deck(d);
+}
+
+void test_push_full(void) {
+    Deck *d = create_deck(2);
+    Card c1 = {.values = {.flip = 0, .color = 1, .suit = 1, .value = 10}};
+    Card c2 = {.values = {.flip = 1, .color = 0, .suit = 0, .value = 14}};
+
+    push(d, c1);
+    push(d, c2); // deck is now full
+
     // Test pushing to a full deck
     Card c3 = {.card = 0xFF};
     CU_ASSERT_EQUAL(push(d, c3), (uint8_t)-1); // Should fail and return -1
+
+    eliminate_deck(d);
+}
+
+void test_pop(void) {
+    Deck *d = create_deck(2);
+    Card c1 = {.values = {.flip = 0, .color = 1, .suit = 1, .value = 10}};
+    Card c2 = {.values = {.flip = 1, .color = 0, .suit = 0, .value = 14}};
+
+    push(d, c1);
+    push(d, c2); // c2 last in
 
     // Test pop (should pop c2 first, LIFO)
     Card popped = pop(d);
@@ -73,7 +95,7 @@ void test_populate_deck(void) {
     eliminate_deck(d);
 }
 
-void test_deal(void) {
+void test_deal_normal(void) {
     Deck *d1 = create_deck(10);
     Deck *d2 = create_deck(5);
 
@@ -90,23 +112,37 @@ void test_deal(void) {
     CU_ASSERT_EQUAL(d2->cards[0].values.suit, 0);
     CU_ASSERT_EQUAL(d2->cards[0].values.value, 12);
 
-    // Attempt to deal 5 more cards (but d2 only has 2 spaces left)
+    eliminate_deck(d1);
+    eliminate_deck(d2);
+}
+
+void test_deal_overflow(void) {
+    Deck *d1 = create_deck(10);
+    Deck *d2 = create_deck(2);
+
+    populate_deck(d1);
+
+    // Attempt to deal 5 cards (but d2 only has 2 spaces)
     deal(d1, d2, 5);
-    CU_ASSERT_EQUAL(d1->top, 5); // Only 2 cards should be removed
-    CU_ASSERT_EQUAL(d2->top, 5); // d2 should be completely full
+    CU_ASSERT_EQUAL(d1->top, 8); // Only 2 cards should be removed
+    CU_ASSERT_EQUAL(d2->top, 2); // d2 should be completely full
 
     eliminate_deck(d1);
     eliminate_deck(d2);
 }
 
-
-
-void test_top_card(void) {
+void test_top_card_empty(void) {
     Deck *d = create_deck(5);
 
     // Test empty deck returns {0} safely
     Card empty_top = top_card(d);
     CU_ASSERT_EQUAL(empty_top.card, 0);
+
+    eliminate_deck(d);
+}
+
+void test_top_card_normal(void) {
+    Deck *d = create_deck(5);
 
     // Test normal top card
     Card c1 = {.values = {.value = 7}};
@@ -237,14 +273,15 @@ int main(void) {
     }
 
     // Add the tests to the suite
-    if ((NULL == CU_add_test(pSuite, "test of create/eliminate deck",
-                             test_create_and_eliminate_deck)) ||
-        (NULL ==
-         CU_add_test(pSuite, "test of push and pop", test_push_and_pop)) ||
-        (NULL ==
-         CU_add_test(pSuite, "test of populate_deck", test_populate_deck)) ||
-        (NULL == CU_add_test(pSuite, "test of deal", test_deal)) ||
-        (NULL == CU_add_test(pSuite, "test of top_card", test_top_card)) ||
+    if ((NULL == CU_add_test(pSuite, "test of create/eliminate deck", test_create_and_eliminate_deck)) ||
+        (NULL == CU_add_test(pSuite, "test of a normal push", test_push_normal)) ||
+        (NULL == CU_add_test(pSuite, "test of push on a full deck", test_push_full)) ||
+        (NULL == CU_add_test(pSuite, "test of push and pop", test_pop)) ||
+        (NULL == CU_add_test(pSuite, "test of populate_deck", test_populate_deck)) ||
+        (NULL == CU_add_test(pSuite, "test of a normal deal", test_deal_normal)) ||
+        (NULL == CU_add_test(pSuite, "test of a overflow deal", test_deal_overflow)) ||
+        (NULL == CU_add_test(pSuite, "test of top_card on empty deck", test_top_card_empty)) ||
+        (NULL == CU_add_test(pSuite, "test of top_card", test_top_card_normal)) ||
         (NULL == CU_add_test(pSuite, "test of flip_card", test_flip_card)) ||
         (NULL == CU_add_test(pSuite, "test of flip_deal", test_flip_deal)) ||
         (NULL == CU_add_test(pSuite, "test of get_bigger_deck", test_get_bigger_deck)) ||
