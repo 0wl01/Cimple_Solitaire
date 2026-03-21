@@ -14,6 +14,12 @@ int clean_suite_golf(void) { return 0; }
 
 /**
  * @brief Tests the logic for stacking cards based on the lookup table.
+ * 
+ * Verifies that a card can be successfully placed on top of another
+ * if their values are adjacent according to the rules (e.g., a 3 on a 2).
+ * Asserts that can_deal() returns true (1) for this move.
+ *
+ * @see can_deal()
  */
 
 void test_can_deal_basic(void) {
@@ -31,6 +37,15 @@ void test_can_deal_basic(void) {
     eliminate_deck(d2);
 }
 
+/**
+ * @brief Tests the cyclic wrapping rule for stacking cards.
+ *
+ * Verifies the edge case where a King (value 15) can be placed on 
+ * an Ace (value 3), or vice versa. Asserts that can_deal() correctly
+ * validates this wrap-around logic using the lookup table.
+ *
+ * @see can_deal()
+ */
 
 void test_can_deal_cyclic(void) {
     Deck *d1 = create_deck(1);
@@ -47,12 +62,23 @@ void test_can_deal_cyclic(void) {
     eliminate_deck(d2);
 }
 
+/**
+ * @brief Tests the rejection of an invalid card move.
+ *
+ * Simulates an attempt to stack two non-adjacent cards (e.g., a 8 on a 3).
+ * Asserts that can_deal() successfully blocks the move and returns false (0).
+ *
+ * @see can_deal()
+ */
+
 void test_cant_deal(void) {
     Deck *d1 = create_deck(1);
     Deck *d2 = create_deck(1);
-    // Can a 10 go on top of a 5? (No)
+    // Can a 8 go on top of a 3? (No)
     d1->cards[0] = (Card){.values = {.value = 10}};
+    d1->top = 1;
     d2->cards[0] = (Card){.values = {.value = 5}};
+    d2->top = 1;
     CU_ASSERT_FALSE(can_deal(d1, d2));
 
     eliminate_deck(d1);
@@ -72,7 +98,6 @@ void test_can_play_basic(void) {
     table.stock->top = 1;
     CU_ASSERT_TRUE(can_play(&table));
 
-    // Limpeza
     eliminate_deck(table.stock);
     eliminate_deck(table.waste);
     for(int i=0; i<GOLF_COLUMNS; i++) eliminate_deck(table.columns[i]);
