@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 // Include the header from your project's include directory
-#include "../src/golf.c"
+#include "golf.c"
 
 /* Suite initialization and cleanup functions */
 int init_suite_golf(void) { return 0; }
