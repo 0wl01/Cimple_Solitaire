@@ -14,9 +14,6 @@
   - Substituir todas as chamadas exit(0) na função game_loop por um regresso (return) limpo ao main
   - Garantir que a função clean_golf é chamada no final da execução para libertar o stock, waste e as 7 colunas
 
-- [ ] **Documentação Doxygen**
-  - Substituir os comentários `// TODO: Docs` por blocos Doxygen `/** ... */` nas funções do `golf.c` e na `struct golf_state` do `golf.h`.
-
 - [ ] **Limpeza de Avisos (Warnings)**
   - Tratar o valor de retorno do fgets na função get_input (cli.c) para silenciar o aviso do compilador
   
