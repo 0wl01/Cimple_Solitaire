@@ -130,9 +130,11 @@ static void run_golf(golf_state *table) {
         playing = game_loop(input, table);
     } while (playing);
 
-    print_golf_table(table);
-    if (input != 'q')
+    if (input != 'q') {
+
+        print_golf_table(table);
         print_end(table->waste->top == 52);
+    }
 }
 
 void init_golf() {
