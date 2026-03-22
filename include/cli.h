@@ -1,7 +1,8 @@
+#include "card.h"
+#include "golf.h"
+#include <stdbool.h>
 #ifndef CLI_H
 #define CLI_H
-
-#include "card.h"
 
 /**
  * @brief Prints a single card to the terminal using Unicode symbols.
@@ -22,13 +23,13 @@ void print_deck(const Deck *deck);
  * @param decks Array of pointers to the column decks.
  * @param columns Number of columns to display (usually GOLF_COLUMNS).
  */
-void print_decks_columns(Deck *restrict decks[], uint8_t columns);
+void print_decks_columns(Deck *restrict decks[], const uint8_t columns);
 
 /**
  * @brief Prints the final game message (Win/Loss).
- * @param win Boolean-like flag (1 for win, 0 for loss).
+ * @param win true for win, false for loss.
  */
-void print_end(const uint8_t win);
+void print_end(const bool win);
 
 /**
  * @brief Renders the entire Golf game table.

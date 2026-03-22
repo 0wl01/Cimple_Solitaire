@@ -1,5 +1,6 @@
 #include "golf.h"
 #include "cli.h"
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -34,12 +35,12 @@ static const uint8_t deal_lookup[16] = {
  * @param d1 Pointer to a Deck
  * @param d2 Pointer to a Deck
  *
- * @return 1 if valid and 0 if not.
+ * @return true if valid and false not.
  *
  * @see deal_lookup
  * @see Deck
  */
-static uint8_t can_deal(Deck *d1, Deck *d2) {
+static bool can_deal(Deck *restrict d1, Deck *restrict d2) {
     Card c1 = top_card(d1);
     uint8_t c2_val = top_card(d2).values.value;
     uint8_t possible_stacks = deal_lookup[c1.values.value];
@@ -61,14 +62,14 @@ static void buy(Deck *restrict d1, Deck *restrict d2) {
  * @brief Checks if there's still a play to be made
  *
  * Calls @ref can_deal() to each card column and then checks if there's at least a card in stock.
- * @return 1 (True) if there is at least one move possible, 0 (False) otherwise.
+ * @return true if there is at least one move possible, false otherwise.
  */
-static uint8_t can_play(golf_state *table) {
-    uint8_t result = table->stock->top;
+static bool can_play(golf_state *table) {
+    bool result = table->stock->top;
 
     for (size_t i = 0; i < GOLF_COLUMNS; ++i)
         if (can_deal(table->columns[i], table->waste))
-            result = 1;
+            result = true;
     return result;
 }
 
@@ -88,7 +89,6 @@ static void init_columns(Deck *columns[]) {
     }
 }
 
-// stop using exit and start returning a True or False here to be checked at the run golf
 /**
  * @brief Logic engine for a single game turn.
  * * This function checks for game-over conditions and maps user input
@@ -97,26 +97,22 @@ static void init_columns(Deck *columns[]) {
  *
  * @param input The command character received from the user.
  * @param table Pointer to the active game state.
+ * @return false if game has ended
  */
-static void game_loop(char input, golf_state *table) {
-    const uint8_t not_playable = !can_play(table);
-    if (not_playable) {
-        print_end(table->waste->top == 52);
-        exit(0);
-    }
-    if (input == 's') {
+static bool game_loop(const char input, golf_state *table) {
+    if (input == 'q') {
+        return false;
+    } else if (input == 's') {
         flip_deal(table->stock, table->waste, 1);
     } else if (input == '?') {
         print_help();
-    } else if (input == 'q') {
-        exit(0);
-    } else if (input <= '7' && input >= '1') {
-        input -= '1';
-        buy(table->columns[(uint8_t)input], table->waste);
+    } else if (input >= '1' && input <= '7') {
+        buy(table->columns[(uint8_t)input - '1'], table->waste);
     }
+
+    return can_play(table);
 }
 
-// change this to a do while game loop is true.
 /**
  * @brief Orchestrates the continuous execution of the game.
  * * It maintains the main game loop, ensuring the table is rendered
@@ -125,10 +121,18 @@ static void game_loop(char input, golf_state *table) {
  * @param table Pointer to the active game state.
  */
 static void run_golf(golf_state *table) {
-    while (1) {
-        print_golf_table((table));
-        game_loop(get_input(), table);
-    };
+    bool playing;
+    char input;
+
+    do {
+        print_golf_table(table);
+        input = get_input();
+        playing = game_loop(input, table);
+    } while (playing);
+
+    print_golf_table(table);
+    if (input != 'q')
+        print_end(table->waste->top == 52);
 }
 
 void init_golf() {
@@ -144,6 +148,7 @@ void init_golf() {
 
     flip_all(table.stock);
     run_golf(&table);
+    clean_golf(&table);
 }
 
 // uses existing functions to remove the Stock, Waste and Colunm Decks

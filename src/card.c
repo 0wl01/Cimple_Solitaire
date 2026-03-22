@@ -7,7 +7,7 @@
 // Search about realloc and check if applicable in this code.
 
 /* Allocates a Deck with a flexible array member for cards. */
-Deck *create_deck(uint8_t size) {
+Deck *create_deck(const uint8_t size) {
     Deck *deck = malloc(sizeof(Deck) + (sizeof(Card) * size));
     if (deck == NULL)
         return NULL;
@@ -21,7 +21,6 @@ void eliminate_deck(Deck *deck) { free(deck); }
 
 // This is a basic pop function to a stack.
 // It returns the card popped.
-// if deck is empty it returns 0.
 Card pop(Deck *deck) {
     assert(deck->top > 0);
     return deck->cards[--deck->top];
@@ -48,9 +47,9 @@ void populate_deck(Deck *deck) {
         uint8_t is_red = (s == 1 || s == 2) ? 1 : 0;
         for (uint8_t v = 3; v <= 15 && !is_full; ++v) {
             if (deck->top >= deck->size) {
-            is_full = 1;
+                is_full = 1;
             } else {
-            deck->cards[deck->top++] = (Card){.values = {.flip = 0, .color = is_red, .suit = s, .value = v}};
+                deck->cards[deck->top++] = (Card){.values = {.flip = 0, .color = is_red, .suit = s, .value = v}};
             }
         }
     }
@@ -99,7 +98,7 @@ void flip_all(Deck *d1) {
 }
 
 // deal from d1 to d2 and flip the card
-void flip_deal(Deck *restrict d1, Deck *restrict d2, uint8_t q) {
+void flip_deal(Deck *restrict d1, Deck *restrict d2, const uint8_t q) {
     const uint8_t available = (d1->top < q) ? d1->top : q;
     const uint8_t space_left = d2->size - d2->top;
     uint8_t transfer_count = (available < space_left) ? available : space_left;
@@ -113,10 +112,11 @@ void flip_deal(Deck *restrict d1, Deck *restrict d2, uint8_t q) {
 
 // Returns the deck with the highest 'top' value from the array.
 Deck *get_bigger_deck(Deck *restrict decks[], int8_t n) {
-    Deck *biggest = decks[0];
-    for (--n; n >= 0; --n) {
-        if (biggest->top < decks[n]->top)
-            biggest = decks[n];
+    Deck *biggest = *decks;
+    while (n--) {
+        if (biggest->top < (*decks)->top)
+            biggest = *decks;
+        decks++;
     }
     return biggest;
 }

@@ -39,7 +39,7 @@ void print_deck(Deck const *deck) {
 }
 
 // The top card in the columns is not the top card of the stack. This function reverts the stack.
-void print_decks_columns(Deck *restrict decks[], uint8_t columns) {
+void print_decks_columns(Deck *restrict decks[], const uint8_t columns) {
     Deck *biggest = get_bigger_deck(decks, columns);
     for (size_t i = 0; i <= biggest->top; ++i) {
         for (size_t j = 0; j < columns; ++j) {
@@ -54,7 +54,7 @@ void print_decks_columns(Deck *restrict decks[], uint8_t columns) {
     }
 }
 
-void print_end(const uint8_t win) {
+void print_end(const bool win) {
     if (win)
         printf("You Win!\n");
     else

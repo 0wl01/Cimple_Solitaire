@@ -8,15 +8,6 @@
 
 #include <stdint.h>
 
-/** @brief Boolean false value */
-#define FALSE 0
-/** @brief Boolean true value */
-#define TRUE 1
-/** @brief Default number of card columns in golf */
-#define GOLF_COLUMNS 7
-/** @brief Default size of each column in golf */
-#define GOLF_COLUMN_SIZE 5
-
 /**
  * @brief Represents a playing card.
  * @details The card value is packed into an 8-bit unsigned int.
@@ -45,15 +36,6 @@ typedef struct {
     uint8_t size; /**< Max capacity of the stack; this is set at creation */
     Card cards[]; /**< The flexible array that contains all the cards */
 } Deck;
-
-/**
- * @brief Structure holding the complete state of a Golf solitaire game.
- */
-typedef struct {
-    Deck *stock;                  /**< The draw pile (face-down cards). */
-    Deck *waste;                  /**< The discard pile (where cards are played). */
-    Deck *columns[GOLF_COLUMNS];  /**< The 7 columns of cards on the tableau. */
-} golf_state;
 
 /**
  * @brief Checks whether a given Deck is empty.
@@ -201,13 +183,13 @@ void flip_all(Deck *d1);
  * @see deal()
  * @see flip_card()
  */
-void flip_deal(Deck *restrict d1, Deck *restrict d2, uint8_t q);
+void flip_deal(Deck *restrict d1, Deck *restrict d2, const uint8_t q);
 
 /**
  * @brief Logic for finding the deck with the highest occupancy.
- * * This implementation iterates through the provided array and compares
+ * This implementation iterates through the provided array and compares
  * the 'top' field of each Deck.
- * * @param decks Array of pointers to Deck structures.
+ * @param decks Array of pointers to Deck structures.
  * @param n The number of decks to evaluate.
  * @return Pointer to the Deck with the highest number of cards.
  */

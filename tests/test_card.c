@@ -1,5 +1,6 @@
 #include <CUnit/Basic.h>
 #include <CUnit/CUnit.h>
+#include <stddef.h>
 #include <stdlib.h>
 
 // Include the header from your project's include directory
@@ -243,7 +244,7 @@ void test_flip_all(void) {
  * * @see flip_card()
  */
 void test_flip_card(void) {
-    Card c = {.values= {.flip = 0, .color = 1, .suit= 1, .value = 10}};
+    Card c = {.values = {.flip = 0, .color = 1, .suit = 1, .value = 10}};
 
     c = flip_card(c);
     CU_ASSERT_EQUAL(c.values.flip, 1); // card is now face down
@@ -263,7 +264,7 @@ void test_flip_deal(void) {
     Deck *d2 = create_deck(5);
 
     Card c = {.values = {.flip = 0, .color = 1, .suit = 1, .value = 10}}; // 2 cards facing up
-    
+
     // cards inserted in deck 1
     push(d1, c);
     push(d1, c);
@@ -283,6 +284,16 @@ void test_flip_deal(void) {
     eliminate_deck(d2);
 }
 
+static void mk(Deck *d[3], Card c) {
+    for (int i = 0; i < 3; i++)
+        for (d[i] = create_deck(3); d[i]->top <= i; push(d[i], c))
+            ;
+}
+
+static void rm(Deck *d[3]) {
+    for (int i = 0; i < 3; eliminate_deck(d[i++]))
+        ;
+}
 /**
  * @brief Tests the logic for identifying the largest deck in a collection.
  * * Compares multiple decks with different card counts to ensure the 
@@ -290,31 +301,12 @@ void test_flip_deal(void) {
  * * @see get_bigger_deck()
  */
 void test_get_bigger_deck(void) {
-    Deck *decks[3];
-    decks[0] = create_deck(5);
-    decks[1] = create_deck(5);
-    decks[2] = create_deck(5);
-
-    Card c = {.card = 0xFF}; // dummy card (11111111) just for size purposes
-
-    // 2. Colocamos cartas em quantidades diferentes
-    push(decks[0], c); // decks[0] with 1 card
-    
-    push(decks[1], c);
-    push(decks[1], c);
-    push(decks[1], c); // decks[1] with 3 cards
-    
-    push(decks[2], c);
-    push(decks[2], c); // decks[2] with 2 cards
-
-    Deck *biggest = get_bigger_deck(decks, 3);
-
-    CU_ASSERT_PTR_EQUAL(biggest, decks[1]); // should return decks[1] which has 3 cards
-    CU_ASSERT_EQUAL(biggest->top, 3);
-
-    eliminate_deck(decks[0]);
-    eliminate_deck(decks[1]);
-    eliminate_deck(decks[2]);
+    Deck *d[3];
+    Card c = {.card = 0xFF};
+    mk(d, c);
+    CU_ASSERT_PTR_EQUAL(get_bigger_deck(d, 3), d[2]);
+    CU_ASSERT_EQUAL(get_bigger_deck(d, 3)->top, 3);
+    rm(d);
 }
 
 /**
@@ -333,7 +325,7 @@ void test_shuffle_deck(void) {
     shuffle_deck(d);
 
     CU_ASSERT_EQUAL(d->top, 52); // Must keep all cards
-    
+
     // Checks if the first or last card changed
     // False Positive very unlikely
     CU_ASSERT_TRUE(d->cards[0].card != first_before.card || d->cards[51].card != last_before.card);
@@ -341,48 +333,55 @@ void test_shuffle_deck(void) {
     eliminate_deck(d);
 }
 
+typedef struct {
+    const char *name;
+    CU_TestFunc fn;
+} T;
+
+static int add_all(CU_pSuite s) {
+    T t[] = {{"test of create/eliminate deck", test_create_and_eliminate_deck},
+             {"test of a normal push", test_push_normal},
+             {"test of push on a full deck", test_push_full},
+             {"test of push and pop", test_pop},
+             {"test of populate_deck", test_populate_deck},
+             {"test of a normal deal", test_deal_normal},
+             {"test of a overflow deal", test_deal_overflow},
+             {"test of top_card on empty deck", test_top_card_empty},
+             {"test of top_card", test_top_card_normal},
+             {"test of flip_card", test_flip_card},
+             {"test of flip_deal", test_flip_deal},
+             {"test of get_bigger_deck", test_get_bigger_deck},
+             {"test of shuffle_deck", test_shuffle_deck},
+             {"test of flip_all", test_flip_all}};
+
+    for (size_t i = 0; i < (sizeof(t) / sizeof(*t)); i++)
+        if (!CU_add_test(s, t[i].name, t[i].fn))
+            return 0;
+
+    return 1;
+}
+
+int setup_card_suite(void) {
+    CU_pSuite s = CU_add_suite("Card_Test_Suite", init_suite_card, clean_suite_card);
+    return s && add_all(s);
+}
+
 /* --- MAIN TEST RUNNER --- */
 
 int main(void) {
-    CU_pSuite pSuite = NULL;
-
-    // Initialize the CUnit test registry
-    if (CUE_SUCCESS != CU_initialize_registry()) {
+    if (CUE_SUCCESS != CU_initialize_registry())
         return CU_get_error();
-    }
 
-    // Add a suite to the registry
-    pSuite = CU_add_suite("Card_Test_Suite", init_suite_card, clean_suite_card);
-    if (NULL == pSuite) {
+    if (!setup_card_suite()) {
         CU_cleanup_registry();
         return CU_get_error();
     }
 
-    // Add the tests to the suite
-    if ((NULL == CU_add_test(pSuite, "test of create/eliminate deck", test_create_and_eliminate_deck)) ||
-        (NULL == CU_add_test(pSuite, "test of a normal push", test_push_normal)) ||
-        (NULL == CU_add_test(pSuite, "test of push on a full deck", test_push_full)) ||
-        (NULL == CU_add_test(pSuite, "test of push and pop", test_pop)) ||
-        (NULL == CU_add_test(pSuite, "test of populate_deck", test_populate_deck)) ||
-        (NULL == CU_add_test(pSuite, "test of a normal deal", test_deal_normal)) ||
-        (NULL == CU_add_test(pSuite, "test of a overflow deal", test_deal_overflow)) ||
-        (NULL == CU_add_test(pSuite, "test of top_card on empty deck", test_top_card_empty)) ||
-        (NULL == CU_add_test(pSuite, "test of top_card", test_top_card_normal)) ||
-        (NULL == CU_add_test(pSuite, "test of flip_card", test_flip_card)) ||
-        (NULL == CU_add_test(pSuite, "test of flip_deal", test_flip_deal)) ||
-        (NULL == CU_add_test(pSuite, "test of get_bigger_deck", test_get_bigger_deck)) ||
-        (NULL == CU_add_test(pSuite, "test of shuffle_deck", test_shuffle_deck)) ||
-        (NULL == CU_add_test(pSuite, "test of flip_all", test_flip_all))) {
-        CU_cleanup_registry();
-        return CU_get_error();
-    }
-
-    // Run all tests using the basic interface
     CU_basic_set_mode(CU_BRM_VERBOSE);
     CU_basic_run_tests();
 
     int fails = CU_get_number_of_failures();
-
     CU_cleanup_registry();
-    return fails > 0 ? 1 : 0; // Return non-zero if tests fail
+
+    return fails > 0 ? 1 : 0;
 }
