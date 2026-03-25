@@ -2,6 +2,8 @@
 
 ## Tarefas Pendentes - Lógica do Jogo (golf.c)
 
+- [ ] **Game Rules**
+  - Adicionar uma função para puxar automático 1 carta do deck
 - [ ] **Corrigir Regra do "1 Return" (card.c)**
   - Refatorizar as funções `create_deck` e `push` para terem apenas um único `return` no final, cumprindo a regra imposta pelo professor.
   - Refatorizar as funções create_deck(2 returns) e push(2) no card.c
