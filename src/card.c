@@ -21,10 +21,7 @@ void eliminate_deck(Deck *deck) { free(deck); }
 
 // This is a basic pop function to a stack.
 // It returns the card popped.
-Card pop(Deck *deck) {
-    assert(deck->top > 0);
-    return deck->cards[--deck->top];
-}
+Card pop(Deck *deck) { return deck->top > 0 ? deck->cards[--deck->top] : (Card){0}; }
 
 // This is a basic push function to a stack.
 // Returns the exit code 0 for sucess.
