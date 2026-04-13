@@ -72,7 +72,7 @@ void eliminate_deck(Deck *deck);
  * This pops the top Card of a Deck by decreasing the top var.
  *
  * @param deck A Pointer to a Deck.
- * @return The Card removed.
+ * @return The Card removed if the deck is empty it return an empty card.
  *
  * @see Card
  * @see Deck
