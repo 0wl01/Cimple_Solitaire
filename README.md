@@ -1,8 +1,8 @@
-# Cimple-golf
+# C-litaire
 
-A solitaire game made in C.
+Some solitaire games recreated in C.
 
-Game made for a university project that has the intention of being the as fast and small as possible.
+Made for a university project that has the intention of being the as fast and small as possible.
 
 Right now some project restriction are stopping us from achieving the goal, but the code will be updated after this semester.
 
