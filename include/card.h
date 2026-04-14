@@ -11,6 +11,11 @@
 #include <stdint.h>
 
 /**
+ * @brief Suit order constant
+ */
+typedef enum : uint8_t { SPADES = 0, HEARTS = 1, DIAMONDS = 2, CLUBS = 3 } Suit;
+
+/**
  * @brief Represents a playing card.
  * @details The card value is packed into an 8-bit unsigned int.
  * Because of how a bit field works, it is not possible to strictly know which
@@ -21,7 +26,7 @@ typedef union {
     struct {
         uint8_t flip : 1;  /**< This bit stores if the card is flipped down */
         uint8_t color : 1; /**< Used to check the card color (may be useless if suit order changes) */
-        uint8_t suit : 2;  /**< 2 bits used to identify the 4 possible suits */
+        Suit suit : 2;     /**< 2 bits used to identify the 4 possible suits */
         uint8_t value : 4; /**< The value of the card (3-15). Values (0-2) aren't used. */
     } values;              /**< Bitfield struct for easy access of the card properties */
 } Card;
@@ -65,7 +70,7 @@ Deck *create_deck(const size_t size);
  *
  * @see Deck
  */
-void eliminate_deck(Deck *deck);
+void eliminate_deck(Deck *restrict deck);
 
 /**
  * @brief Function to remove the last element of a Deck.
@@ -79,7 +84,7 @@ void eliminate_deck(Deck *deck);
  * @see Deck
  * @see push()
  */
-Card pop(Deck *deck);
+Card pop(Deck *restrict deck);
 
 /**
  * @brief Inserts a Card in a Deck.
@@ -95,7 +100,7 @@ Card pop(Deck *deck);
  * @see Deck
  * @see Card
  */
-bool push(Deck *deck, const Card card);
+bool push(Deck *restrict deck, const Card card);
 
 /**
  * @brief Fills a Deck with cards.
@@ -107,7 +112,7 @@ bool push(Deck *deck, const Card card);
  *
  * @see Deck
  */
-void populate_deck(Deck *deck);
+void populate_deck(Deck *restrict deck);
 
 /**
  * @brief Shuffle a Deck.
@@ -119,7 +124,7 @@ void populate_deck(Deck *deck);
  *
  * @see Deck
  */
-void shuffle_deck(Deck *deck);
+void shuffle_deck(Deck *restrict deck);
 
 /**
  * @brief Deals cards from a Deck to another Deck.
@@ -148,7 +153,7 @@ void deal(Deck *restrict d1, Deck *restrict d2, const size_t q, const bool flip)
  * @see Deck
  * @see Card
  */
-Card top_card(Deck const *d1);
+Card top_card(const Deck *restrict d1);
 
 /**
  * @brief Flips a Card.
@@ -172,7 +177,7 @@ Card flip_card(Card c);
  * @see flip_card()
  * @see Deck
  */
-void flip_all(Deck *d1);
+void flip_all(Deck *restrict d1);
 
 /**
  * @brief Logic for finding the deck with the highest occupancy.
@@ -180,8 +185,31 @@ void flip_all(Deck *d1);
  * the 'top' field of each Deck.
  * @param decks Array of pointers to Deck structures.
  * @param n The number of decks to evaluate.
+ *
+ * @pre n > 0
+ * @pre All elements decks[0...n] must be non NULL 
  * @return Pointer to the Deck with the highest number of cards.
  */
-Deck *get_bigger_deck(Deck *restrict decks[], size_t n);
+Deck *get_bigger_deck(Deck *restrict decks[], const size_t n);
+
+/**
+ * @brief Splits a deck from a position to the top to another deck.
+ *
+ * @param src Deck which the card will be taken from.
+ * @param dest Deck which the cards will be placed on.
+ * @param pos Position to start taking the cards from.
+ * @return Returns true if possible and false if not possible.
+ */
+bool split_deck(Deck *restrict src, Deck *restrict dest, const size_t pos);
+
+/**
+ * @brief Gets a card in a given position of a Deck
+ *
+ * @param deck Pointer to a Deck.
+ * @param pos size_t arg with the position of an element. 0 indexed.
+ *
+ * @return The card accessed. if the position is invalid returns the empty card.
+ */
+Card peek(Deck *restrict deck, const size_t pos);
 
 #endif
