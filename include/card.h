@@ -49,14 +49,14 @@ typedef struct {
 /**
  * @brief Creates a Pointer to a Deck struct allocating memory.
  *
- * The Deck created may only have at maximum 255 elements.
+ * The Deck created may only have at maximum size_t elements.
  *
  * @param size The size in bytes allocated to the Deck. That is the amount of cards that the deck supports. 
  * @return A pointer to a new empty Deck or NULL if allocation fails.
  *
  * @see Deck
  */
-Deck *create_deck(const uint8_t size);
+Deck *create_deck(const size_t size);
 
 /**
  * @brief Free allocated memory for a Deck.
@@ -173,20 +173,6 @@ Card flip_card(Card c);
  * @see Deck
  */
 void flip_all(Deck *d1);
-
-/**
- * @brief Deals cards and flips them.
- *
- * Combines functionality of @ref flip_card() and @ref deal().
- *
- * @param d1 Pointer to origin Deck.
- * @param d2 Pointer to destiny Deck.
- * @param q Max quantity of cards to deal (MAX: 255)
- *
- * @see deal()
- * @see flip_card()
- */
-void flip_deal(Deck *restrict d1, Deck *restrict d2, const uint8_t q);
 
 /**
  * @brief Logic for finding the deck with the highest occupancy.

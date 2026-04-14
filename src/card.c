@@ -1,15 +1,11 @@
 #include "card.h"
-#include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
-// Should I be using size_t in my loops?
-// Search about realloc and check if applicable in this code.
-
 /* Allocates a Deck with a flexible array member for cards. */
-Deck *create_deck(const uint8_t size) {
+Deck *create_deck(const size_t size) {
     Deck *deck = malloc(sizeof(Deck) + (sizeof(Card) * size));
     if (deck == NULL)
         return NULL;
@@ -32,8 +28,7 @@ bool push(Deck *deck, const Card card) {
         // Deck is full
         return false;
     }
-    deck->cards[(deck->top)] = card;
-    deck->top = deck->top + 1;
+    deck->cards[(deck->top++)] = card;
     return true;
 }
 
@@ -41,15 +36,13 @@ bool push(Deck *deck, const Card card) {
 // I feel like there is a better way to write this thing here.
 void populate_deck(Deck *deck) {
     deck->top = 0;
-    bool is_full = 0; //control flag
-    for (uint8_t s = 0; s < 4 && !is_full; ++s) {
+    for (uint8_t s = 0; s < 4; ++s) {
         uint8_t is_red = (s == 1 || s == 2) ? 1 : 0;
-        for (uint8_t v = 3; v <= 15 && !is_full; ++v) {
-            if (deck->top >= deck->size) {
-                is_full = 1;
-            } else {
-                deck->cards[deck->top++] = (Card){.values = {.flip = 0, .color = is_red, .suit = s, .value = v}};
-            }
+        for (uint8_t v = 3; v <= 15; ++v) {
+            if (deck->top >= deck->size)
+                return;
+
+            deck->cards[deck->top++] = (Card){.values = {.flip = 0, .color = is_red, .suit = s, .value = v}};
         }
     }
 }
@@ -107,10 +100,11 @@ Deck *get_bigger_deck(Deck *restrict decks[], const size_t n) {
 }
 
 // Assuming pos starts at 0
+// calculating src->top - pos twice because I can't use more than two returns.
 bool split_deck(Deck *restrict src, Deck *restrict dest, size_t pos) {
-    const size_t cards_to_copy = src->top - pos, available_space = dest->size - dest->top;
-    if (cards_to_copy > available_space)
+    if (pos >= src->top || src->top - pos > dest->size - dest->top)
         return false;
+    const size_t cards_to_copy = src->top - pos;
     memcpy(dest->cards + dest->top, src->cards + pos, sizeof(Card) * (cards_to_copy));
     src->top -= cards_to_copy;
     dest->top += cards_to_copy;
