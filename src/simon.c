@@ -12,7 +12,7 @@
 void init_simple_simon(void) {
     // 1. Simulate the state creation internally
     simon_state table;
-    
+    (void)table;
     // 2. Visual feedback for the menu test
     printf("\n**************************************\n");
     printf("* SIMPLE SIMON (UNDER CONSTRUCTION)  *\n");
