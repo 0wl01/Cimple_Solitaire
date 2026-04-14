@@ -1,5 +1,11 @@
 # TODO
 
+## Tarefas - Simple Simon
+
+- [ ] **Game Menu**
+  - [ ] Add tests for the Game Menu
+  - [ ] 
+
 ## Tarefas Pendentes - Lógica do Jogo (golf.c)
 
 - [ ] **Game Rules**
