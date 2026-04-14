@@ -1,7 +1,9 @@
 #include "card.h"
 #include <assert.h>
+#include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 
 // Should I be using size_t in my loops?
 // Search about realloc and check if applicable in this code.
@@ -25,21 +27,21 @@ Card pop(Deck *deck) { return deck->top > 0 ? deck->cards[--deck->top] : (Card){
 
 // This is a basic push function to a stack.
 // Returns the exit code 0 for sucess.
-uint8_t push(Deck *deck, const Card card) {
+bool push(Deck *deck, const Card card) {
     if (deck->top == deck->size) {
         // Deck is full
-        return -1;
+        return false;
     }
     deck->cards[(deck->top)] = card;
     deck->top = deck->top + 1;
-    return 0;
+    return true;
 }
 
 // Fills a stack of cards with Cards.
 // I feel like there is a better way to write this thing here.
 void populate_deck(Deck *deck) {
     deck->top = 0;
-    uint8_t is_full = 0; //control flag
+    bool is_full = 0; //control flag
     for (uint8_t s = 0; s < 4 && !is_full; ++s) {
         uint8_t is_red = (s == 1 || s == 2) ? 1 : 0;
         for (uint8_t v = 3; v <= 15 && !is_full; ++v) {
@@ -54,8 +56,8 @@ void populate_deck(Deck *deck) {
 
 // shuffles the deck array using the Fisher-yater shuffle.
 void shuffle_deck(Deck *deck) {
-    for (uint8_t i = 1; i < deck->top; ++i) {
-        uint8_t ran_num = arc4random_uniform(i + 1);
+    for (size_t i = 1; i < deck->top; ++i) {
+        size_t ran_num = arc4random_uniform(i + 1);
         // Swap cards
         Card temp = deck->cards[i];
         deck->cards[i] = deck->cards[ran_num];
@@ -65,14 +67,15 @@ void shuffle_deck(Deck *deck) {
 
 // Simple function that takes elements from a deck to another.
 // It inverses position and only takes what is available
-// I still should probably use memcpy here
-void deal(Deck *restrict d1, Deck *restrict d2, uint8_t q) {
-    const uint8_t available = (d1->top < q) ? d1->top : q;
-    const uint8_t space_left = d2->size - d2->top;
-    uint8_t transfer_count = (available < space_left) ? available : space_left;
+void deal(Deck *restrict d1, Deck *restrict d2, const size_t q, const bool flip) {
+    const size_t available = (d1->top < q) ? d1->top : q;
+    const size_t space_left = d2->size - d2->top;
+    size_t transfer_count = (available < space_left) ? available : space_left;
 
     while (transfer_count--) {
-        d2->cards[d2->top++] = d1->cards[--d1->top];
+        Card temp = d1->cards[--d1->top];
+        temp.values.flip ^= flip;
+        d2->cards[d2->top++] = temp;
     }
 }
 
@@ -94,26 +97,22 @@ void flip_all(Deck *d1) {
     }
 }
 
-// deal from d1 to d2 and flip the card
-void flip_deal(Deck *restrict d1, Deck *restrict d2, const uint8_t q) {
-    const uint8_t available = (d1->top < q) ? d1->top : q;
-    const uint8_t space_left = d2->size - d2->top;
-    uint8_t transfer_count = (available < space_left) ? available : space_left;
-
-    while (transfer_count--) {
-        Card temp = d1->cards[--d1->top];
-        temp.values.flip = !temp.values.flip;
-        d2->cards[d2->top++] = temp;
-    }
+// Returns the deck with the highest 'top' value from the array.
+Deck *get_bigger_deck(Deck *restrict decks[], const size_t n) {
+    Deck *biggest = *decks;
+    for (size_t i = 1; i < n; ++i)
+        if (biggest->top < decks[i]->top)
+            biggest = decks[i];
+    return biggest;
 }
 
-// Returns the deck with the highest 'top' value from the array.
-Deck *get_bigger_deck(Deck *restrict decks[], int8_t n) {
-    Deck *biggest = *decks;
-    while (n--) {
-        if (biggest->top < (*decks)->top)
-            biggest = *decks;
-        decks++;
-    }
-    return biggest;
+// Assuming pos starts at 0
+bool split_deck(Deck *restrict src, Deck *restrict dest, size_t pos) {
+    const size_t cards_to_copy = src->top - pos, available_space = dest->size - dest->top;
+    if (cards_to_copy > available_space)
+        return false;
+    memcpy(dest->cards + dest->top, src->cards + pos, sizeof(Card) * (cards_to_copy));
+    src->top -= cards_to_copy;
+    dest->top += cards_to_copy;
+    return true;
 }

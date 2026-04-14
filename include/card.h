@@ -6,6 +6,8 @@
  * @brief Definitions and macros for playing cards and decks.
  */
 
+#include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 /**
@@ -49,8 +51,7 @@ typedef struct {
  *
  * The Deck created may only have at maximum 255 elements.
  *
- * @param size The size in bytes allocated to the Deck. Each byte supports one
- * Card.
+ * @param size The size in bytes allocated to the Deck. That is the amount of cards that the deck supports. 
  * @return A pointer to a new empty Deck or NULL if allocation fails.
  *
  * @see Deck
@@ -94,13 +95,13 @@ Card pop(Deck *deck);
  * @see Deck
  * @see Card
  */
-uint8_t push(Deck *deck, const Card card);
+bool push(Deck *deck, const Card card);
 
 /**
  * @brief Fills a Deck with cards.
  *
  * Fills a Deck with cards in order (Spades, Hearts, Diamonds, Clubs) 1-13 (value 3-15).
- * It will fill the Deck till its max capacity.
+ * It will fill the Deck till its max capacity. A deck with size 13 will only get the cards of spades.
  *
  * @param deck Pointer to a Deck.
  *
@@ -125,15 +126,17 @@ void shuffle_deck(Deck *deck);
  *
  * Deals q Cards from a Deck or every card from the Deck, whichever is smaller.
  * Will stop dealing if the destination is full.
+ * Flipping an already flipped card will flip it face up.
  * * Dealing cards to itself will result in an error.
  *
  * @param d1 Pointer to the origin Deck (The one being taken cards from).
  * @param d2 Pointer to the destination Deck (The one receiving cards).
- * @param q The max quantity of cards to take (MAX: 255).
+ * @param q The max quantity of cards to take .
+ * @param flip If the card should be flipped or not.
  *
  * @see Deck
  */
-void deal(Deck *restrict d1, Deck *restrict d2, uint8_t q);
+void deal(Deck *restrict d1, Deck *restrict d2, const size_t q, const bool flip);
 
 /**
  * @brief The top Card of a Deck.
@@ -193,6 +196,6 @@ void flip_deal(Deck *restrict d1, Deck *restrict d2, const uint8_t q);
  * @param n The number of decks to evaluate.
  * @return Pointer to the Deck with the highest number of cards.
  */
-Deck *get_bigger_deck(Deck *restrict decks[], int8_t n);
+Deck *get_bigger_deck(Deck *restrict decks[], size_t n);
 
 #endif
