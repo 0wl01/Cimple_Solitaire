@@ -1,4 +1,4 @@
-# Cimple-golf
+# Cimple-Solitaire
 
 A solitaire game made in C.
 
