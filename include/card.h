@@ -34,8 +34,8 @@ typedef union {
  * @see Card
  */
 typedef struct {
-    uint8_t top;  /**< Index of the current top, that is, the current number of elements */
-    uint8_t size; /**< Max capacity of the stack; this is set at creation */
+    size_t top;   /**< Index of the current top, that is, the current number of elements */
+    size_t size;  /**< Max capacity of the stack; this is set at creation */
     Card cards[]; /**< The flexible array that contains all the cards */
 } Deck;
 
