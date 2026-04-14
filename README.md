@@ -13,5 +13,3 @@ José Diogo Ferreira Barbosa (a96609)
 João Sá Parreira (a114898)
 
 Pedro Henrique Dos Santos Silva (a112985)
-
-

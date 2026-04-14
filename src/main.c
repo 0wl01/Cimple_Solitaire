@@ -1,7 +1,10 @@
-#include "golf.h"
-#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include "menu.h"
 
 int main(void) {
-    init_golf();
+    // Starts the Game Engine
+    show_main_menu();
+
     return 0;
 }
