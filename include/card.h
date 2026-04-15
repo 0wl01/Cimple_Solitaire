@@ -52,6 +52,13 @@ typedef struct {
 #define IS_EMPTY(deck) !((deck)->top)
 
 /**
+ * @brief Check whether a given deck is full.
+ * @param deck Pointer to a Deck struct.
+ * @return 1 if full 0 if not full.
+ */
+#define IS_FULL(deck) (deck)->top == (deck)->size
+
+/**
  * @brief Creates a Pointer to a Deck struct allocating memory.
  *
  * The Deck created may only have at maximum size_t elements.
