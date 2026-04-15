@@ -1,8 +1,15 @@
 # TODO
 
-[ ] - Create a selection menu where the user selects which game they want to play.
-[ ] - Make a simple simon game.
-[ ] - Add hints for all the games.
-[ ] - Add undo button.
-[ ] - Add restart button.
-[ ] - start using NCURSES.
+## Geral & Interface
+- [ ] Criar menu de seleção de jogo (Golf e Simple Simon).
+- [ ] Adicionar opções de jogo: Dicas (Hints), Desfazer (Undo) e Reiniciar (Restart).
+- [ ] (Opcional) Implementar interface gráfica no terminal usando `ncurses`.
+
+## Lógica do Simple Simon (`simon.c`)
+- [ ] Implementar distribuição inicial das cartas (formato em escada decrescente).
+- [ ] Criar validação de movimentos (cartas individuais, blocos do mesmo naipe e colunas vazias).
+- [ ] Implementar deteção de vitória (sequência completa de Rei a Ás) e mover para as fundações.
+
+## Testes & Qualidade (`CUnit` e `gcov`)
+- [ ] Escrever testes unitários para: condições de vitória, derrota e movimentos inválidos.
+- [ ] Atualizar a `Makefile` para gerar métricas de cobertura de código com `gcov`.

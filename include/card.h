@@ -219,4 +219,11 @@ bool split_deck(Deck *restrict src, Deck *restrict dest, const size_t pos);
  */
 Card peek(Deck *restrict deck, const size_t pos);
 
+/**
+ * @brief Checks if a sequence of a certain number of cards are all the same suit 
+ * @param deck The deck of cards checked,
+ * @param start_pos Starting position of the sequence.
+ * @param end_pos End position of the sequence.
+ */
+bool same_suit(Deck *restrict deck, size_t start_pos, const size_t end_pos);
 #endif

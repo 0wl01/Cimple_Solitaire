@@ -1,4 +1,5 @@
 #include "card.h"
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -117,7 +118,31 @@ bool split_deck(Deck *restrict src, Deck *restrict dest, const size_t pos) {
 // non destructive
 // assumes pos starts at 0
 Card peek(Deck *restrict deck, const size_t pos) {
-    if (pos >= deck->top)
+    if (!deck || pos >= deck->top)
         return (Card){0};
     return deck->cards[pos];
+}
+
+// will check if a sequence of cards from start_pos to end_pos have equal suits
+bool same_suit(Deck *restrict deck, size_t start_pos, const size_t end_pos) {
+    if (!deck || end_pos < start_pos || start_pos >= deck->top || end_pos >= deck->top)
+        return false;
+    Suit first_suit = deck->cards[start_pos].values.suit;
+    // reusing start_pos as an index to avoid creating a new variable
+    for (++start_pos; start_pos <= end_pos && deck->cards[start_pos].values.suit == first_suit; ++start_pos)
+        ;
+    return start_pos > end_pos;
+}
+
+// basically checks if a sequence of cards is in decreasing order
+bool is_decreasing(Deck *restrict deck, size_t start_pos, const size_t end_pos) {
+    if (!deck || end_pos < start_pos || start_pos >= deck->top || end_pos >= deck->top)
+        return false;
+    uint8_t last_value = deck->cards[start_pos].values.value;
+
+    for (++start_pos; start_pos <= end_pos && last_value - 1 == deck->cards[start_pos].values.value;
+         last_value = deck->cards[start_pos++].values.value) {
+    }
+
+    return start_pos > end_pos;
 }
