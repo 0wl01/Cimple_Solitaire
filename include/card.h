@@ -49,6 +49,8 @@ typedef struct {
 // this is basically a pointer to a function that receives two cards
 typedef bool (*CardPairPredicate)(const Card, const Card);
 
+#define DEFAULT_DECK_SIZE 52
+
 /**
  * @brief Checks whether a given Deck is empty.
  * @param deck Pointer to the Deck struct.
