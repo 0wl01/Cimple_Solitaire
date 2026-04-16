@@ -44,6 +44,11 @@ typedef struct {
     Card cards[]; /**< The flexible array that contains all the cards */
 } Deck;
 
+// TODO
+// needs documentations
+// this is basically a pointer to a function that receives two cards
+typedef bool (*CardPairPredicate)(const Card, const Card);
+
 /**
  * @brief Checks whether a given Deck is empty.
  * @param deck Pointer to the Deck struct.
@@ -219,11 +224,24 @@ bool split_deck(Deck *restrict src, Deck *restrict dest, const size_t pos);
  */
 Card peek(Deck *restrict deck, const size_t pos);
 
+// TODO
+// needs documentation
+bool same_suit(const Card a, const Card b);
+
 /**
  * @brief Checks if a sequence of a certain number of cards are all the same suit 
  * @param deck The deck of cards checked,
  * @param start_pos Starting position of the sequence.
  * @param end_pos End position of the sequence.
  */
-bool same_suit(Deck *restrict deck, size_t start_pos, const size_t end_pos);
+bool sequence_same_suit(Deck *restrict deck, const size_t start_pos, const size_t end_pos);
+
+// TODO
+// Needs docs
+bool is_one_less(const Card a, const Card b);
+
+// TODO
+// Needs docs
+bool sequence_is_decreasing(Deck *restrict deck, const size_t start_pos, const size_t end_pos);
+
 #endif

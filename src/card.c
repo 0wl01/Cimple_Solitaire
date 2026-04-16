@@ -123,26 +123,28 @@ Card peek(Deck *restrict deck, const size_t pos) {
     return deck->cards[pos];
 }
 
-// will check if a sequence of cards from start_pos to end_pos have equal suits
-bool same_suit(Deck *restrict deck, size_t start_pos, const size_t end_pos) {
-    if (!deck || end_pos < start_pos || start_pos >= deck->top || end_pos >= deck->top)
-        return false;
-    Suit first_suit = deck->cards[start_pos].values.suit;
-    // reusing start_pos as an index to avoid creating a new variable
-    for (++start_pos; start_pos <= end_pos && deck->cards[start_pos].values.suit == first_suit; ++start_pos)
+// TODO
+// needs documentation
+// basically runs a two cards function to a sequence of cards.
+static bool all_pairs_match(Deck *restrict deck, size_t start_pos, const size_t end_pos, CardPairPredicate pred) {
+    if (!deck || end_pos < start_pos || start_pos >= deck->top || end_pos >= deck->top || start_pos == end_pos)
+        return start_pos == end_pos;
+
+    for (; start_pos < end_pos && pred(deck->cards[start_pos], deck->cards[start_pos + 1]); ++start_pos)
         ;
     return start_pos > end_pos;
 }
 
+bool same_suit(const Card a, const Card b) { return a.values.suit == b.values.suit; }
+
+// will check if a sequence of cards from start_pos to end_pos have equal suits
+bool sequence_same_suit(Deck *restrict deck, const size_t start_pos, const size_t end_pos) {
+    return all_pairs_match(deck, start_pos, end_pos, same_suit);
+}
+
+bool is_one_less(const Card a, const Card b) { return a.values.value == b.values.value + 1; }
+
 // basically checks if a sequence of cards is in decreasing order
-bool is_decreasing(Deck *restrict deck, size_t start_pos, const size_t end_pos) {
-    if (!deck || end_pos < start_pos || start_pos >= deck->top || end_pos >= deck->top)
-        return false;
-    uint8_t last_value = deck->cards[start_pos].values.value;
-
-    for (++start_pos; start_pos <= end_pos && last_value - 1 == deck->cards[start_pos].values.value;
-         last_value = deck->cards[start_pos++].values.value) {
-    }
-
-    return start_pos > end_pos;
+bool sequence_is_decreasing(Deck *restrict deck, const size_t start_pos, const size_t end_pos) {
+    return all_pairs_match(deck, start_pos, end_pos, is_one_less);
 }
