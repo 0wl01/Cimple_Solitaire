@@ -5,6 +5,10 @@
 - [ ] A função eliminate deck agora recebe um ponteiro para outro ponteiro em vez de apenas um ponteiro. Golf e Testes precisam ser refatorados.
 - [ ] Resolver o loop infinito que ocorre com o end of input (CTRL-D).
 
+## Documentação
+- [ ] Algumas funções novas do card.c precisam de documentação.
+    - Lembrar que funções static tem a documentação escrita no arquivo source (.c) e as outras no header.
+
 ## Geral & Interface
 - [ ] Criar menu de seleção de jogo (Golf e Simple Simon).
 - [ ] Adicionar opções de jogo: Dicas (Hints), Desfazer (Undo) e Reiniciar (Restart).
