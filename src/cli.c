@@ -1,4 +1,6 @@
 #include "cli.h"
+#include "menu.h"
+#include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -72,15 +74,26 @@ void print_golf_table(golf_state *table) {
 
 void print_prompt() { printf("(? for help) ~> "); }
 
-void print_help() {
+void print_golf_help() {
     printf(" s - To deal card from the stock\n 1-7 - To deal cards from the columns\n q - To quit\n ? - For this "
            "screen\n");
 }
 
-char get_input() {
-    char buffer[10];
-    print_prompt();
-    fgets(buffer, 10, stdin);
+char game_get_input() {}
 
-    return buffer[0];
+char menu_get_input() {
+    char buffer[3];
+    return !fgets(buffer, sizeof(buffer), stdin) ? buffer[0] : 'q';
+}
+
+void print_menu(const size_t games_length, const GameOption *restrict games) {
+    printf("\n==================================\n");
+    printf("   Cimple-Solitaire   \n");
+    printf("==================================\n");
+
+    for (size_t i = 0; i < games_length; ++i)
+        printf("  [%zu] %s\n", i + 1, games[i].name);
+    printf("  [q] Exit\n");
+    printf("==================================\n");
+    printf("Pick your game: \n");
 }
