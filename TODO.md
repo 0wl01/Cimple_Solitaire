@@ -5,11 +5,11 @@
 - [ ] Resolver o loop infinito que ocorre com o end of input (CTRL-D).
 
 ## Documentação
-- [ ] Algumas funções novas do card.c precisam de documentação.
+- [ ] Algumas funções novas precisam de documentação.
     - Lembrar que funções static tem a documentação escrita no arquivo source (.c) e as outras no header.
 
 ## Geral & Interface
-- [ ] Criar menu de seleção de jogo (Golf e Simple Simon).
+- [x] Criar menu de seleção de jogo (Golf e Simple Simon).
 - [ ] Adicionar opções de jogo: Dicas (Hints), Desfazer (Undo) e Reiniciar (Restart).
 - [ ] (Opcional) Implementar interface gráfica no terminal usando `ncurses`.
 
