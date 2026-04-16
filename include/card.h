@@ -244,4 +244,12 @@ bool is_one_less(const Card a, const Card b);
 // Needs docs
 bool sequence_is_decreasing(Deck *restrict deck, const size_t start_pos, const size_t end_pos);
 
+// TODO
+// Needs docs
+bool sequence_is_decreasing_hierarchy(Deck *restrict deck, const size_t start_pos, const size_t end_pos);
+
+// TODO
+// Needs docs
+bool one_less_same_suit(const Card a, const Card b);
+
 #endif

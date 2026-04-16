@@ -25,7 +25,7 @@ Card pop(Deck *restrict deck) { return (deck && deck->top > 0) ? deck->cards[--d
 // This is a basic push function to a stack.
 // Returns the exit code 0 for sucess.
 bool push(Deck *deck, const Card card) {
-    if (deck || deck->top == deck->size) {
+    if (!deck || deck->top == deck->size) {
         // Deck is full
         return false;
     }
@@ -147,4 +147,10 @@ bool is_one_less(const Card a, const Card b) { return a.values.value == b.values
 // basically checks if a sequence of cards is in decreasing order
 bool sequence_is_decreasing(Deck *restrict deck, const size_t start_pos, const size_t end_pos) {
     return all_pairs_match(deck, start_pos, end_pos, is_one_less);
+}
+
+bool one_less_same_suit(const Card a, const Card b) { return same_suit(a, b) && is_one_less(a, b); }
+
+bool sequence_is_decreasing_hierarchy(Deck *restrict deck, const size_t start_pos, const size_t end_pos) {
+    return all_pairs_match(deck, start_pos, end_pos, one_less_same_suit);
 }
