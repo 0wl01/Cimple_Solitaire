@@ -1,5 +1,7 @@
 #include "golf.h"
+#include "card.h"
 #include "cli.h"
+#include <assert.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -55,7 +57,7 @@ static bool can_deal(Deck *restrict d1, Deck *restrict d2) {
  */
 static void buy(Deck *restrict d1, Deck *restrict d2) {
     if (can_deal(d1, d2))
-        deal(d1, d2, 1);
+        deal(d1, d2, 1, false);
 }
 
 /**
@@ -103,7 +105,7 @@ static bool game_loop(const char input, golf_state *table) {
     if (input == 'q') {
         return false;
     } else if (input == 's') {
-        flip_deal(table->stock, table->waste, 1);
+        deal(table->stock, table->waste, 1, false);
     } else if (input == '?') {
         print_help();
     } else if (input >= '1' && input <= '7') {
@@ -145,7 +147,7 @@ void init_golf() {
     populate_deck(table.stock);
     shuffle_deck(table.stock);
     for (size_t i = 0; i < GOLF_COLUMNS; ++i) {
-        deal(table.stock, table.columns[i], GOLF_COLUMN_SIZE);
+        split_deck(table.stock, table.columns[i], table.stock->top - GOLF_COLUMN_SIZE);
     }
 
     flip_all(table.stock);
@@ -155,12 +157,11 @@ void init_golf() {
 
 // uses existing functions to remove the Stock, Waste and Colunm Decks
 void clean_golf(golf_state *table) {
-    if (table != NULL) {
-        eliminate_deck(table->stock);
-        eliminate_deck(table->waste);
-        // Iterates through each column to free its allocated memory
-        for (uint8_t i = 0; i < GOLF_COLUMNS; ++i) {
-            eliminate_deck(table->columns[i]);
-        }
+    assert(table != NULL);
+    eliminate_deck(&table->stock);
+    eliminate_deck(&table->waste);
+    // Iterates through each column to free its allocated memory
+    for (size_t i = 0; i < GOLF_COLUMNS; ++i) {
+        eliminate_deck(&table->columns[i]);
     }
 }
