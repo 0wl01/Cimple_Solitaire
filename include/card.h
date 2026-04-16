@@ -61,7 +61,7 @@ typedef bool (*CardPairPredicate)(const Card, const Card);
  * @param deck Pointer to a Deck struct.
  * @return 1 if full 0 if not full.
  */
-#define IS_FULL(deck) ((deck)->top == (deck)->sizei)
+#define IS_FULL(deck) ((deck)->top == (deck)->size)
 
 /**
  * @brief Creates a Pointer to a Deck struct allocating memory.
