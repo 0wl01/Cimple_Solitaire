@@ -1,4 +1,5 @@
 #include "card.h"
+#include <assert.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -23,12 +24,16 @@ void eliminate_deck(Deck **deck) {
 
 // This is a basic pop function to a stack.
 // It returns the card popped.
-Card pop(Deck *restrict deck) { return (deck && deck->top > 0) ? deck->cards[--deck->top] : (Card){0}; }
+Card pop(Deck *restrict deck) {
+    assert(deck != NULL);
+    return deck->top > 0 ? deck->cards[--deck->top] : (Card){0};
+}
 
 // This is a basic push function to a stack.
 // Returns the exit code 0 for sucess.
 bool push(Deck *deck, const Card card) {
-    if (!deck || IS_FULL(deck)) {
+    assert(deck != NULL);
+    if (IS_FULL(deck)) {
         // Deck is full
         return false;
     }
@@ -38,6 +43,7 @@ bool push(Deck *deck, const Card card) {
 
 // Fills a stack of cards with Cards.
 void populate_deck(Deck *restrict deck) {
+    assert(deck != NULL);
     deck->top = 0;
     for (uint8_t s = 0; s < 4; ++s) {
         uint8_t is_red = (s == DIAMONDS || s == HEARTS) ? 1 : 0;
@@ -51,6 +57,7 @@ void populate_deck(Deck *restrict deck) {
 
 // shuffles the deck array using the Fisher-yater shuffle.
 void shuffle_deck(Deck *restrict deck) {
+    assert(deck != NULL);
     for (size_t i = 1; i < deck->top; ++i) {
         size_t ran_num = arc4random_uniform(i + 1);
         // Swap cards
@@ -63,6 +70,7 @@ void shuffle_deck(Deck *restrict deck) {
 // Simple function that takes elements from a deck to another.
 // It inverses position and only takes what is available
 void deal(Deck *restrict d1, Deck *restrict d2, const size_t q, const bool flip) {
+    assert(d1 != NULL && d2 != NULL);
     if (d1 == d2)
         return;
     const size_t available = (d1->top < q) ? d1->top : q;
@@ -78,7 +86,10 @@ void deal(Deck *restrict d1, Deck *restrict d2, const size_t q, const bool flip)
 
 // A function that returns the top card of a card stack
 // or returns 0 if the stack is empty.
-Card top_card(const Deck *restrict d1) { return (d1 && d1->top) ? d1->cards[d1->top - 1] : (Card){0}; }
+Card top_card(const Deck *restrict d1) {
+    assert(d1 != NULL);
+    return d1->top ? d1->cards[d1->top - 1] : (Card){0};
+}
 
 // Flips a card by changing the flip bit.
 Card flip_card(Card c) {
@@ -88,6 +99,7 @@ Card flip_card(Card c) {
 
 // flips all cards in a stack.
 void flip_all(Deck *restrict d1) {
+    assert(d1 != NULL);
     Card *end = d1->cards + d1->top;
     for (Card *c = d1->cards; c < end; ++c) {
         c->values.flip ^= 1;
@@ -96,10 +108,10 @@ void flip_all(Deck *restrict d1) {
 
 // Returns the deck with the highest 'top' value from the array.
 Deck *get_bigger_deck(Deck *restrict decks[], const size_t n) {
-    if (!decks || n == 0)
-        return NULL;
+    assert(decks != NULL && n > 0);
     Deck *biggest = *decks;
     for (size_t i = 1; i < n; ++i)
+
         if (biggest->top < decks[i]->top)
             biggest = decks[i];
     return biggest;
@@ -108,9 +120,10 @@ Deck *get_bigger_deck(Deck *restrict decks[], const size_t n) {
 // Assuming pos starts at 0
 // calculating src->top - pos twice because I can't use more than two returns.
 bool split_deck(Deck *restrict src, Deck *restrict dest, const size_t pos) {
-    if (pos >= src->top || src->top - pos > dest->size - dest->top)
-        return false;
+    assert(src != NULL && dest != NULL);
     const size_t cards_to_copy = src->top - pos;
+    if (pos >= src->top || cards_to_copy > dest->size - dest->top)
+        return false;
     memcpy(dest->cards + dest->top, src->cards + pos, sizeof(Card) * (cards_to_copy));
     src->top -= cards_to_copy;
     dest->top += cards_to_copy;
@@ -121,16 +134,16 @@ bool split_deck(Deck *restrict src, Deck *restrict dest, const size_t pos) {
 // non destructive
 // assumes pos starts at 0
 Card peek(Deck *restrict deck, const size_t pos) {
-    if (!deck || pos >= deck->top)
-        return (Card){0};
-    return deck->cards[pos];
+    assert(deck != NULL);
+    return pos >= deck->top ? (Card){0} : deck->cards[pos];
 }
 
 // TODO
 // needs documentation
 // basically runs a two cards function to a sequence of cards.
 static bool all_pairs_match(Deck *restrict deck, size_t start_pos, const size_t end_pos, CardPairPredicate pred) {
-    if (!deck || end_pos < start_pos || start_pos >= deck->top || end_pos >= deck->top || start_pos == end_pos)
+    assert(deck != NULL && pred != NULL);
+    if (end_pos < start_pos || start_pos >= deck->top || end_pos >= deck->top || start_pos == end_pos)
         return start_pos == end_pos;
 
     for (; start_pos < end_pos && pred(deck->cards[start_pos], deck->cards[start_pos + 1]); ++start_pos)
