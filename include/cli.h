@@ -1,6 +1,8 @@
 #include "card.h"
 #include "golf.h"
+#include "menu.h"
 #include <stdbool.h>
+#include <stddef.h>
 #ifndef CLI_H
 #define CLI_H
 
@@ -49,11 +51,13 @@ void print_prompt();
  */
 void print_help();
 
-/**
- * @brief Reads a single character from the standard input.
- * @note Uses a buffer to handle potential extra characters in the input stream.
- * @return The first character entered by the user.
- */
-char get_input();
+// TODO: docs
+char game_get_input();
+
+// TODO: docs
+char menu_get_input();
+
+// TODO: docs
+void print_menu(const size_t games_length, const GameOption *restrict games);
 
 #endif

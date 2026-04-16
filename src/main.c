@@ -1,6 +1,6 @@
-#include "golf.h"
+#include "menu.h"
 
 int main(void) {
-    init_golf();
+    show_main_menu();
     return 0;
 }
