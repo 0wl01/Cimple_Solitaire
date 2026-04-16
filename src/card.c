@@ -16,7 +16,10 @@ Deck *create_deck(const size_t size) {
 }
 
 // A function to free memory of uneeded decks in the game.
-void eliminate_deck(Deck *restrict deck) { free(deck); }
+void eliminate_deck(Deck **deck) {
+    free(*deck);
+    *deck = NULL;
+}
 
 // This is a basic pop function to a stack.
 // It returns the card popped.
@@ -34,7 +37,6 @@ bool push(Deck *deck, const Card card) {
 }
 
 // Fills a stack of cards with Cards.
-// I feel like there is a better way to write this thing here.
 void populate_deck(Deck *restrict deck) {
     deck->top = 0;
     for (uint8_t s = 0; s < 4; ++s) {
@@ -42,7 +44,6 @@ void populate_deck(Deck *restrict deck) {
         for (uint8_t v = 3; v <= 15; ++v) {
             if (deck->top >= deck->size)
                 return;
-
             deck->cards[deck->top++] = (Card){.values = {.flip = 0, .color = is_red, .suit = s, .value = v}};
         }
     }

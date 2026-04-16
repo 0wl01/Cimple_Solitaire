@@ -1,5 +1,9 @@
 # TODO
 
+## Urgente
+- [ ] A função flip_deal foi removida então todo o código do golf e dos testes precisa ser refatorado.
+- [ ] A função eliminate deck agora recebe um ponteiro para outro ponteiro em vez de apenas um ponteiro. Golf e Testes precisam ser refatorados.
+
 ## Geral & Interface
 - [ ] Criar menu de seleção de jogo (Golf e Simple Simon).
 - [ ] Adicionar opções de jogo: Dicas (Hints), Desfazer (Undo) e Reiniciar (Restart).

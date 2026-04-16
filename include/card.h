@@ -61,7 +61,7 @@ typedef bool (*CardPairPredicate)(const Card, const Card);
  * @param deck Pointer to a Deck struct.
  * @return 1 if full 0 if not full.
  */
-#define IS_FULL(deck) (deck)->top == (deck)->size
+#define IS_FULL(deck) ((deck)->top == (deck)->sizei)
 
 /**
  * @brief Creates a Pointer to a Deck struct allocating memory.
@@ -78,11 +78,11 @@ Deck *create_deck(const size_t size);
 /**
  * @brief Free allocated memory for a Deck.
  *
- * @param deck A Pointer to a Deck you want to free.
+ * @param deck A Pointer to a Deck pointer you want to free.
  *
  * @see Deck
  */
-void eliminate_deck(Deck *restrict deck);
+void eliminate_deck(Deck **deck);
 
 /**
  * @brief Function to remove the last element of a Deck.
