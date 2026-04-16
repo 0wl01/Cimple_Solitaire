@@ -28,7 +28,7 @@ Card pop(Deck *restrict deck) { return (deck && deck->top > 0) ? deck->cards[--d
 // This is a basic push function to a stack.
 // Returns the exit code 0 for sucess.
 bool push(Deck *deck, const Card card) {
-    if (!deck || deck->top == deck->size) {
+    if (!deck || IS_FULL(deck)) {
         // Deck is full
         return false;
     }
@@ -40,7 +40,7 @@ bool push(Deck *deck, const Card card) {
 void populate_deck(Deck *restrict deck) {
     deck->top = 0;
     for (uint8_t s = 0; s < 4; ++s) {
-        uint8_t is_red = (s == 1 || s == 2) ? 1 : 0;
+        uint8_t is_red = (s == DIAMONDS || s == HEARTS) ? 1 : 0;
         for (uint8_t v = 3; v <= 15; ++v) {
             if (deck->top >= deck->size)
                 return;
@@ -63,6 +63,8 @@ void shuffle_deck(Deck *restrict deck) {
 // Simple function that takes elements from a deck to another.
 // It inverses position and only takes what is available
 void deal(Deck *restrict d1, Deck *restrict d2, const size_t q, const bool flip) {
+    if (d1 == d2)
+        return;
     const size_t available = (d1->top < q) ? d1->top : q;
     const size_t space_left = d2->size - d2->top;
     size_t transfer_count = (available < space_left) ? available : space_left;
