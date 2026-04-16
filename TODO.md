@@ -3,6 +3,7 @@
 ## Urgente
 - [ ] A função flip_deal foi removida então todo o código do golf e dos testes precisa ser refatorado.
 - [ ] A função eliminate deck agora recebe um ponteiro para outro ponteiro em vez de apenas um ponteiro. Golf e Testes precisam ser refatorados.
+- [ ] Resolver o loop infinito que ocorre com o end of input (CTRL-D).
 
 ## Geral & Interface
 - [ ] Criar menu de seleção de jogo (Golf e Simple Simon).
