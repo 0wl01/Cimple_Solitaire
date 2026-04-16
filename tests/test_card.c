@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 // Include the header from your project's include directory
-#include "../include/card.h"
+#include "card.h"
 
 /* Suite initialization and cleanup functions */
 int init_suite_card(void) { return 0; }
@@ -20,14 +20,16 @@ int clean_suite_card(void) { return 0; }
  * * @see create_deck()
  * @see eliminate_deck()
  */
-void test_create_and_eliminate_deck(void) {
+void test_create_and_eliminate_deck() {
     Deck *d = create_deck(52);
     CU_ASSERT_PTR_NOT_NULL(d);
     CU_ASSERT_EQUAL(d->size, 52);
     CU_ASSERT_EQUAL(d->top, 0);
     CU_ASSERT_TRUE(IS_EMPTY(d));
 
-    eliminate_deck(d);
+    eliminate_deck(&d);
+
+    CU_ASSERT_PTR_NULL(d);
 }
 
 /**
@@ -36,7 +38,7 @@ void test_create_and_eliminate_deck(void) {
  * 'top' index increments as expected.
  * * @see push()
  */
-void test_push_normal(void) {
+void test_push_normal() {
     Deck *d = create_deck(2);
     Card c1 = {.values = {.flip = 0, .color = 1, .suit = 1, .value = 10}};
     Card c2 = {.values = {.flip = 1, .color = 0, .suit = 0, .value = 14}};
