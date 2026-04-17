@@ -2,7 +2,6 @@
 #include <CUnit/CUnit.h>
 #include <stddef.h>
 
-// Include the header from your project's include directory
 #include "golf.c"
 
 /* Suite initialization and cleanup functions */
@@ -33,8 +32,8 @@ void test_can_deal_basic(void) {
     d2->top = 1;
     CU_ASSERT_TRUE(can_deal(d1, d2));
 
-    eliminate_deck(d1);
-    eliminate_deck(d2);
+    eliminate_deck(&d1);
+    eliminate_deck(&d2);
 }
 
 /**
@@ -58,8 +57,8 @@ void test_can_deal_cyclic(void) {
     d2->top = 1;
     CU_ASSERT_TRUE(can_deal(d1, d2));
 
-    eliminate_deck(d1);
-    eliminate_deck(d2);
+    eliminate_deck(&d1);
+    eliminate_deck(&d2);
 }
 
 /**
@@ -81,8 +80,8 @@ void test_cant_deal(void) {
     d2->top = 1;
     CU_ASSERT_FALSE(can_deal(d1, d2));
 
-    eliminate_deck(d1);
-    eliminate_deck(d2);
+    eliminate_deck(&d1);
+    eliminate_deck(&d2);
 }
 
 /**
@@ -99,10 +98,10 @@ void test_can_play_basic(void) {
     table.stock->top = 1;
     CU_ASSERT_TRUE(can_play(&table));
 
-    eliminate_deck(table.stock);
-    eliminate_deck(table.waste);
+    eliminate_deck(&table.stock);
+    eliminate_deck(&table.waste);
     for (int i = 0; i < GOLF_COLUMNS; i++)
-        eliminate_deck(table.columns[i]);
+        eliminate_deck(&table.columns[i]);
 }
 
 /**
@@ -129,8 +128,8 @@ void test_buy_valid_move(void) {
     CU_ASSERT_EQUAL(col->top, 0);   // col should be empty now
     CU_ASSERT_EQUAL(waste->top, 2); // waste has two
 
-    eliminate_deck(col);
-    eliminate_deck(waste);
+    eliminate_deck(&col);
+    eliminate_deck(&waste);
 }
 
 /**
@@ -189,7 +188,7 @@ static int add_golf_tests(CU_pSuite s) {
              {"test of can_deal cyclic", test_can_deal_cyclic},
              {"test of cant_deal", test_cant_deal},
              {"test of can_play logic", test_can_play_basic},
-             {"test of buy balid move", test_buy_valid_move},
+             {"test of buy valid move", test_buy_valid_move},
              {"test of game over", test_can_play_game_over},
              {"test of column move", test_can_play_column_move}};
 

@@ -25,7 +25,7 @@ typedef struct {
     Deck *columns[GOLF_COLUMNS]; /**< The 7 columns of cards on the tableau. */
 } golf_state;
 
-typedef enum : int8_t { NOTHING = 0, WIN = 2, RESTART = 1, QUIT = 1 } golf_flags;
+typedef enum { NOTHING = 0, WIN = 2, RESTART = 1, QUIT = 1 } golf_flags;
 /**
  * @brief Starts the Golf game session.
  * Initializes the table, shuffles the deck, deals cards, and enters the game loop.

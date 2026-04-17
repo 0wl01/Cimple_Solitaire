@@ -1,6 +1,5 @@
-#include "cli.h"
-#include <card.h>
-#include <simon.h>
+#include "card.h"
+#include "simon.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -88,29 +87,8 @@ static void setup_columns(simon_state *restrict table) {
 }
 
 // TODO
-static bool can_play(simon_state *restrict table) {}
-
-// TODO
-static bool run_simon(simon_state *restrict table) {
-    int result = 0;
-    Command cmd;
-    while (!result) {
-        print_table(&(TableLayout){.columns = table->columns,
-                                   .foundations = table->foundations,
-                                   .waste = NULL,
-                                   .stock = NULL,
-                                   .n_columns = SIMON_COLUMNS,
-                                   .n_foundations = SIMON_FOUNDATIONS});
-        print_prompt();
-        result = dispatch(simon_dispatch, sizeof(simon_dispatch) / sizeof(simon_dispatch[0]), table, game_get_input());
-    }
-    if (!can_play(table) || result == 2) {
-        print_end(result == 2);
-        print_prompt();
-        cmd = game_get_input();
-        result = cmd.type == CMD_YES;
-    }
-    return result == 1;
+static void run_simon(simon_state *restrict table) {
+    (void)table; // TODO finish this (added to silence warnings)
 }
 
 // TODO: docs

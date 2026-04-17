@@ -44,14 +44,14 @@ void test_push_normal() {
     Card c2 = {.values = {.flip = 1, .color = 0, .suit = 0, .value = 14}};
 
     // Test successful pushes
-    CU_ASSERT_EQUAL(push(d, c1), 0);
+    CU_ASSERT_TRUE(push(d, c1));
     CU_ASSERT_EQUAL(d->top, 1);
     CU_ASSERT_FALSE(IS_EMPTY(d));
 
-    CU_ASSERT_EQUAL(push(d, c2), 0);
+    CU_ASSERT_TRUE(push(d, c2));
     CU_ASSERT_EQUAL(d->top, 2);
 
-    eliminate_deck(d);
+    eliminate_deck(&d);
 }
 
 /**
@@ -70,9 +70,9 @@ void test_push_full(void) {
 
     // Test pushing to a full deck
     Card c3 = {.card = 0xFF};
-    CU_ASSERT_EQUAL(push(d, c3), (uint8_t)-1); // Should fail and return -1
+    CU_ASSERT_FALSE(push(d, c3));
 
-    eliminate_deck(d);
+    eliminate_deck(&d);
 }
 
 /**
@@ -95,7 +95,7 @@ void test_pop(void) {
     CU_ASSERT_EQUAL(popped.values.flip, 1);
     CU_ASSERT_EQUAL(d->top, 1);
 
-    eliminate_deck(d);
+    eliminate_deck(&d);
 }
 
 /**
@@ -127,7 +127,7 @@ void test_populate_deck(void) {
     CU_ASSERT_EQUAL(d->cards[51].values.color, 0);
     CU_ASSERT_EQUAL(d->cards[51].values.value, 15);
 
-    eliminate_deck(d);
+    eliminate_deck(&d);
 }
 
 /**
@@ -143,7 +143,7 @@ void test_deal_normal(void) {
     populate_deck(d1); // d1 has 10 cards now
 
     // Deal 3 cards from d1 to d2
-    deal(d1, d2, 3);
+    deal(d1, d2, 3, false);
     CU_ASSERT_EQUAL(d1->top, 7);
     CU_ASSERT_EQUAL(d2->top, 3);
 
@@ -153,8 +153,8 @@ void test_deal_normal(void) {
     CU_ASSERT_EQUAL(d2->cards[0].values.suit, 0);
     CU_ASSERT_EQUAL(d2->cards[0].values.value, 12);
 
-    eliminate_deck(d1);
-    eliminate_deck(d2);
+    eliminate_deck(&d1);
+    eliminate_deck(&d2);
 }
 
 /**
@@ -170,12 +170,12 @@ void test_deal_overflow(void) {
     populate_deck(d1);
 
     // Attempt to deal 5 cards (but d2 only has 2 spaces)
-    deal(d1, d2, 5);
+    deal(d1, d2, 5, false);
     CU_ASSERT_EQUAL(d1->top, 8); // Only 2 cards should be removed
     CU_ASSERT_EQUAL(d2->top, 2); // d2 should be completely full
 
-    eliminate_deck(d1);
-    eliminate_deck(d2);
+    eliminate_deck(&d1);
+    eliminate_deck(&d2);
 }
 
 /**
@@ -191,7 +191,7 @@ void test_top_card_empty(void) {
     Card empty_top = top_card(d);
     CU_ASSERT_EQUAL(empty_top.card, 0);
 
-    eliminate_deck(d);
+    eliminate_deck(&d);
 }
 
 /**
@@ -211,7 +211,7 @@ void test_top_card_normal(void) {
     CU_ASSERT_EQUAL(top.card, c1.card);
     CU_ASSERT_EQUAL(d->top, 1); // Ensure top_card doesn't pop it!
 
-    eliminate_deck(d);
+    eliminate_deck(&d);
 }
 
 /**
@@ -236,7 +236,7 @@ void test_flip_all(void) {
     flip_all(d);
     CU_ASSERT_EQUAL(d->cards[0].values.flip, 0);
 
-    eliminate_deck(d);
+    eliminate_deck(&d);
 }
 
 /**
@@ -274,7 +274,7 @@ void test_flip_deal(void) {
     CU_ASSERT_EQUAL(d1->top, 2); // d1 now has 2 cards
     CU_ASSERT_EQUAL(d2->top, 0);
 
-    flip_deal(d1, d2, 2); // move to d2 while fliping
+    deal(d1, d2, 2, true); // move to d2 while fliping
 
     CU_ASSERT_EQUAL(d1->top, 0);
     CU_ASSERT_EQUAL(d2->top, 2); // d2 now has 2 cards and they should be flipped
@@ -282,19 +282,17 @@ void test_flip_deal(void) {
     CU_ASSERT_EQUAL(d2->cards[0].values.flip, 1);
     CU_ASSERT_EQUAL(d2->cards[1].values.flip, 1);
 
-    eliminate_deck(d1);
-    eliminate_deck(d2);
+    eliminate_deck(&d1);
+    eliminate_deck(&d2);
 }
 
 static void mk(Deck *d[3], Card c) {
-    for (int i = 0; i < 3; i++)
-        for (d[i] = create_deck(3); d[i]->top <= i; push(d[i], c))
-            ;
+    for (size_t i = 0; i < 3; i++)
+        for (d[i] = create_deck(3); d[i]->top <= i; push(d[i], c));
 }
 
 static void rm(Deck *d[3]) {
-    for (int i = 0; i < 3; eliminate_deck(d[i++]))
-        ;
+    for (size_t i = 0; i < 3; eliminate_deck(&d[i++]));
 }
 /**
  * @brief Tests the logic for identifying the largest deck in a collection.
@@ -332,7 +330,7 @@ void test_shuffle_deck(void) {
     // False Positive very unlikely
     CU_ASSERT_TRUE(d->cards[0].card != first_before.card || d->cards[51].card != last_before.card);
 
-    eliminate_deck(d);
+    eliminate_deck(&d);
 }
 
 typedef struct {
