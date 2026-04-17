@@ -15,5 +15,5 @@ typedef struct {
 } simon_state;
 
 // TODO:  needs docs
-void init_simple_simon();
+bool init_simple_simon();
 #endif

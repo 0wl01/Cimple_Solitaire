@@ -2,6 +2,7 @@
 #define GOLF_H
 
 #include "card.h"
+#include "cli.h"
 
 /**
  *
@@ -27,12 +28,21 @@ typedef struct {
  * @brief Starts the Golf game session.
  * Initializes the table, shuffles the deck, deals cards, and enters the game loop.
  */
-void init_golf();
+bool init_golf();
 
 /**
  * @brief Recursively frees all decks within a golf_state.
  * @param table Pointer to the game state to be deallocated.
  */
 void clean_golf(golf_state *table);
+
+// TODO: docs
+typedef int (*CommandHandler)(golf_state *restrict state, const Command cmd);
+
+// TODO: docs
+typedef struct {
+    CommandType type;
+    CommandHandler handler;
+} CommandDispatch;
 
 #endif

@@ -1,5 +1,6 @@
 #include <card.h>
 #include <simon.h>
+#include <stdbool.h>
 #include <stddef.h>
 
 /**
@@ -39,11 +40,12 @@ static void clean_simon_table(simon_state *restrict table) {
 /**
  * @brief Orchestrates the complete setup of a Simple Simon game.
  */
-void init_simple_simon() {
+bool init_simple_simon() {
     simon_state table;
     setup_foundations(&table);
     setup_columns(&table);
 
     run_simon(&table);
     clean_simon_table(&table);
+    return false;
 }

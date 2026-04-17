@@ -2,7 +2,7 @@
 
 ## Urgente
 - [x] Refator golf.c por causa das breaking changes.
-- [ ] Resolver o loop infinito que ocorre com o end of input (CTRL-D).
+- [x] Resolver o loop infinito que ocorre com o end of input (CTRL-D).
 
 ## Documentação
 - [ ] Algumas funções novas precisam de documentação.

@@ -17,9 +17,11 @@ static bool process_choice(char choice) {
         printf("Closing Cimple-Solitaire! Goodbye!\n");
         return false;
     }
+    choice -= '0';
     if (choice > 0 && (size_t)choice <= NUM_GAMES) {
         printf("Loading %s...\n", games[choice - 1].name);
-        games[choice - 1].init_game_fun();
+        while (games[choice - 1].init_game_fun())
+            ;
     }
 
     // Invalid input
