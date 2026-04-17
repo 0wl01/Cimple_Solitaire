@@ -19,12 +19,12 @@ typedef struct {
 bool init_simple_simon();
 
 // TODO: docs
-typedef int (*CommandHandler)(simon_state *restrict state, const Command cmd);
+typedef int (*SimonCommandHandler)(simon_state *restrict state, const Command cmd);
 
 // TODO: docs
 typedef struct {
     CommandType type;
-    CommandHandler handler;
-} CommandDispatch;
+    SimonCommandHandler handler;
+} SimonCommandDispatch;
 
 #endif

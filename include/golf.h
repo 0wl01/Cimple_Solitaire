@@ -39,12 +39,12 @@ bool init_golf();
 void clean_golf(golf_state *table);
 
 // TODO: docs
-typedef int (*CommandHandler)(golf_state *restrict state, const Command cmd);
+typedef int (*GolfCommandHandler)(golf_state *restrict state, const Command cmd);
 
 // TODO: docs
 typedef struct {
     CommandType type;
-    CommandHandler handler;
-} CommandDispatch;
+    GolfCommandHandler handler;
+} GolfCommandDispatch;
 
 #endif

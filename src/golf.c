@@ -139,12 +139,12 @@ static int golf_handle_help(golf_state *restrict table, const Command cmd) {
 }
 
 // TODO: docs
-static const CommandDispatch golf_dispatch[] = {
+static const GolfCommandDispatch golf_dispatch[] = {
     {CMD_MOV, golf_handle_move},    {CMD_HNT, golf_handle_hint}, {CMD_HLP, golf_handle_help},
     {CMD_RST, golf_handle_restart}, {CMD_QUT, golf_handle_quit},
 };
 // TODO: docs
-static int dispatch(const CommandDispatch *table, const size_t table_size, golf_state *state, Command cmd) {
+static int dispatch(const GolfCommandDispatch *table, const size_t table_size, golf_state *state, Command cmd) {
     for (size_t i = 0; i < table_size; ++i)
         if (table[i].type == cmd.type)
             return table[i].handler(state, cmd);

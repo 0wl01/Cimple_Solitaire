@@ -50,13 +50,13 @@ static int simon_handle_help(simon_state *restrict table, const Command cmd) {
 }
 
 // TODO: docs
-static const CommandDispatch simon_dispatch[] = {
+static const SimonCommandDispatch simon_dispatch[] = {
     {CMD_MOV, simon_handle_move},    {CMD_HNT, simon_handle_hint}, {CMD_HLP, simon_handle_help},
     {CMD_RST, simon_handle_restart}, {CMD_QUT, simon_handle_quit},
 };
 
 // TODO: docs
-static int dispatch(const CommandDispatch *table, const size_t table_size, simon_state *state, Command cmd) {
+static int dispatch(const SimonCommandDispatch *table, const size_t table_size, simon_state *state, Command cmd) {
     for (size_t i = 0; i < table_size; ++i)
         if (table[i].type == cmd.type)
             return table[i].handler(state, cmd);
@@ -89,6 +89,8 @@ static void setup_columns(simon_state *restrict table) {
 // TODO
 static void run_simon(simon_state *restrict table) {
     (void)table; // TODO finish this (added to silence warnings)
+    (void)simon_dispatch; // TODO finish this (added to silence warnings)
+    (void)dispatch; // TODO finish this (added to silence warnings)
 }
 
 // TODO: docs
