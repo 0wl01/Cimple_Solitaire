@@ -21,7 +21,7 @@ TARGET = $(BIN_DIR)/c-litaire
 all: CFLAGS = $(BASE_CFLAGS) -O3 -flto -march=native
 
 # Debugging versions (Debug symbols, no optimizations)
-gdb valgrind: CFLAGS = $(BASE_CFLAGS) -g -O0
+gdb valgrind test: CFLAGS = $(BASE_CFLAGS) -g -O0
 TEST_OBJS = $(filter-out $(BUILD_DIR)/main.o, $(OBJS))
 TEST_BIN = $(BIN_DIR)/test_card
 TEST_GOLF_BIN = $(BIN_DIR)/test_golf
