@@ -1,8 +1,5 @@
 #include "cli.h"
-#include "card.h"
-#include "menu.h"
-#include <stddef.h>
-#include <stdint.h>
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -81,6 +78,11 @@ void print_golf_help() {
            "screen\n");
 }
 
+void print_simon_help() {
+    printf(" s - To deal card from the stock\n 1-7 - To deal cards from the columns\n q - To quit\n ? - For this "
+           "screen\n");
+}
+
 void print_invalid_column() { printf("Invalid column!\n"); }
 
 void print_unknown_command() { printf("Unknown command!\n"); }
@@ -126,4 +128,49 @@ Command game_get_input() {
     if (!fgets(buffer, sizeof(buffer), stdin))
         return (Command){.type = CMD_QUT};
     return buffer[0] == 'm' ? parse_move(buffer) : (Command){.type = char_to_command(buffer[0])};
+}
+
+// TODO docs
+static void print_top_row(const TableLayout *t) {
+    if (t->stock) {
+        print_card(top_card(t->stock));
+        printf(" ");
+    }
+    if (t->waste) {
+        print_card(top_card(t->waste));
+        printf(" ");
+    }
+    for (uint8_t i = 0; i < t->n_foundations; ++i) {
+        print_card(top_card(t->foundations[i]));
+        printf(" ");
+    }
+    putchar('\n');
+}
+
+// TODO: docs
+static void print_column_headers(const uint8_t n_columns) {
+    for (uint8_t i = 0; i < n_columns; ++i)
+        printf("%c ", 'A' + i);
+    putchar('\n');
+}
+
+//TODO: docs
+static void print_column_row(Deck *restrict *columns, const uint8_t n_columns, const size_t row) {
+    for (uint8_t j = 0; j < n_columns; ++j) {
+        if (columns[j] && columns[j]->top > row)
+            print_card(columns[j]->cards[row]);
+        else
+            printf(" ");
+        printf(" ");
+    }
+    putchar('\n');
+}
+
+void print_table(const TableLayout *restrict t) {
+    assert(t != NULL);
+    print_top_row(t);
+    print_column_headers(t->n_columns);
+    Deck *biggest = get_bigger_deck(t->columns, t->n_columns);
+    for (size_t i = 0; biggest && i < biggest->top; ++i)
+        print_column_row(t->columns, t->n_columns, i);
 }
