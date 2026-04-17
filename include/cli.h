@@ -6,7 +6,7 @@
 #include <stddef.h>
 #include <stdint.h>
 // TODO: docs
-typedef enum : uint8_t {
+typedef enum {
     CMD_MOV = 0,
     CMD_HNT = 1,
     CMD_HLP = 2,

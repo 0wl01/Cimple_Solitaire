@@ -1,5 +1,5 @@
-#include <card.h>
-#include <simon.h>
+#include "card.h"
+#include "simon.h"
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -27,7 +27,9 @@ static void setup_columns(simon_state *restrict table) {
 }
 
 // TODO
-static void run_simon(simon_state *restrict table) {}
+static void run_simon(simon_state *restrict table) {
+    (void)table; // TODO finish this (added to silence warnings)
+}
 
 // TODO: docs
 static void clean_simon_table(simon_state *restrict table) {

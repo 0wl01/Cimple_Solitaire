@@ -13,7 +13,7 @@
 /**
  * @brief Suit order constant
  */
-typedef enum : uint8_t { SPADES = 0, HEARTS = 1, DIAMONDS = 2, CLUBS = 3 } Suit;
+typedef enum { SPADES = 0, HEARTS = 1, DIAMONDS = 2, CLUBS = 3 } Suit;
 
 /**
  * @brief Represents a playing card.
