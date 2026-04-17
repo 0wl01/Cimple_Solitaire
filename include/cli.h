@@ -6,6 +6,17 @@
 #ifndef CLI_H
 #define CLI_H
 
+// TODO: docs
+typedef enum { CMD_MOV, CMD_HNT, CMD_HLP, CMD_RST, CMD_QUT, CMD_UNK } CommandType;
+
+// TODO: docs
+typedef struct {
+    CommandType type;
+    char src_col;
+    size_t index;
+    char dest_col;
+} Command;
+
 /**
  * @brief Prints a single card to the terminal using Unicode symbols.
  * @details Checks the flip state to show either the back or the face.
@@ -52,7 +63,7 @@ void print_prompt();
 void print_help();
 
 // TODO: docs
-char game_get_input();
+Command game_get_input();
 
 // TODO: docs
 char menu_get_input();

@@ -79,8 +79,6 @@ void print_golf_help() {
            "screen\n");
 }
 
-char game_get_input() {}
-
 char menu_get_input() {
     char buffer[3];
     return !fgets(buffer, sizeof(buffer), stdin) ? buffer[0] : 'q';
@@ -96,4 +94,42 @@ void print_menu(const size_t games_length, const GameOption *restrict games) {
     printf("  [q] Exit\n");
     printf("==================================\n");
     printf("Pick your game: \n");
+}
+
+// TODO: docs
+static Command parse_move(const char *restrict buffer) {
+    Command cmd = {.type = CMD_UNK};
+    char src, dest;
+    size_t idx;
+    if (sscanf(buffer, "m %c %zu %c", &src, &idx, &dest) != 3)
+        return cmd;
+    if (src < 'a' || src > 'j' || dest < 'a' || dest > 'j')
+        return cmd;
+    return (Command){.type = CMD_MOV, .src_col = src, .index = idx, .dest_col = dest};
+}
+
+// TODO: docs
+static CommandType char_to_command(const char c) {
+    const struct {
+        char key;
+        CommandType cmd;
+    } map[] = {
+        {'h', CMD_HNT},
+        {'?', CMD_HLP},
+        {'r', CMD_RST},
+        {'q', CMD_QUT},
+    };
+    for (size_t i = 0; i < sizeof(map) / sizeof(*map); ++i)
+        if (map[i].key == c)
+            return map[i].cmd;
+    return CMD_UNK;
+}
+
+Command game_get_input() {
+    char buffer[32];
+    if (!fgets(buffer, sizeof(buffer), stdin))
+        return (Command){.type = CMD_QUT};
+    if (buffer[0] == 'm')
+        return parse_move(buffer);
+    return (Command){.type = char_to_command(buffer[0])};
 }
