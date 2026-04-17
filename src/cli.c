@@ -62,6 +62,7 @@ void print_end(const bool win) {
         printf("You Win!\n");
     else
         printf("You Lose! HAHA\n");
+    printf("Do you want to keep playing? (y/n)\n");
 }
 
 void print_golf_table(const size_t qnty_columns, Deck *restrict columns[], Deck *restrict stock, Deck *restrict waste) {
@@ -113,12 +114,7 @@ static CommandType char_to_command(const char c) {
     const struct {
         char key;
         CommandType cmd;
-    } map[] = {
-        {'h', CMD_HNT},
-        {'?', CMD_HLP},
-        {'r', CMD_RST},
-        {'q', CMD_QUT},
-    };
+    } map[] = {{'h', CMD_HNT}, {'?', CMD_HLP}, {'r', CMD_RST}, {'q', CMD_QUT}, {'y', CMD_YES}, {'n', CMD_NOT}};
     for (size_t i = 0; i < sizeof(map) / sizeof(*map); ++i)
         if (map[i].key == c)
             return map[i].cmd;

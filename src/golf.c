@@ -102,13 +102,27 @@ static int golf_handle_move(golf_state *restrict table, const Command cmd) {
     return 0;
 }
 
-static int golf_handle_restart(golf_state *restrict table, const Command cmd) { return -1; }
+static int golf_handle_restart(golf_state *restrict table, const Command cmd) {
+    (void)table;
+    (void)cmd;
+    return 1;
+}
 
-static int golf_handle_quit(golf_state *restrict table, const Command cmd) { return 1; }
+static int golf_handle_quit(golf_state *restrict table, const Command cmd) {
+    (void)table;
+    (void)cmd;
+    return -1;
+}
 
-static int golf_handle_hint(golf_state *restrict table, const Command cmd) { return 0; }
+static int golf_handle_hint(golf_state *restrict table, const Command cmd) {
+    (void)table;
+    (void)cmd;
+    return 0;
+}
 
 static int golf_handle_help(golf_state *restrict table, const Command cmd) {
+    (void)table;
+    (void)cmd;
     print_golf_help();
     return 0;
 }
@@ -136,20 +150,21 @@ static int dispatch(const CommandDispatch *table, const size_t table_size, golf_
  * @return returns the restart code.
  */
 static bool run_game(golf_state *restrict table) {
-    bool restart = false;
-    bool playing = true;
-    while (playing) {
+    int result = 0;
+    Command cmd;
+    while (!result && can_play(table)) {
         print_golf_table(GOLF_COLUMNS, table->columns, table->stock, table->waste);
         print_prompt();
-        Command cmd = game_get_input();
-        int result_code = dispatch(golf_dispatch, sizeof(golf_dispatch) / sizeof(golf_dispatch[0]), table, cmd);
-        if (result_code == 1)
-            playing = false;
-        else if (result_code == -1) {
-            playing = false, restart = true;
-        };
+        result = dispatch(golf_dispatch, sizeof(golf_dispatch) / sizeof(golf_dispatch[0]), table, game_get_input());
+        result = table->waste->top + table->stock->top == DEFAULT_DECK_SIZE ? 2 : result;
     }
-    return restart;
+    if (!can_play(table) || result == 2) {
+        print_end(result == 2);
+        print_prompt();
+        cmd = game_get_input();
+        result = cmd.type == CMD_YES;
+    }
+    return result == 1;
 }
 
 bool init_golf() {

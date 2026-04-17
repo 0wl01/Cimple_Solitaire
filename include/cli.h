@@ -6,7 +6,16 @@
 #include <stddef.h>
 #include <stdint.h>
 // TODO: docs
-typedef enum : uint8_t { CMD_MOV = 0, CMD_HNT = 1, CMD_HLP = 2, CMD_RST = 3, CMD_QUT = 4, CMD_UNK = 5 } CommandType;
+typedef enum : uint8_t {
+    CMD_MOV = 0,
+    CMD_HNT = 1,
+    CMD_HLP = 2,
+    CMD_RST = 3,
+    CMD_QUT = 4,
+    CMD_UNK = 5,
+    CMD_YES = 6,
+    CMD_NOT = 7
+} CommandType;
 
 // TODO: docs
 typedef struct {
