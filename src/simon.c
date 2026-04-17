@@ -2,7 +2,67 @@
 #include "simon.h"
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdio.h>
 
+static int simon_handle_move(simon_state *restrict table, const Command cmd) {
+    int src, dest;
+    if (cmd.src_col < 'A' || cmd.src_col > 'Z')
+        return 0;
+    if (cmd.dest_col < 'A' || cmd.dest_col > 'Z')
+        return 0;
+    if (cmd.src_col == cmd.dest_col)
+        return 0;
+    src = cmd.src_col - 'A';
+    dest = cmd.dest_col - 'A';
+    if (cmd.index >= table->columns[src]->top)
+        return 0;
+    if (!sequence_is_decreasing_hierarchy(table->columns[src], cmd.index, table->columns[src]->top - 1))
+        return 0;
+    if (!is_one_less(top_card(table->columns[dest]), table->columns[src]->cards[cmd.index]))
+        return 0;
+    split_deck(table->columns[src], table->columns[dest], cmd.index);
+    return 0;
+}
+
+static int simon_handle_restart(simon_state *restrict table, const Command cmd) {
+    (void)table;
+    (void)cmd;
+    return 1;
+}
+
+static int simon_handle_quit(simon_state *restrict table, const Command cmd) {
+    (void)table;
+    (void)cmd;
+    return -1;
+}
+
+static int simon_handle_hint(simon_state *restrict table, const Command cmd) {
+    (void)table;
+    (void)cmd;
+    return 0;
+}
+
+static int simon_handle_help(simon_state *restrict table, const Command cmd) {
+    (void)table;
+    (void)cmd;
+    print_simon_help();
+    return 0;
+}
+
+// TODO: docs
+static const CommandDispatch simon_dispatch[] = {
+    {CMD_MOV, simon_handle_move},    {CMD_HNT, simon_handle_hint}, {CMD_HLP, simon_handle_help},
+    {CMD_RST, simon_handle_restart}, {CMD_QUT, simon_handle_quit},
+};
+
+// TODO: docs
+static int dispatch(const CommandDispatch *table, const size_t table_size, simon_state *state, Command cmd) {
+    for (size_t i = 0; i < table_size; ++i)
+        if (table[i].type == cmd.type)
+            return table[i].handler(state, cmd);
+    print_unknown_command();
+    return 0;
+}
 /**
  * @brief Initializes the 4 foundation decks for Simple Simon.
  */
@@ -43,6 +103,7 @@ static void clean_simon_table(simon_state *restrict table) {
  * @brief Orchestrates the complete setup of a Simple Simon game.
  */
 bool init_simple_simon() {
+
     simon_state table;
     setup_foundations(&table);
     setup_columns(&table);

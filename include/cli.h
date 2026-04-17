@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+
 // TODO: docs
 typedef enum {
     CMD_MOV = 0,
@@ -24,6 +25,15 @@ typedef struct {
     size_t index;
     char dest_col;
 } Command;
+
+typedef struct {
+    Deck *restrict *columns;
+    Deck *restrict *foundations;
+    Deck *restrict stock;
+    Deck *restrict waste;
+    uint8_t n_columns;
+    uint8_t n_foundations;
+} TableLayout;
 
 /**
  * @brief Prints a single card to the terminal using Unicode symbols.
@@ -75,6 +85,9 @@ void print_prompt();
  */
 void print_golf_help();
 
+// TODO: docs and actual help message.
+void print_simon_help();
+
 // TODO: docs
 Command game_get_input();
 
@@ -84,4 +97,6 @@ char menu_get_input();
 // TODO: docs
 void print_menu(const size_t games_length, const GameOption *restrict games);
 
+// TODO: docs
+void print_table(const TableLayout *restrict t);
 #endif

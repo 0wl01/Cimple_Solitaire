@@ -148,7 +148,7 @@ static bool all_pairs_match(Deck *restrict deck, size_t start_pos, const size_t 
 
     for (; start_pos < end_pos && pred(deck->cards[start_pos], deck->cards[start_pos + 1]); ++start_pos)
         ;
-    return start_pos > end_pos;
+    return start_pos == end_pos;
 }
 
 bool same_suit(const Card a, const Card b) { return a.values.suit == b.values.suit; }
@@ -158,7 +158,7 @@ bool sequence_same_suit(Deck *restrict deck, const size_t start_pos, const size_
     return all_pairs_match(deck, start_pos, end_pos, same_suit);
 }
 
-bool is_one_less(const Card a, const Card b) { return a.values.value == b.values.value + 1; }
+bool is_one_less(const Card a, const Card b) { return a.values.value == b.values.value + 1 || a.card == 0; }
 
 // basically checks if a sequence of cards is in decreasing order
 bool sequence_is_decreasing(Deck *restrict deck, const size_t start_pos, const size_t end_pos) {
