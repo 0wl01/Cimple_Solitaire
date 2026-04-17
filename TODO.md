@@ -21,4 +21,4 @@
 ## Testes & Qualidade (`CUnit` e `gcov`)
 - [ ] Escrever testes unitários para: condições de vitória, derrota e movimentos inválidos.
 - [ ] Atualizar a `Makefile` para gerar métricas de cobertura de código com `gcov`.
-- [ ] Testes precisam ser refatorados para por conta de algumas breaking changes em card.c
+- [X] Testes precisam ser refatorados para por conta de algumas breaking changes em card.c
