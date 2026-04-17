@@ -86,7 +86,7 @@ char menu_get_input() {
 
 void print_menu(const size_t games_length, const GameOption *restrict games) {
     printf("\n==================================\n");
-    printf("   Cimple-Solitaire   \n");
+    printf("      C-litaire      \n");
     printf("==================================\n");
 
     for (size_t i = 0; i < games_length; ++i)

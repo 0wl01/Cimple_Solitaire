@@ -12,9 +12,12 @@
  */
 static const GameOption games[] = {{"Golf", init_golf}, {"Simple Simon", init_simple_simon}};
 
+/**
+ * 
+ */
 static bool process_choice(char choice) {
     if (choice == 'q') {
-        printf("Closing Cimple-Solitaire! Goodbye!\n");
+        printf("Closing C-litaire! Goodbye!\n");
         return false;
     }
     if (choice > 0 && (size_t)choice <= NUM_GAMES) {
