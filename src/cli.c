@@ -1,4 +1,5 @@
 #include "cli.h"
+#include "card.h"
 #include "menu.h"
 #include <stddef.h>
 #include <stdint.h>
@@ -63,12 +64,12 @@ void print_end(const bool win) {
         printf("You Lose! HAHA\n");
 }
 
-void print_golf_table(golf_state *table) {
-    puts("1 2 3 4 5 6 7\n");
-    print_decks_columns(table->columns, GOLF_COLUMNS);
-    print_card(top_card(table->stock));
+void print_golf_table(const size_t qnty_columns, Deck *restrict columns[], Deck *restrict stock, Deck *restrict waste) {
+    puts("A B C D E F G\n");
+    print_decks_columns(columns, qnty_columns);
+    print_card(top_card(stock));
     printf(" ");
-    print_card(top_card(table->waste));
+    print_card(top_card(waste));
     printf("\n");
 }
 
@@ -79,9 +80,13 @@ void print_golf_help() {
            "screen\n");
 }
 
+void print_invalid_column() { printf("Invalid column!\n"); }
+
+void print_unknown_command() { printf("Unknown command!\n"); }
+
 char menu_get_input() {
     char buffer[3];
-    return !fgets(buffer, sizeof(buffer), stdin) ? buffer[0] : 'q';
+    return fgets(buffer, sizeof(buffer), stdin) ? buffer[0] : 'q';
 }
 
 void print_menu(const size_t games_length, const GameOption *restrict games) {
@@ -98,14 +103,9 @@ void print_menu(const size_t games_length, const GameOption *restrict games) {
 
 // TODO: docs
 static Command parse_move(const char *restrict buffer) {
-    Command cmd = {.type = CMD_UNK};
-    char src, dest;
-    size_t idx;
-    if (sscanf(buffer, "m %c %zu %c", &src, &idx, &dest) != 3)
-        return cmd;
-    if (src < 'a' || src > 'j' || dest < 'a' || dest > 'j')
-        return cmd;
-    return (Command){.type = CMD_MOV, .src_col = src, .index = idx, .dest_col = dest};
+    Command cmd = {.type = CMD_MOV, .src_col = 0, .index = SIZE_MAX, .dest_col = 0};
+    int result_code = sscanf(buffer, "m %c %zu %c", &cmd.src_col, &cmd.index, &cmd.dest_col);
+    return result_code < 1 ? (Command){.type = CMD_UNK} : cmd;
 }
 
 // TODO: docs
@@ -129,7 +129,5 @@ Command game_get_input() {
     char buffer[32];
     if (!fgets(buffer, sizeof(buffer), stdin))
         return (Command){.type = CMD_QUT};
-    if (buffer[0] == 'm')
-        return parse_move(buffer);
-    return (Command){.type = char_to_command(buffer[0])};
+    return buffer[0] == 'm' ? parse_move(buffer) : (Command){.type = char_to_command(buffer[0])};
 }

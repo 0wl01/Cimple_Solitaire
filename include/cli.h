@@ -1,13 +1,12 @@
+#ifndef CLI_H
+#define CLI_H
 #include "card.h"
-#include "golf.h"
 #include "menu.h"
 #include <stdbool.h>
 #include <stddef.h>
-#ifndef CLI_H
-#define CLI_H
-
+#include <stdint.h>
 // TODO: docs
-typedef enum { CMD_MOV, CMD_HNT, CMD_HLP, CMD_RST, CMD_QUT, CMD_UNK } CommandType;
+typedef enum : uint8_t { CMD_MOV = 0, CMD_HNT = 1, CMD_HLP = 2, CMD_RST = 3, CMD_QUT = 4, CMD_UNK = 5 } CommandType;
 
 // TODO: docs
 typedef struct {
@@ -23,6 +22,9 @@ typedef struct {
  * @param card The Card structure to be rendered.
  */
 void print_card(const Card card);
+
+// TODO: docs
+void print_invalid_column();
 
 /**
  * @brief Debug function to print all cards in a deck horizontally.
@@ -44,14 +46,16 @@ void print_decks_columns(Deck *restrict decks[], const uint8_t columns);
  */
 void print_end(const bool win);
 
+//TODO: docs
+void print_unknown_command();
+
 /**
  * @brief Renders the entire Golf game table.
  * @details Displays the column headers (1-7), the columns themselves, 
  * the stock pile, and the waste pile.
  * @param table Pointer to the current game state.
  */
-void print_golf_table(golf_state *table);
-
+void print_golf_table(const size_t column_size, Deck *restrict columns[], Deck *restrict stock, Deck *restrict waste);
 /**
  * @brief Displays the command prompt to the user.
  */
@@ -60,7 +64,7 @@ void print_prompt();
 /**
  * @brief Displays the help menu with available commands.
  */
-void print_help();
+void print_golf_help();
 
 // TODO: docs
 Command game_get_input();

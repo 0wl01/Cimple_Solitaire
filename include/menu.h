@@ -1,6 +1,6 @@
 #ifndef MENU_H
 #define MENU_H
-
+#include <stdbool.h>
 #define NUM_GAMES (sizeof(games) / sizeof(games[0]))
 
 /**
@@ -8,7 +8,7 @@
  */
 typedef struct {
     const char *name;
-    void (*init_game_fun)(void); // pointer to game init
+    bool (*init_game_fun)(void); // pointer to game init
 } GameOption;
 
 /**

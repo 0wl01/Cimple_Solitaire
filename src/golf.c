@@ -91,28 +91,40 @@ static void init_columns(Deck *columns[]) {
     }
 }
 
-/**
- * @brief Logic engine for a single game turn.
- * * This function checks for game-over conditions and maps user input
- * characters to specific game actions like dealing from stock, 
- * moving cards from columns, or quitting.
- *
- * @param input The command character received from the user.
- * @param table Pointer to the active game state.
- * @return false if game has ended
- */
-static bool game_loop(const char input, golf_state *table) {
-    if (input == 'q') {
-        return false;
-    } else if (input == 's') {
-        deal(table->stock, table->waste, 1, false);
-    } else if (input == '?') {
-        print_help();
-    } else if (input >= '1' && input <= '7') {
-        buy(table->columns[(uint8_t)input - '1'], table->waste);
+static int golf_handle_move(golf_state *restrict table, const Command cmd) {
+    if ((cmd.src_col < 'A' || cmd.src_col > 'G') && cmd.src_col != 'S') {
+        print_invalid_column();
+    } else if (cmd.src_col == 'S') {
+        deal(table->stock, table->waste, 1, true);
+    } else {
+        buy(table->columns[cmd.src_col - 'A'], table->waste);
     }
+    return 0;
+}
 
-    return can_play(table);
+static int golf_handle_restart(golf_state *restrict table, const Command cmd) { return -1; }
+
+static int golf_handle_quit(golf_state *restrict table, const Command cmd) { return 1; }
+
+static int golf_handle_hint(golf_state *restrict table, const Command cmd) { return 0; }
+
+static int golf_handle_help(golf_state *restrict table, const Command cmd) {
+    print_golf_help();
+    return 0;
+}
+
+// TODO: docs
+static const CommandDispatch golf_dispatch[] = {
+    {CMD_MOV, golf_handle_move},    {CMD_HNT, golf_handle_hint}, {CMD_HLP, golf_handle_help},
+    {CMD_RST, golf_handle_restart}, {CMD_QUT, golf_handle_quit},
+};
+// TODO: docs
+static int dispatch(const CommandDispatch *table, const size_t table_size, golf_state *state, Command cmd) {
+    for (size_t i = 0; i < table_size; ++i)
+        if (table[i].type == cmd.type)
+            return table[i].handler(state, cmd);
+    print_unknown_command();
+    return 0;
 }
 
 /**
@@ -121,25 +133,26 @@ static bool game_loop(const char input, golf_state *table) {
  * to the CLI before requesting and processing the next user input.
  *
  * @param table Pointer to the active game state.
+ * @return returns the restart code.
  */
-static void run_golf(golf_state *table) {
-    bool playing;
-    char input;
-
-    do {
-        print_golf_table(table);
-        input = get_input();
-        playing = game_loop(input, table);
-    } while (playing);
-
-    if (input != 'q') {
-
-        print_golf_table(table);
-        print_end(table->waste->top == 52);
+static bool run_game(golf_state *restrict table) {
+    bool restart = false;
+    bool playing = true;
+    while (playing) {
+        print_golf_table(GOLF_COLUMNS, table->columns, table->stock, table->waste);
+        print_prompt();
+        Command cmd = game_get_input();
+        int result_code = dispatch(golf_dispatch, sizeof(golf_dispatch) / sizeof(golf_dispatch[0]), table, cmd);
+        if (result_code == 1)
+            playing = false;
+        else if (result_code == -1) {
+            playing = false, restart = true;
+        };
     }
+    return restart;
 }
 
-void init_golf() {
+bool init_golf() {
     golf_state table;
     table.stock = create_deck(52);
     table.waste = create_deck(52);
@@ -151,8 +164,9 @@ void init_golf() {
     }
 
     flip_all(table.stock);
-    run_golf(&table);
+    bool result = run_game(&table);
     clean_golf(&table);
+    return result;
 }
 
 // uses existing functions to remove the Stock, Waste and Colunm Decks
