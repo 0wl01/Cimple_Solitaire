@@ -18,7 +18,7 @@ OBJS = $(SRCS:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
 TARGET = $(BIN_DIR)/c-litaire
 
 # Release version (Performance optimizations)
-all: CFLAGS = $(BASE_CFLAGS) -O3 -flto -march=native
+all: CFLAGS = $(BASE_CFLAGS) -O3 -flto -march=native -DNDEBUG
 
 # Debugging versions (Debug symbols, no optimizations)
 gdb valgrind test: CFLAGS = $(BASE_CFLAGS) -g -O0
