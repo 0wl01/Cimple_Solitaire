@@ -17,11 +17,11 @@ static size_t sequence_start_pos(const Deck *restrict column) {
 
 static bool has_play_left(const simon_state *restrict table) {
     bool hope = false;
-    for (size_t i = 0; i < SIMON_COLUMNS && !hope; i++) {
+    for (size_t i = 0; i < SIMON_COLUMNS && !hope; ++i) {
         if (table->columns[i]->top > 0) {
             size_t bottom = sequence_start_pos(table->columns[i]);
             Card moving = table->columns[i]->cards[bottom];
-            for (size_t j = 0; j < SIMON_COLUMNS && !hope; j++)
+            for (size_t j = 0; j < SIMON_COLUMNS && !hope; ++j)
                 hope = j != i && is_one_less(moving, top_card(table->columns[j]));
         }
     }
