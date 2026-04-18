@@ -15,7 +15,7 @@
 
 ## Lógica do Simple Simon (`simon.c`)
 - [x] Implementar distribuição inicial das cartas (formato em escada decrescente).
-- [ ] Criar validação de movimentos (cartas individuais, blocos do mesmo naipe e colunas vazias).
+- [x] Criar validação de movimentos (cartas individuais, blocos do mesmo naipe e colunas vazias).
 - [ ] Implementar deteção de vitória (sequência completa de Rei a Ás) e mover para as fundações.
 
 ## Testes & Qualidade (`CUnit` e `gcov`)
