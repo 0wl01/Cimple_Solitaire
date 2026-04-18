@@ -10,6 +10,7 @@
 
 ## Geral & Interface
 - [x] Criar menu de seleção de jogo (Golf e Simple Simon).
+- [ ] Escrever texto de ajuda para o simple simon.
 - [ ] Adicionar opções de jogo: Dicas (Hints), Desfazer (Undo) e Reiniciar (Restart).
     - [x] Reiniciar.
     - [ ] Undo.

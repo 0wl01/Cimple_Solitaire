@@ -137,6 +137,7 @@ static void print_top_row(const TableLayout *t) {
 
 // TODO: docs
 static void print_column_headers(const uint8_t n_columns) {
+    printf("  ");
     for (uint8_t i = 0; i < n_columns; ++i)
         printf("%c ", 'A' + i);
     putchar('\n');
@@ -144,6 +145,7 @@ static void print_column_headers(const uint8_t n_columns) {
 
 //TODO: docs
 static void print_column_row(Deck *restrict *columns, const uint8_t n_columns, const size_t row) {
+    printf("%lu ", row);
     for (uint8_t j = 0; j < n_columns; ++j) {
         if (columns[j] && columns[j]->top > row)
             print_card(columns[j]->cards[row]);
