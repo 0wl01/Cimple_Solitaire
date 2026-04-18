@@ -43,21 +43,10 @@ static const uint8_t deal_lookup[16] = {
  * @see Deck
  */
 static bool can_deal(Deck *restrict d1, Deck *restrict d2) {
-    bool result = false;
-    // SESE = Single Entry Single Exit
-    if (d1->top > 0) {
-        if (d2->top == 0) {
-            result = true;
-        } else {
-            Card c1 = top_card(d1);
-            uint8_t c2_val = top_card(d2).values.value;
-            uint8_t possible_stacks = deal_lookup[c1.values.value];
-            
-            result = possible_stacks && (c2_val == (possible_stacks & 0x0F) || c2_val == (possible_stacks >> 4));
-        }
-    }
-
-    return result;
+    const uint8_t c2_val = top_card(d2).values.value;
+    const uint8_t possible_stacks = deal_lookup[top_card(d1).values.value];
+    return possible_stacks && (c2_val == (possible_stacks & 0x0F) || c2_val == (possible_stacks >> 4));
+    ;
 }
 
 /**
