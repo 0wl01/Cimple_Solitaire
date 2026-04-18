@@ -15,6 +15,8 @@
     - [ ] Undo.
     - [ ] Dicas. 
         - Dicas é um pouco mais fácil de fazer que o undo. Apenas deve dizer quais são os possíveis movimentos atuais.
+- [ ] Pintar cartas vermelhas de vermelho.
+- [ ] Limpar a terminal a cada loop do jogo.
 - [ ] (Opcional) Implementar interface gráfica no terminal usando `ncurses`.
 
 ## Lógica do Simple Simon (`simon.c`)
