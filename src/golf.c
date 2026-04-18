@@ -126,7 +126,7 @@ static const CommandDispatch golf_dispatch[] = {
  * @param table Pointer to the active game state.
  * @return returns the restart code.
  */
-static bool run_game(golf_state *restrict table) {
+static LoopSignal run_game(golf_state *restrict table) {
     LoopSignal signal = LOOP_CONTINUE;
     while (signal == LOOP_CONTINUE && can_play(table)) {
         print_golf_table(GOLF_COLUMNS, table->columns, table->stock, table->waste);
