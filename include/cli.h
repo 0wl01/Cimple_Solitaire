@@ -1,39 +1,11 @@
 #ifndef CLI_H
 #define CLI_H
 #include "card.h"
-#include "menu.h"
+#include "command.h"
+#include "game.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-
-// TODO: docs
-typedef enum {
-    CMD_MOV = 0,
-    CMD_HNT = 1,
-    CMD_HLP = 2,
-    CMD_RST = 3,
-    CMD_QUT = 4,
-    CMD_UNK = 5,
-    CMD_YES = 6,
-    CMD_NOT = 7
-} CommandType;
-
-// TODO: docs
-typedef struct {
-    CommandType type;
-    char src_col;
-    size_t index;
-    char dest_col;
-} Command;
-
-typedef struct {
-    Deck *restrict *columns;
-    Deck *restrict *foundations;
-    Deck *restrict stock;
-    Deck *restrict waste;
-    uint8_t n_columns;
-    uint8_t n_foundations;
-} TableLayout;
 
 /**
  * @brief Prints a single card to the terminal using Unicode symbols.
@@ -93,9 +65,6 @@ Command game_get_input();
 
 // TODO: docs
 char menu_get_input();
-
-// TODO: docs
-void print_menu(const size_t games_length, const GameOption *restrict games);
 
 // TODO: docs
 void print_table(const TableLayout *restrict t);

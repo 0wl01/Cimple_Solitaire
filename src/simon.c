@@ -1,10 +1,42 @@
-#include "card.h"
 #include "simon.h"
+#include "card.h"
+#include "cli.h"
+#include "game.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
 
-static int simon_handle_move(simon_state *restrict table, const Command cmd) {
+static size_t sequence_start_pos(const Deck *restrict column) {
+    if (IS_EMPTY(column))
+        return 0;
+    size_t i = column->top - 1;
+    while (i > 0 && one_less_same_suit(column->cards[i - 1], column->cards[i]))
+        i--;
+    return i;
+}
+
+static bool has_play_left(const simon_state *restrict table) {
+    bool hope = false;
+    for (size_t i = 0; i < SIMON_COLUMNS && !hope; i++) {
+        if (table->columns[i]->top > 0) {
+            size_t bottom = sequence_start_pos(table->columns[i]);
+            Card moving = table->columns[i]->cards[bottom];
+            for (size_t j = 0; j < SIMON_COLUMNS && !hope; j++)
+                hope = j != i && is_one_less(moving, top_card(table->columns[j]));
+        }
+    }
+    return hope;
+}
+
+static bool has_won(simon_state *restrict table) {
+    bool win = false;
+    for (size_t i = 0; i < SIMON_FOUNDATIONS; ++i)
+        win = win && IS_FULL(table->foundations[i]);
+    return win;
+}
+// TODO: docs
+static LoopSignal simon_handle_move(void *restrict state, const Command cmd) {
+    simon_state *table = state;
     int src, dest;
     if (cmd.src_col < 'A' || cmd.src_col > 'Z')
         return 0;
@@ -24,45 +56,41 @@ static int simon_handle_move(simon_state *restrict table, const Command cmd) {
     return 0;
 }
 
-static int simon_handle_restart(simon_state *restrict table, const Command cmd) {
-    (void)table;
-    (void)cmd;
-    return 1;
-}
-
-static int simon_handle_quit(simon_state *restrict table, const Command cmd) {
-    (void)table;
-    (void)cmd;
-    return -1;
-}
-
-static int simon_handle_hint(simon_state *restrict table, const Command cmd) {
-    (void)table;
-    (void)cmd;
-    return 0;
-}
-
-static int simon_handle_help(simon_state *restrict table, const Command cmd) {
+// TODO: docs
+static LoopSignal simon_handle_help(void *restrict table, const Command cmd) {
     (void)table;
     (void)cmd;
     print_simon_help();
-    return 0;
+    return LOOP_CONTINUE;
 }
 
 // TODO: docs
-static const SimonCommandDispatch simon_dispatch[] = {
-    {CMD_MOV, simon_handle_move},    {CMD_HNT, simon_handle_hint}, {CMD_HLP, simon_handle_help},
-    {CMD_RST, simon_handle_restart}, {CMD_QUT, simon_handle_quit},
+static const CommandDispatch simon_dispatch[] = {
+    {CMD_MOV, simon_handle_move},      {CMD_HNT, default_handle_hint}, {CMD_HLP, simon_handle_help},
+    {CMD_RST, default_handle_restart}, {CMD_QUT, default_handle_quit},
 };
 
-// TODO: docs
-static int dispatch(const SimonCommandDispatch *table, const size_t table_size, simon_state *state, Command cmd) {
-    for (size_t i = 0; i < table_size; ++i)
-        if (table[i].type == cmd.type)
-            return table[i].handler(state, cmd);
-    print_unknown_command();
-    return 0;
+static LoopSignal run_simon(simon_state *restrict table) {
+    LoopSignal sig = LOOP_CONTINUE;
+    while (sig == LOOP_CONTINUE && has_play_left(table)) {
+        print_table(&(TableLayout){.columns = table->columns,
+                                   .foundations = table->foundations,
+                                   .stock = NULL,
+                                   .waste = NULL,
+                                   .n_columns = SIMON_COLUMNS,
+                                   .n_foundations = SIMON_FOUNDATIONS});
+        print_prompt();
+        sig = dispatch(simon_dispatch, sizeof(simon_dispatch) / sizeof(simon_dispatch[0]), table, game_get_input());
+    }
+    if (!has_play_left(table)) {
+        print_end(has_won(table));
+        print_prompt();
+        if (game_get_input().type == CMD_YES)
+            sig = LOOP_RESTART;
+    }
+    return sig;
 }
+
 /**
  * @brief Initializes the 4 foundation decks for Simple Simon.
  */
@@ -87,11 +115,6 @@ static void setup_columns(simon_state *restrict table) {
 }
 
 // TODO
-static void run_simon(simon_state *restrict table) {
-    (void)table; // TODO finish this (added to silence warnings)
-    (void)simon_dispatch; // TODO finish this (added to silence warnings)
-    (void)dispatch; // TODO finish this (added to silence warnings)
-}
 
 // TODO: docs
 static void clean_simon_table(simon_state *restrict table) {
@@ -109,8 +132,7 @@ bool init_simple_simon() {
     simon_state table;
     setup_foundations(&table);
     setup_columns(&table);
-
-    run_simon(&table);
+    LoopSignal exit_sig = run_simon(&table);
     clean_simon_table(&table);
-    return false;
+    return exit_sig == LOOP_RESTART;
 }

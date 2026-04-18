@@ -12,6 +12,17 @@
  */
 static const GameOption games[] = {{"Golf", init_golf}, {"Simple Simon", init_simple_simon}};
 
+static void print_menu(const size_t games_length, const GameOption *restrict games) {
+    printf("\n==================================\n");
+    printf("      C-litaire      \n");
+    printf("==================================\n");
+
+    for (size_t i = 0; i < games_length; ++i)
+        printf("  [%zu] %s\n", i + 1, games[i].name);
+    printf("  [q] Exit\n");
+    printf("==================================\n");
+    printf("Pick your game: \n");
+}
 /**
  * 
  */

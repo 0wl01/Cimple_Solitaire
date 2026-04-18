@@ -1,6 +1,8 @@
 #include "golf.h"
 #include "card.h"
 #include "cli.h"
+#include "command.h"
+#include "game.h"
 #include <assert.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -91,7 +93,8 @@ static void init_columns(Deck *columns[]) {
     }
 }
 
-static int golf_handle_move(golf_state *restrict table, const Command cmd) {
+static LoopSignal golf_handle_move(void *restrict state, const Command cmd) {
+    golf_state *table = state;
     if ((cmd.src_col < 'A' || cmd.src_col > 'G') && cmd.src_col != 'S') {
         print_invalid_column();
     } else if (cmd.src_col == 'S') {
@@ -99,28 +102,10 @@ static int golf_handle_move(golf_state *restrict table, const Command cmd) {
     } else {
         buy(table->columns[cmd.src_col - 'A'], table->waste);
     }
-    return 0;
+    return LOOP_CONTINUE;
 }
 
-static int golf_handle_restart(golf_state *restrict table, const Command cmd) {
-    (void)table;
-    (void)cmd;
-    return 1;
-}
-
-static int golf_handle_quit(golf_state *restrict table, const Command cmd) {
-    (void)table;
-    (void)cmd;
-    return -1;
-}
-
-static int golf_handle_hint(golf_state *restrict table, const Command cmd) {
-    (void)table;
-    (void)cmd;
-    return 0;
-}
-
-static int golf_handle_help(golf_state *restrict table, const Command cmd) {
+static LoopSignal golf_handle_help(void *restrict table, const Command cmd) {
     (void)table;
     (void)cmd;
     print_golf_help();
@@ -128,18 +113,10 @@ static int golf_handle_help(golf_state *restrict table, const Command cmd) {
 }
 
 // TODO: docs
-static const GolfCommandDispatch golf_dispatch[] = {
-    {CMD_MOV, golf_handle_move},    {CMD_HNT, golf_handle_hint}, {CMD_HLP, golf_handle_help},
-    {CMD_RST, golf_handle_restart}, {CMD_QUT, golf_handle_quit},
+static const CommandDispatch golf_dispatch[] = {
+    {CMD_MOV, golf_handle_move},       {CMD_HNT, default_handle_hint}, {CMD_HLP, golf_handle_help},
+    {CMD_RST, default_handle_restart}, {CMD_QUT, default_handle_quit},
 };
-// TODO: docs
-static int dispatch(const GolfCommandDispatch *table, const size_t table_size, golf_state *state, Command cmd) {
-    for (size_t i = 0; i < table_size; ++i)
-        if (table[i].type == cmd.type)
-            return table[i].handler(state, cmd);
-    print_unknown_command();
-    return 0;
-}
 
 /**
  * @brief Orchestrates the continuous execution of the game.
@@ -150,21 +127,20 @@ static int dispatch(const GolfCommandDispatch *table, const size_t table_size, g
  * @return returns the restart code.
  */
 static bool run_game(golf_state *restrict table) {
-    int result = 0;
-    Command cmd;
-    while (!result && can_play(table)) {
+    LoopSignal signal = LOOP_CONTINUE;
+    while (signal == LOOP_CONTINUE && can_play(table)) {
         print_golf_table(GOLF_COLUMNS, table->columns, table->stock, table->waste);
         print_prompt();
-        result = dispatch(golf_dispatch, sizeof(golf_dispatch) / sizeof(golf_dispatch[0]), table, game_get_input());
-        result = table->waste->top + table->stock->top == DEFAULT_DECK_SIZE ? 2 : result;
+        signal = dispatch(golf_dispatch, sizeof(golf_dispatch) / sizeof(golf_dispatch[0]), table, game_get_input());
     }
-    if (!can_play(table) || result == 2) {
-        print_end(result == 2);
+
+    if (!can_play(table)) {
+        print_end(table->stock->top + table->waste->top == DEFAULT_DECK_SIZE);
         print_prompt();
-        cmd = game_get_input();
-        result = cmd.type == CMD_YES;
+        if (game_get_input().type == CMD_YES)
+            signal = LOOP_RESTART;
     }
-    return result == 1;
+    return signal;
 }
 
 bool init_golf() {
@@ -179,9 +155,9 @@ bool init_golf() {
     }
 
     flip_all(table.stock);
-    bool result = run_game(&table);
+    LoopSignal exit_sig = run_game(&table);
     clean_golf(&table);
-    return result;
+    return exit_sig == LOOP_RESTART;
 }
 
 // uses existing functions to remove the Stock, Waste and Colunm Decks

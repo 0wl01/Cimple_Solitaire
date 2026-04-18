@@ -2,7 +2,6 @@
 #define GOLF_H
 
 #include "card.h"
-#include "cli.h"
 #include <stdint.h>
 
 /**
@@ -25,7 +24,6 @@ typedef struct {
     Deck *columns[GOLF_COLUMNS]; /**< The 7 columns of cards on the tableau. */
 } golf_state;
 
-typedef enum { NOTHING = 0, WIN = 2, RESTART = 1, QUIT = 1 } golf_flags;
 /**
  * @brief Starts the Golf game session.
  * Initializes the table, shuffles the deck, deals cards, and enters the game loop.
@@ -37,14 +35,5 @@ bool init_golf();
  * @param table Pointer to the game state to be deallocated.
  */
 void clean_golf(golf_state *table);
-
-// TODO: docs
-typedef int (*GolfCommandHandler)(golf_state *restrict state, const Command cmd);
-
-// TODO: docs
-typedef struct {
-    CommandType type;
-    GolfCommandHandler handler;
-} GolfCommandDispatch;
 
 #endif

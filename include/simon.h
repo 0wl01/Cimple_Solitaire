@@ -2,7 +2,6 @@
 #define SIMON_H
 
 #include "card.h"
-#include "cli.h"
 #include <stdint.h>
 
 #define SIMON_COLUMNS 10
@@ -17,14 +16,5 @@ typedef struct {
 
 // TODO:  needs docs
 bool init_simple_simon();
-
-// TODO: docs
-typedef int (*SimonCommandHandler)(simon_state *restrict state, const Command cmd);
-
-// TODO: docs
-typedef struct {
-    CommandType type;
-    SimonCommandHandler handler;
-} SimonCommandDispatch;
 
 #endif

@@ -141,6 +141,7 @@ Card peek(Deck *restrict deck, const size_t pos) {
 // TODO
 // needs documentation
 // basically runs a two cards function to a sequence of cards.
+// a single card sequence always return true.
 static bool all_pairs_match(Deck *restrict deck, size_t start_pos, const size_t end_pos, CardPairPredicate pred) {
     assert(deck != NULL && pred != NULL);
     if (end_pos < start_pos || start_pos >= deck->top || end_pos >= deck->top || start_pos == end_pos)
@@ -158,6 +159,7 @@ bool sequence_same_suit(Deck *restrict deck, const size_t start_pos, const size_
     return all_pairs_match(deck, start_pos, end_pos, same_suit);
 }
 
+// The empty card 0 is always one less.
 bool is_one_less(const Card a, const Card b) { return a.values.value == b.values.value + 1 || a.card == 0; }
 
 // basically checks if a sequence of cards is in decreasing order

@@ -92,18 +92,6 @@ char menu_get_input() {
     return fgets(buffer, sizeof(buffer), stdin) ? buffer[0] : 'q';
 }
 
-void print_menu(const size_t games_length, const GameOption *restrict games) {
-    printf("\n==================================\n");
-    printf("      C-litaire      \n");
-    printf("==================================\n");
-
-    for (size_t i = 0; i < games_length; ++i)
-        printf("  [%zu] %s\n", i + 1, games[i].name);
-    printf("  [q] Exit\n");
-    printf("==================================\n");
-    printf("Pick your game: \n");
-}
-
 // TODO: docs
 static Command parse_move(const char *restrict buffer) {
     Command cmd = {.type = CMD_MOV, .src_col = 0, .index = SIZE_MAX, .dest_col = 0};
