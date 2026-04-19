@@ -83,7 +83,12 @@ static LoopSignal simon_handle_move(void *restrict state, const Command cmd) {
     return 0;
 }
 
-// TODO: docs
+/**
+ * @brief Prints the help menu specific to the Simple Simon game.
+ * @param table Pointer to the game state (unused).
+ * @param cmd The command context (unused).
+ * @return Always returns LOOP_CONTINUE.
+ */
 static LoopSignal simon_handle_help(void *restrict table, const Command cmd) {
     (void)table;
     (void)cmd;
@@ -91,7 +96,9 @@ static LoopSignal simon_handle_help(void *restrict table, const Command cmd) {
     return LOOP_CONTINUE;
 }
 
-// TODO: docs
+/**
+ * @brief Dispatch table mapping CommandTypes to their Simon-specific handler functions.
+ */
 static const CommandDispatch simon_dispatch[] = {
     {CMD_MOV, simon_handle_move},      {CMD_HNT, default_handle_hint}, {CMD_HLP, simon_handle_help},
     {CMD_RST, default_handle_restart}, {CMD_QUT, default_handle_quit},

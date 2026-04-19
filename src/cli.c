@@ -96,7 +96,11 @@ char menu_get_input() {
     return fgets(buffer, sizeof(buffer), stdin) ? buffer[0] : 'q';
 }
 
-// TODO: docs
+/**
+ * @brief Parses a move command string into a Command struct.
+ * @param buffer The input string (e.g., "m A 5 B").
+ * @return A populated Command struct, or a CMD_UNK command if parsing fails.
+ */
 static Command parse_move(const char *restrict buffer) {
     Command cmd = {.type = CMD_MOV, .src_col = 0, .index = SIZE_MAX, .dest_col = 0};
     int result_code = sscanf(buffer, "m %c %zu %c", &cmd.src_col, &cmd.index, &cmd.dest_col);
@@ -128,7 +132,10 @@ Command game_get_input() {
     return buffer[0] == 'm' ? parse_move(buffer) : (Command){.type = char_to_command(buffer[0])};
 }
 
-// TODO docs
+/**
+ * @brief Renders the top row of the table (Stock, Waste, Foundations).
+ * @param t Pointer to the TableLayout.
+ */
 static void print_top_row(const TableLayout *t) {
     if (t->stock) {
         print_card(top_card(t->stock));
@@ -145,7 +152,10 @@ static void print_top_row(const TableLayout *t) {
     putchar('\n');
 }
 
-// TODO: docs
+/**
+ * @brief Renders the alphabetical column headers (A, B, C...).
+ * @param n_columns The number of headers to print.
+ */
 static void print_column_headers(const uint8_t n_columns) {
     printf("  ");
     for (uint8_t i = 0; i < n_columns; ++i)
@@ -153,7 +163,12 @@ static void print_column_headers(const uint8_t n_columns) {
     putchar('\n');
 }
 
-//TODO: docs
+/**
+ * @brief Renders a single horizontal row across all vertical columns.
+ * @param columns Array of pointers to the table columns.
+ * @param n_columns Total number of columns.
+ * @param row The current depth index being printed.
+ */
 static void print_column_row(Deck *restrict *columns, const uint8_t n_columns, const size_t row) {
     printf("%lu ", row);
     for (uint8_t j = 0; j < n_columns; ++j) {

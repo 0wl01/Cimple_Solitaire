@@ -20,7 +20,9 @@
  */
 void print_card(const Card card);
 
-// TODO: docs
+/**
+ * @brief Prints an error message for invalid column selection.
+ */
 void print_invalid_column();
 
 /**
@@ -43,7 +45,9 @@ void print_decks_columns(Deck *restrict decks[], const uint8_t columns);
  */
 void print_end(const bool win);
 
-//TODO: docs
+/**
+ * @brief Prints an error message for unrecognized commands.
+ */
 void print_unknown_command();
 
 /**
@@ -78,7 +82,10 @@ void print_simon_help();
  */
 Command game_get_input();
 
-// TODO: docs
+/**
+ * @brief Reads a single character command from standard input.
+ * @return The first character of the input, or 'q' if reading fails.
+ */
 char menu_get_input();
 
 // TODO: docs
