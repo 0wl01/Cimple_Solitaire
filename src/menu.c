@@ -23,8 +23,12 @@ static void print_menu(const size_t games_length, const GameOption *restrict gam
     printf("==================================\n");
     printf("Pick your game: \n");
 }
+
 /**
- * 
+ * @brief Processes the user's choice from the main menu.
+ * Launches the selected game or triggers the application exit sequence.
+ * * @param choice The character inputted by the user.
+ * @return false if the user chooses to quit ('q'), true otherwise.
  */
 static bool process_choice(char choice) {
     if (choice == 'q') {

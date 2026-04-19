@@ -94,7 +94,12 @@ static void init_columns(Deck *columns[]) {
 }
 
 /**
- * @brief TODO Documentation
+ * @brief Processes a user command for the Golf game.
+ * Executes the corresponding action, such as drawing from the stock
+ * or moving a card from a column to the waste pile.
+ * * @param state Pointer to the active golf_state.
+ * @param cmd The parsed command inputted by the user.
+ * @return Always returns LOOP_CONTINUE to keep the game running.
  */
 static LoopSignal golf_handle_move(void *restrict state, const Command cmd) {
     golf_state *table = state;

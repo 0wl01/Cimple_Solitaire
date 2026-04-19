@@ -84,8 +84,8 @@ static void check_and_move_completed_suits(simon_state *restrict table) {
  * from the index, which is a position in the source deck(the one getting its cards taken from), to the its top must be a sequence and the top most card of the 
  * destination deck(the one getting the cards after the split deck function) should have a higher value than the one at the index position at the source.
  * 
- * @param state !!TODO
- * @param cmd dictated by the player.
+ * @param state Pointer to the active simon_state.
+ * @param cmd command inputted by the player.
  * 
  * @see sequence_is_decreasing_hierarchy
  * @see split_deck
@@ -132,6 +132,12 @@ static const CommandDispatch simon_dispatch[] = {
     {CMD_RST, default_handle_restart}, {CMD_QUT, default_handle_quit},
 };
 
+/**
+ * @brief Main game loop for the Simple Simon game.
+ * Handles table rendering, user input dispatching, and checks for game over states.
+ * * @param table Pointer to the active simon_state.
+ * @return LOOP_RESTART if the user chooses to play again, LOOP_QUIT otherwise.
+ */
 static LoopSignal run_simon(simon_state *restrict table) {
     LoopSignal sig = LOOP_CONTINUE;
     while (sig == LOOP_CONTINUE && has_play_left(table)) {
