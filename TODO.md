@@ -5,11 +5,11 @@
 - [x] Resolver o loop infinito que ocorre com o end of input (CTRL-D).
 - [X] Segmentation Fault em simon.c
     - check "if (cmd.src_col < 'A' || cmd.src_col > 'Z') return 0;"
-- [ ] Criar Função para Mover para as Fundações
+- [X] Criar Função para Mover para as Fundações
     - Senão o jogo vai continuar impossível de ganhar
 
 ## Documentação
-- [ ] Algumas funções novas precisam de documentação.
+- [X] Algumas funções novas precisam de documentação.
     - Lembrar que funções static tem a documentação escrita no arquivo source (.c) e as outras no header.
 
 ## Geral & Interface
@@ -31,5 +31,5 @@
 
 ## Testes & Qualidade (`CUnit` e `gcov`)
 - [X] Escrever testes unitários para: condições de vitória, derrota e movimentos inválidos.
-- [ ] Atualizar a `Makefile` para gerar métricas de cobertura de código com `gcov`.
+- [X] Atualizar a `Makefile` para gerar métricas de cobertura de código com `gcov`.
 - [X] Testes precisam ser refatorados para por conta de algumas breaking changes em card.c
