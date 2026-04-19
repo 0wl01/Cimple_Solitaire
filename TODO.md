@@ -3,7 +3,7 @@
 ## Urgente
 - [x] Refator golf.c por causa das breaking changes.
 - [x] Resolver o loop infinito que ocorre com o end of input (CTRL-D).
-- [ ] Segmentation Fault em simon.c
+- [X] Segmentation Fault em simon.c
     - check "if (cmd.src_col < 'A' || cmd.src_col > 'Z') return 0;"
 - [ ] Criar Função para Mover para as Fundações
     - Senão o jogo vai continuar impossível de ganhar

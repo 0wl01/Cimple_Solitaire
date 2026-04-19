@@ -50,6 +50,34 @@ static bool has_won(simon_state *restrict table) {
 }
 
 /**
+ * @brief Scans all columns for a complete sequence (King to Ace of the same suit).
+ * If found, moves the entire 13-card sequence to an empty foundation.
+ * * @param table Pointer to the current Simple Simon game state.
+ */
+static void check_and_move_completed_suits(simon_state *restrict table) {
+    for (size_t i = 0; i < SIMON_COLUMNS; ++i) {
+        Deck *col = table->columns[i];
+        
+        // A complete suit requires exactly 13 cards
+        if (col->top >= 13) {
+            size_t start_idx = col->top - 13;
+            
+            // Checks if the last 13 cards are a perfect sequence of the same suit
+            if (sequence_is_decreasing_hierarchy(col, start_idx, col->top - 1)) {
+                
+                // Finds the first empty foundation to store the completed suit
+                for (size_t f = 0; f < SIMON_FOUNDATIONS; ++f) {
+                    if (IS_EMPTY(table->foundations[f])) {
+                        split_deck(col, table->foundations[f], start_idx);
+                        break; // Suit moved, move on to check the next column
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
  * @brief Makes moves certain decks, or single cards, determined by a comand 
  * 
  * If all the right conditions are met, them being, having 2 diferent decks, both must have a corrent input(A-Z characters),
@@ -65,9 +93,9 @@ static bool has_won(simon_state *restrict table) {
 static LoopSignal simon_handle_move(void *restrict state, const Command cmd) {
     simon_state *table = state;
     int src, dest;
-    if (cmd.src_col < 'A' || cmd.src_col > 'Z')
+    if (cmd.src_col < 'A' || cmd.src_col > 'J')
         return 0;
-    if (cmd.dest_col < 'A' || cmd.dest_col > 'Z')
+    if (cmd.dest_col < 'A' || cmd.dest_col > 'J')
         return 0;
     if (cmd.src_col == cmd.dest_col)
         return 0;
@@ -115,6 +143,7 @@ static LoopSignal run_simon(simon_state *restrict table) {
                                    .n_foundations = SIMON_FOUNDATIONS});
         print_prompt();
         sig = dispatch(simon_dispatch, sizeof(simon_dispatch) / sizeof(simon_dispatch[0]), table, game_get_input());
+        check_and_move_completed_suits(table);
     }
     if (!has_play_left(table)) {
         print_end(has_won(table));

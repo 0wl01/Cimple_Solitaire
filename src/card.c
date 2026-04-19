@@ -138,7 +138,6 @@ Card peek(Deck *restrict deck, const size_t pos) {
     return pos >= deck->top ? (Card){0} : deck->cards[pos];
 }
 
-// TODO
 /**
  * @brief Runs a function through the whole deck, from top to bottom, testing if one card and the one above fits parameters.
  * 
