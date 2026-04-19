@@ -1,6 +1,8 @@
 #ifndef MENU_H
 #define MENU_H
 #include <stdbool.h>
+
+/** @brief Automatically calculates the number of available games based on the games array. */
 #define NUM_GAMES (sizeof(games) / sizeof(games[0]))
 
 /**

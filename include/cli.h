@@ -89,8 +89,9 @@ Command game_get_input();
  */
 char menu_get_input();
 
-/** 
- * @brief 
+/** * @brief Renders the generic table layout for any game.
+ * @details Displays the top row (stock, waste, foundations) and the column grid.
+ * @param t Pointer to the TableLayout structure containing the game's state.
  */
 void print_table(const TableLayout *restrict t);
 #endif

@@ -44,9 +44,12 @@ typedef struct {
     Card cards[]; /**< The flexible array that contains all the cards */
 } Deck;
 
-// TODO
-// needs documentations
-// this is basically a pointer to a function that receives two cards
+/**
+ * @brief Typedef for a function pointer that compares two cards.
+ * @param a The first card.
+ * @param b The second card.
+ * @return true if the cards meet the predicate's condition, false otherwise.
+ */
 typedef bool (*CardPairPredicate)(const Card, const Card);
 
 #define DEFAULT_DECK_SIZE 52
