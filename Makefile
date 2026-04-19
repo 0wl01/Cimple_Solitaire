@@ -88,7 +88,7 @@ valgrind: all
 coverage: clean
 	@$(MAKE) test CFLAGS="$(BASE_CFLAGS) -g -O0 --coverage" > /dev/null
 	@echo "\n--- Relatório de Cobertura ---"
-	@find . -name "*.gcda" -exec gcov {} \; | grep -A 1 "File"
+	@find . -name "*.gcda" -exec gcov {} \; | grep -A 1 "File 'src/card.c'\|File 'src/golf.c'\|File 'src/simon.c'" | grep -v "0.00%"
 
 # Cleanup rule
 clean:
