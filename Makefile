@@ -22,14 +22,18 @@ all: CFLAGS = $(BASE_CFLAGS) -O3 -flto -march=native -DNDEBUG
 
 # Debugging versions (Debug symbols, no optimizations)
 gdb valgrind test: CFLAGS = $(BASE_CFLAGS) -g -O0
+coverage: CFLAGS = $(BASE_CFLAGS) -g -O0 --coverage
 TEST_OBJS = $(filter-out $(BUILD_DIR)/main.o, $(OBJS))
 TEST_BIN = $(BIN_DIR)/test_card
 TEST_GOLF_BIN = $(BIN_DIR)/test_golf
+TEST_SIMON_BIN = $(BIN_DIR)/test_simon
 
 # Dependencies for Golf tests
-GOLF_TEST_DEPS = $(BUILD_DIR)/card.o $(BUILD_DIR)/cli.o
+GOLF_TEST_DEPS = $(BUILD_DIR)/card.o $(BUILD_DIR)/cli.o $(BUILD_DIR)/game.o
+# Dependencias for Simon tests
+SIMON_TEST_DEPS = $(BUILD_DIR)/card.o $(BUILD_DIR)/cli.o $(BUILD_DIR)/game.o
 
-.PHONY: all clean run test gdb valgrind
+.PHONY: all clean run test gdb valgrind coverage
 
 # Default build rule
 all: $(TARGET)
@@ -46,11 +50,13 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Test execution rule
-test: $(TEST_BIN) $(TEST_GOLF_BIN)
+test: $(TEST_BIN) $(TEST_GOLF_BIN) $(TEST_SIMON_BIN)
 	@echo "\n--- Running Card Tests ---"
 	@./$(TEST_BIN)
 	@echo "\n--- Running Golf Rules Tests ---"
 	@./$(TEST_GOLF_BIN)
+	@echo "\n--- Running Simon Rules Tests ---"
+	@./$(TEST_SIMON_BIN)
 
 # Building Card tests
 $(TEST_BIN): $(TEST_OBJS) $(TEST_DIR)/test_card.c
@@ -59,6 +65,11 @@ $(TEST_BIN): $(TEST_OBJS) $(TEST_DIR)/test_card.c
 
 # Building Golf tests
 $(TEST_GOLF_BIN): $(GOLF_TEST_DEPS) $(TEST_DIR)/test_golf.c
+	@mkdir -p $(BIN_DIR)
+	$(CC) $(CFLAGS) $^ -o $@ -lcunit
+
+# Building Simon tests
+$(TEST_SIMON_BIN): $(SIMON_TEST_DEPS) $(TEST_DIR)/test_simon.c
 	@mkdir -p $(BIN_DIR)
 	$(CC) $(CFLAGS) $^ -o $@ -lcunit
 
@@ -73,6 +84,11 @@ gdb: all
 valgrind: all
 	@echo "\n--- Analyzing Memory Leaks with Valgrind ---"
 	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./$(TARGET)
+
+coverage: clean
+	@$(MAKE) test CFLAGS="$(BASE_CFLAGS) -g -O0 --coverage" > /dev/null
+	@echo "\n--- Relatório de Cobertura ---"
+	@find . -name "*.gcda" -exec gcov {} \; | grep -A 1 "File 'src/card.c'\|File 'src/golf.c'\|File 'src/simon.c'" | grep -v "0.00%"
 
 # Cleanup rule
 clean:

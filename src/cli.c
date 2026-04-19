@@ -79,12 +79,13 @@ void print_golf_help() {
 }
 
 void print_simon_help() {
-    printf( "m -> Columns should be in capital letters that range from A-J and positions range from 0 to the column's current top card position, no spaces in between.\n"
-            "example: mA6B\n"
-            "h -> Gives you an advice on a command.\n"
-            "? -> Pops this screen.\n"
-            "r -> Creates a new simon table from the beginning.\n"
-            "q -> Quits");
+    printf("m -> Columns should be in capital letters that range from A-J and positions range from 0 to the column's "
+           "current top card position, no spaces in between.\n"
+           "example: mA6B\n"
+           "h -> Gives you an advice on a command.\n"
+           "? -> Pops this screen.\n"
+           "r -> Creates a new simon table from the beginning.\n"
+           "q -> Quits");
 }
 
 void print_invalid_column() { printf("Invalid column!\n"); }
@@ -95,13 +96,12 @@ char menu_get_input() {
     char buffer[3];
     return fgets(buffer, sizeof(buffer), stdin) ? buffer[0] : 'q';
 }
-/** 
- * @brief Checks if after a move input, it has all required information for the move function.
- *
- * @param Pointer to the input memory block.
- *
- * @see Command
- * */
+
+/**
+ * @brief Parses a move command string into a Command struct.
+ * @param buffer The input string (e.g., "m A 5 B").
+ * @return A populated Command struct, or a CMD_UNK command if parsing fails.
+ */
 static Command parse_move(const char *restrict buffer) {
     Command cmd = {.type = CMD_MOV, .src_col = 0, .index = SIZE_MAX, .dest_col = 0};
     int result_code = sscanf(buffer, "m %c %zu %c", &cmd.src_col, &cmd.index, &cmd.dest_col);
@@ -134,7 +134,8 @@ Command game_get_input() {
 }
 
 /**
- * @brief Prints a 
+ * @brief Renders the top row of the table (Stock, Waste, Foundations).
+ * @param t Pointer to the TableLayout.
  */
 static void print_top_row(const TableLayout *t) {
     if (t->stock) {
@@ -152,8 +153,9 @@ static void print_top_row(const TableLayout *t) {
     putchar('\n');
 }
 
-/** 
- * @brief Print a capital letter in for each column, in alphabetical order.
+/**
+ * @brief Renders the alphabetical column headers (A, B, C...).
+ * @param n_columns The number of headers to print.
  */
 static void print_column_headers(const uint8_t n_columns) {
     printf("  ");
@@ -163,7 +165,10 @@ static void print_column_headers(const uint8_t n_columns) {
 }
 
 /**
- * @brief
+ * @brief Renders a single horizontal row across all vertical columns.
+ * @param columns Array of pointers to the table columns.
+ * @param n_columns Total number of columns.
+ * @param row The current depth index being printed.
  */
 static void print_column_row(Deck *restrict *columns, const uint8_t n_columns, const size_t row) {
     printf("%lu ", row);

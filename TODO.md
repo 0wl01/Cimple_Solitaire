@@ -3,6 +3,10 @@
 ## Urgente
 - [x] Refator golf.c por causa das breaking changes.
 - [x] Resolver o loop infinito que ocorre com o end of input (CTRL-D).
+- [X] Segmentation Fault em simon.c
+    - check "if (cmd.src_col < 'A' || cmd.src_col > 'Z') return 0;"
+- [ ] Criar Função para Mover para as Fundações
+    - Senão o jogo vai continuar impossível de ganhar
 
 ## Documentação
 - [ ] Algumas funções novas precisam de documentação.
@@ -26,6 +30,6 @@
 - [x] Implementar deteção de vitória (sequência completa de Rei a Ás) e mover para as fundações.
 
 ## Testes & Qualidade (`CUnit` e `gcov`)
-- [ ] Escrever testes unitários para: condições de vitória, derrota e movimentos inválidos.
+- [X] Escrever testes unitários para: condições de vitória, derrota e movimentos inválidos.
 - [ ] Atualizar a `Makefile` para gerar métricas de cobertura de código com `gcov`.
 - [X] Testes precisam ser refatorados para por conta de algumas breaking changes em card.c
