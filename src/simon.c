@@ -6,6 +6,9 @@
 #include <stddef.h>
 #include <stdio.h>
 
+/**
+ * @brief Seeks for the index of the bottom of a sequence(of one suit).
+ */
 static size_t sequence_start_pos(const Deck *restrict column) {
     if (IS_EMPTY(column))
         return 0;
@@ -15,6 +18,14 @@ static size_t sequence_start_pos(const Deck *restrict column) {
     return i;
 }
 
+/**
+ * @brief Checks if there is at least one possible move.
+ * Selects a collumn, picks,from top to bottom ,the lowest index of a sequence of same suit and then
+ * cheks if the value of the bottom card of the sequence is one unit smaller than the top card of every other collumn.
+ * @return If this is true at least one time, it return true
+ * 
+ * @see bottom_of_sequence
+ */
 static bool has_play_left(const simon_state *restrict table) {
     bool hope = false;
     for (size_t i = 0; i < SIMON_COLUMNS && !hope; ++i) {
@@ -28,13 +39,29 @@ static bool has_play_left(const simon_state *restrict table) {
     return hope;
 }
 
+/**
+ * @brief Checks if all the 52 cards were stored, and so the playing table is empty.
+ */
 static bool has_won(simon_state *restrict table) {
     bool win = false;
     for (size_t i = 0; i < SIMON_FOUNDATIONS; ++i)
         win = win && IS_FULL(table->foundations[i]);
     return win;
 }
-// TODO: docs
+
+/**
+ * @brief Makes moves certain decks, or single cards, determined by a comand 
+ * 
+ * If all the right conditions are met, them being, having 2 diferent decks, both must have a corrent input(A-Z characters),
+ * from the index, which is a position in the source deck(the one getting its cards taken from), to the its top must be a sequence and the top most card of the 
+ * destination deck(the one getting the cards after the split deck function) should have a higher value than the one at the index position at the source.
+ * 
+ * @param state !!TODO
+ * @param cmd dictated by the player.
+ * 
+ * @see sequence_is_decreasing_hierarchy
+ * @see split_deck
+ */
 static LoopSignal simon_handle_move(void *restrict state, const Command cmd) {
     simon_state *table = state;
     int src, dest;
@@ -100,7 +127,13 @@ static void setup_foundations(simon_state *restrict table) {
     }
 }
 
-// TODO: needs docs
+/**
+ * @brief Fill all 52 cards(shuffled) in all the 10 columns of the table.
+ * Using a temporary deck, to create and shuffle the cards, moves, with split_deck, 8 cards to the first 3 columns and then reduces the
+ * the number of cards by one every collumn remaing.
+ * 
+ * @see split_deck
+ */
 static void setup_columns(simon_state *restrict table) {
     Deck *temp_deck = create_deck(DEFAULT_DECK_SIZE);
     populate_deck(temp_deck);
@@ -114,9 +147,9 @@ static void setup_columns(simon_state *restrict table) {
     eliminate_deck(&temp_deck);
 }
 
-// TODO
-
-// TODO: docs
+/**
+ * @brief Frees the memory at the end of the game.
+ */
 static void clean_simon_table(simon_state *restrict table) {
     for (size_t i = 0; i < SIMON_COLUMNS; ++i)
         eliminate_deck(&table->columns[i]);

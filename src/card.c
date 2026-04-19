@@ -139,7 +139,17 @@ Card peek(Deck *restrict deck, const size_t pos) {
 }
 
 // TODO
-// needs documentation
+/**
+ * @brief Runs a function through the whole deck, from top to bottom, testing if one card and the one above fits parameters.
+ * 
+ * @param deck A pointer to a Deck.
+ * @param start_pos Index from the bottom of the potential sequence.
+ * @param end_pos Index from the top of the potential sequence.
+ * @param pred funtion that return a bool value, such as is_one_less and one_less_same_suit.
+ * 
+ * @see one_less_same_suit
+ * @see is_one_less
+ */
 // basically runs a two cards function to a sequence of cards.
 // a single card sequence always return true.
 static bool all_pairs_match(Deck *restrict deck, size_t start_pos, const size_t end_pos, CardPairPredicate pred) {

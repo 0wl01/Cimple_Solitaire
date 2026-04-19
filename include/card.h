@@ -226,8 +226,12 @@ bool split_deck(Deck *restrict src, Deck *restrict dest, const size_t pos);
  */
 Card peek(Deck *restrict deck, const size_t pos);
 
-// TODO
-// needs documentation
+/**
+ * @brief Chekcs if two cards share the same suit.
+ * 
+ * @param a A card...
+ * @param b Another... card...
+ */
 bool same_suit(const Card a, const Card b);
 
 /**
@@ -238,20 +242,46 @@ bool same_suit(const Card a, const Card b);
  */
 bool sequence_same_suit(Deck *restrict deck, const size_t start_pos, const size_t end_pos);
 
-// TODO
-// Needs docs
+/**
+ * @brief Checks if the hierarchy order is correct (Kings > Queens > ... > Aces)
+ * @param b Card of bigger value.
+ * @param a Card of smaller value.
+ */
 bool is_one_less(const Card a, const Card b);
 
 // TODO
-// Needs docs
+/**
+ * @brief Given a deck and two indexes, chekcs if the cards follow the stated hierarchy.
+ * 
+ * @param deck Pointer to a Deck.
+ * @param start_pos Index from the bottom of the potential sequence.
+ * @param end_pos Index from the top of the potential sequence.
+ * 
+ * @see is_one_less
+ */
 bool sequence_is_decreasing(Deck *restrict deck, const size_t start_pos, const size_t end_pos);
 
-// TODO
-// Needs docs
+
+/**
+ * @brief Given a deck and two indexes, chekcs if the cards follow the stated hierarchy and are all of same suit.
+ * 
+ * @param deck Pointer to a Deck.
+ * @param start_pos Index from the bottom of the potential sequence.
+ * @param end_pos Index from the top of the potential sequence.
+ * 
+ * @see one_less_same_suit
+ */
 bool sequence_is_decreasing_hierarchy(Deck *restrict deck, const size_t start_pos, const size_t end_pos);
 
-// TODO
-// Needs docs
+/**
+ * @brief Checks if two cards are of same suit and follows the stated hierarchy.
+ *
+ * @param b Card of bigger value and of suit X.
+ * @param a Card of smaller value and of suit X.
+ * 
+ * @see is_one_less
+ * @see same_suit 
+ */
 bool one_less_same_suit(const Card a, const Card b);
 
 #endif

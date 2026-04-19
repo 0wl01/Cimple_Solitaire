@@ -79,8 +79,12 @@ void print_golf_help() {
 }
 
 void print_simon_help() {
-    printf(" s - To deal card from the stock\n 1-7 - To deal cards from the columns\n q - To quit\n ? - For this "
-           "screen\n");
+    printf( "m -> Columns should be in capital letters that range from A-J and positions range from 0 to the column's current top card position, no spaces in between.\n"
+            "example: mA6B\n"
+            "h -> Gives you an advice on a command.\n"
+            "? -> Pops this screen.\n"
+            "r -> Creates a new simon table from the beginning.\n"
+            "q -> Quits");
 }
 
 void print_invalid_column() { printf("Invalid column!\n"); }
@@ -99,7 +103,13 @@ static Command parse_move(const char *restrict buffer) {
     return result_code < 1 ? (Command){.type = CMD_UNK} : cmd;
 }
 
-// TODO: docs
+/**
+ * @brief Turns character from an input into a command.
+ * 
+ * @return if input is none of the ones listed in "map" then it returns a unknown command, which does nothing.
+ * 
+ * @see CommandType
+ */
 static CommandType char_to_command(const char c) {
     const struct {
         char key;

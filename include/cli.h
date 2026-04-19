@@ -1,5 +1,11 @@
 #ifndef CLI_H
 #define CLI_H
+
+/**
+ * @file 
+ * @brief Communication between the client and the game
+ */
+
 #include "card.h"
 #include "command.h"
 #include "game.h"
@@ -57,10 +63,19 @@ void print_prompt();
  */
 void print_golf_help();
 
-// TODO: docs and actual help message.
+/**
+ * @brief Prints all the inputs to play Simon.
+ */
 void print_simon_help();
 
-// TODO: docs
+/**
+ * @brief Get the commands from the player inside a card game.
+ *
+ * If the first character of the input is a 'm' then the output changes depending on what card game you are playing on, since
+ * is one command they share but have different output.
+ *  
+ * @see Command
+ */
 Command game_get_input();
 
 // TODO: docs
