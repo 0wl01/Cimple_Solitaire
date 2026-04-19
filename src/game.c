@@ -2,18 +2,32 @@
 #include "cli.h"
 #include <stddef.h>
 
-LoopSignal default_handle_quit(void *state, const Command cmd) { return LOOP_QUIT; }
-LoopSignal default_handle_restart(void *state, const Command cmd) { return LOOP_RESTART; }
+LoopSignal default_handle_quit(void *state, const Command cmd) {
+    // TODO remove silencers
+    (void)state; (void)cmd;
+    return LOOP_QUIT; 
+}
+LoopSignal default_handle_restart(void *state, const Command cmd) {
+    // TODO remove silencers
+    (void)state; (void)cmd;
+    return LOOP_RESTART; 
+}
 LoopSignal default_handle_unknown(void *state, const Command cmd) {
+    // TODO remove silencers
+    (void)state; (void)cmd;
     print_unknown_command();
     return LOOP_CONTINUE;
 }
 LoopSignal default_handle_help(void *state, const Command cmd) {
+    // TODO remove silencers
+    (void)state; (void)cmd;
     // maybe add default stuff here
     return LOOP_CONTINUE;
 }
 
 LoopSignal default_handle_hint(void *state, const Command cmd) {
+    // TODO remove silencers
+    (void)state; (void)cmd;
     // maybe add default stuff here
     return LOOP_CONTINUE;
 }
