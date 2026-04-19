@@ -20,7 +20,9 @@
  */
 void print_card(const Card card);
 
-// TODO: docs
+/**
+ * @brief What prints in case the input of a collumn is out of the tables range.  
+ */
 void print_invalid_column();
 
 /**
@@ -43,7 +45,9 @@ void print_decks_columns(Deck *restrict decks[], const uint8_t columns);
  */
 void print_end(const bool win);
 
-//TODO: docs
+/**
+ * @brief What prints if the intput has no programmed output.
+ */
 void print_unknown_command();
 
 /**
@@ -52,7 +56,8 @@ void print_unknown_command();
  * the stock pile, and the waste pile.
  * @param table Pointer to the current game state.
  */
-void print_golf_table(const size_t column_size, Deck *restrict columns[], Deck *restrict stock, Deck *restrict waste);
+void print_golf_table(const size_t column_size, Deck *restrict columns[], Deck *restrict stock, Deck *restrict waste)l;
+
 /**
  * @brief Displays the command prompt to the user.
  */
@@ -78,9 +83,13 @@ void print_simon_help();
  */
 Command game_get_input();
 
-// TODO: docs
+/**
+ * @brief Gets input at the menu screen.
+ */
 char menu_get_input();
 
-// TODO: docs
+/** 
+ * @brief 
+ */
 void print_table(const TableLayout *restrict t);
 #endif

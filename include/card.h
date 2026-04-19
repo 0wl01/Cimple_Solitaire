@@ -249,7 +249,6 @@ bool sequence_same_suit(Deck *restrict deck, const size_t start_pos, const size_
  */
 bool is_one_less(const Card a, const Card b);
 
-// TODO
 /**
  * @brief Given a deck and two indexes, chekcs if the cards follow the stated hierarchy.
  * 

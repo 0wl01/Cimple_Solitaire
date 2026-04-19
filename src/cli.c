@@ -95,8 +95,13 @@ char menu_get_input() {
     char buffer[3];
     return fgets(buffer, sizeof(buffer), stdin) ? buffer[0] : 'q';
 }
-
-// TODO: docs
+/** 
+ * @brief Checks if after a move input, it has all required information for the move function.
+ *
+ * @param Pointer to the input memory block.
+ *
+ * @see Command
+ * */
 static Command parse_move(const char *restrict buffer) {
     Command cmd = {.type = CMD_MOV, .src_col = 0, .index = SIZE_MAX, .dest_col = 0};
     int result_code = sscanf(buffer, "m %c %zu %c", &cmd.src_col, &cmd.index, &cmd.dest_col);
@@ -106,7 +111,7 @@ static Command parse_move(const char *restrict buffer) {
 /**
  * @brief Turns character from an input into a command.
  * 
- * @return if input is none of the ones listed in "map" then it returns a unknown command, which does nothing.
+ * @return If input is none of the ones listed in "map" then it returns a unknown command, which does nothing.
  * 
  * @see CommandType
  */
@@ -128,7 +133,9 @@ Command game_get_input() {
     return buffer[0] == 'm' ? parse_move(buffer) : (Command){.type = char_to_command(buffer[0])};
 }
 
-// TODO docs
+/**
+ * @brief Prints a 
+ */
 static void print_top_row(const TableLayout *t) {
     if (t->stock) {
         print_card(top_card(t->stock));
@@ -145,7 +152,9 @@ static void print_top_row(const TableLayout *t) {
     putchar('\n');
 }
 
-// TODO: docs
+/** 
+ * @brief Print a capital letter in for each column, in alphabetical order.
+ */
 static void print_column_headers(const uint8_t n_columns) {
     printf("  ");
     for (uint8_t i = 0; i < n_columns; ++i)
@@ -153,7 +162,9 @@ static void print_column_headers(const uint8_t n_columns) {
     putchar('\n');
 }
 
-//TODO: docs
+/**
+ * @brief
+ */
 static void print_column_row(Deck *restrict *columns, const uint8_t n_columns, const size_t row) {
     printf("%lu ", row);
     for (uint8_t j = 0; j < n_columns; ++j) {
