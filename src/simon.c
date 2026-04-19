@@ -43,7 +43,7 @@ static bool has_play_left(const simon_state *restrict table) {
  * @brief Checks if all the 52 cards were stored, and so the playing table is empty.
  */
 static bool has_won(simon_state *restrict table) {
-    bool win = false;
+    bool win = true;
     for (size_t i = 0; i < SIMON_FOUNDATIONS; ++i)
         win = win && IS_FULL(table->foundations[i]);
     return win;

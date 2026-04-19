@@ -93,6 +93,9 @@ coverage: clean
 # Cleanup rule
 clean:
 	rm -rf $(BUILD_DIR) $(BIN_DIR)
+	rm -f *.gcov *.gcda *.gcno
+	find . -name "*.gcda" -delete
+	find . -name "*.gcno" -delete
 	@echo "Workspace cleaned successfully!"
 
 # Build and run the main game

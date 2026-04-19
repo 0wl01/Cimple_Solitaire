@@ -93,6 +93,9 @@ static void init_columns(Deck *columns[]) {
     }
 }
 
+/**
+ * @brief TODO Documentation
+ */
 static LoopSignal golf_handle_move(void *restrict state, const Command cmd) {
     golf_state *table = state;
     if ((cmd.src_col < 'A' || cmd.src_col > 'G') && cmd.src_col != 'S') {

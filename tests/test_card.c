@@ -286,11 +286,20 @@ void test_flip_deal(void) {
     eliminate_deck(&d2);
 }
 
+/**
+ * @brief Helper function to create and populate 3 decks for testing.
+ * @param d Array of 3 Deck pointers to be initialized.
+ * @param c The card to push into the decks.
+ */
 static void mk(Deck *d[3], Card c) {
     for (size_t i = 0; i < 3; i++)
         for (d[i] = create_deck(3); d[i]->top <= i; push(d[i], c));
 }
 
+/**
+ * @brief Helper function to safely eliminate an array of 3 decks.
+ * @param d Array of 3 Deck pointers to be freed.
+ */
 static void rm(Deck *d[3]) {
     for (size_t i = 0; i < 3; eliminate_deck(&d[i++]));
 }

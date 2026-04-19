@@ -74,6 +74,11 @@ void test_simon_victory_move(void) {
     clean_simon_table(&table);
 }
 
+/**
+ * @brief Tests a valid move between two columns.
+ * Verifies that a card can be successfully moved from the source column
+ * to the destination column when the game rules allow it.
+ */
 void test_simon_valid_move(void) {
     simon_state table;
     setup_blank_simon(&table);
@@ -89,6 +94,11 @@ void test_simon_valid_move(void) {
     clean_simon_table(&table);
 }
 
+/**
+ * @brief Tests the rejection of a move with invalid card values.
+ * Verifies that the game logic prevents placing a card onto another
+ * card if they do not follow the descending numerical order rule.
+ */
 void test_simon_invalid_value(void) {
     simon_state table;
     setup_blank_simon(&table);
@@ -104,6 +114,11 @@ void test_simon_invalid_value(void) {
     clean_simon_table(&table);
 }
 
+/**
+ * @brief Tests the handling of out-of-bounds column commands.
+ * Verifies that the move handler safely rejects column identifiers 
+ * that do not exist on the board (e.g., column 'Z').
+ */
 void test_simon_invalid_bounds(void) {
     simon_state table;
     setup_blank_simon(&table);
@@ -113,6 +128,76 @@ void test_simon_invalid_bounds(void) {
     int result = simon_handle_move(&table, bad_cmd);
 
     CU_ASSERT_EQUAL(result, 0); // Checks if the move handler returned 0
+    clean_simon_table(&table);
+}
+
+/**
+ * @brief Tests the victory condition when all foundations are full.
+ * * Verifies that has_won() returns true when every foundation deck
+ * contains exactly 13 cards (a complete suit).
+ */
+void test_simon_has_won_true(void) {
+    simon_state table;
+    setup_blank_simon(&table);
+    
+    // Simulate a win by filling all foundations with 13 cards
+    for (int i = 0; i < SIMON_FOUNDATIONS; i++) {
+        table.foundations[i]->top = 13; 
+    }
+    
+    CU_ASSERT_TRUE(has_won(&table));
+    
+    clean_simon_table(&table);
+}
+
+/**
+ * @brief Tests the victory condition when the game is not yet won.
+ * * Verifies that has_won() returns false when the foundations are empty
+ * or only partially filled.
+ */
+void test_simon_has_won_false(void) {
+    simon_state table;
+    setup_blank_simon(&table);
+    
+    // Empty foundations should not trigger a win
+    CU_ASSERT_FALSE(has_won(&table));
+    
+    clean_simon_table(&table);
+}
+
+/**
+ * @brief Tests if the game correctly identifies available moves.
+ * * Verifies that has_play_left() returns true when there is at least 
+ * one valid move on the table.
+ */
+void test_simon_has_play_left_true(void) {
+    simon_state table;
+    setup_blank_simon(&table);
+    
+    // Setup a valid move: 5 of Hearts can be moved onto a 6 of any suit
+    push(table.columns[0], (Card){.values = {.suit = HEARTS, .value = 6}});
+    push(table.columns[1], (Card){.values = {.suit = HEARTS, .value = 5}});
+    
+    CU_ASSERT_TRUE(has_play_left(&table)); 
+    
+    clean_simon_table(&table);
+}
+
+/**
+ * @brief Tests if the game correctly identifies when no moves are left.
+ * * Verifies that has_play_left() returns false when no valid moves 
+ * can be made between the existing columns.
+ */
+void test_simon_has_play_left_false(void) {
+    simon_state table;
+    setup_blank_simon(&table);
+    
+    // Setup an invalid scenario: King (15) and Ace (3) cannot be stacked
+    push(table.columns[0], (Card){.values = {.suit = SPADES, .value = 15}});
+    push(table.columns[1], (Card){.values = {.suit = HEARTS, .value = 3}});
+    
+    CU_ASSERT_FALSE(has_play_left(&table)); 
+    
     clean_simon_table(&table);
 }
 
@@ -128,7 +213,11 @@ static int add_simon_tests(CU_pSuite s) {
         {"test of Simon victory move", test_simon_victory_move},
         {"test of Simon valid move", test_simon_valid_move},
         {"test of Simon invalid value", test_simon_invalid_value},
-        {"test of Simon invalid bounds", test_simon_invalid_bounds}
+        {"test of Simon invalid bounds", test_simon_invalid_bounds},
+        {"test of Simon win condition (true)", test_simon_has_won_true},
+        {"test of Simon win condition (false)", test_simon_has_won_false},
+        {"test of Simon play left (true)", test_simon_has_play_left_true},
+        {"test of Simon play left (false)", test_simon_has_play_left_false}
     };
 
     for (size_t i = 0; i < sizeof(t) / sizeof(*t); i++)

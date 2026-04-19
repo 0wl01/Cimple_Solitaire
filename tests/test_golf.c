@@ -178,19 +178,75 @@ void test_can_play_column_move(void) {
     clean_golf(&table);
 }
 
+/**
+ * @brief Tests golf_handle_move for a valid stock-to-waste deal.
+ * Verifies that when the 'S' command is issued, the top card of the 
+ * stock is moved to the waste pile and the stack counters are updated correctly.
+ */
+void test_golf_handle_move_draw_from_stock(void) {
+    golf_state table;
+    table.stock = create_deck(1);
+    table.waste = create_deck(1);
+    init_columns(table.columns);
+
+    // Setup: Place a specific card in stock
+    table.stock->cards[0] = (Card){.values = {.value = 5}};
+    table.stock->top = 1;
+    table.waste->top = 0;
+
+    // Action: Trigger deal from stock ('S')
+    golf_handle_move(&table, (Command){.src_col = 'S'});
+    
+    // Assertions: Stock should be empty, Waste should have 1 card
+    CU_ASSERT_EQUAL(table.stock->top, 0);
+    CU_ASSERT_EQUAL(table.waste->top, 1);
+    CU_ASSERT_EQUAL(table.waste->cards[0].values.value, 5);
+
+    clean_golf(&table);
+}
+
+/**
+ * @brief Tests golf_handle_move with an invalid source column.
+ * Ensures that providing a non-existent column (e.g., 'Z') does not 
+ * alter the game state and is handled gracefully by the logic.
+ */
+void test_golf_handle_move_invalid_column(void) {
+    golf_state table;
+    table.stock = create_deck(1);
+    table.waste = create_deck(1);
+    init_columns(table.columns);
+
+    // Setup: Start with empty piles
+    table.stock->top = 0;
+    table.waste->top = 0;
+
+    // Action: Pass an invalid command 'Z'
+    golf_handle_move(&table, (Command){.src_col = 'Z'});
+
+    // Assertions: State must remain unchanged
+    CU_ASSERT_EQUAL(table.stock->top, 0);
+    CU_ASSERT_EQUAL(table.waste->top, 0);
+
+    clean_golf(&table);
+}
+
 typedef struct {
     const char *name;
     CU_TestFunc fn;
 } T;
 
 static int add_golf_tests(CU_pSuite s) {
-    T t[] = {{"test of can_deal basic", test_can_deal_basic},
-             {"test of can_deal cyclic", test_can_deal_cyclic},
-             {"test of cant_deal", test_cant_deal},
-             {"test of can_play logic", test_can_play_basic},
-             {"test of buy valid move", test_buy_valid_move},
-             {"test of game over", test_can_play_game_over},
-             {"test of column move", test_can_play_column_move}};
+    T t[] = {
+        {"test of can_deal basic", test_can_deal_basic},
+        {"test of can_deal cyclic", test_can_deal_cyclic},
+        {"test of cant_deal", test_cant_deal},
+        {"test of can_play logic", test_can_play_basic},
+        {"test of buy valid move", test_buy_valid_move},
+        {"test of game over", test_can_play_game_over},
+        {"test of column move", test_can_play_column_move},
+        {"test of move handler draw stock", test_golf_handle_move_draw_from_stock},
+        {"test of move handler invalid col", test_golf_handle_move_invalid_column}
+    };
 
     for (size_t i = 0; i < sizeof(t) / sizeof(*t); i++)
         if (!CU_add_test(s, t[i].name, t[i].fn))
