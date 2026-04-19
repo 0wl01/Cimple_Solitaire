@@ -120,7 +120,11 @@ static LoopSignal golf_handle_help(void *restrict table, const Command cmd) {
     return 0;
 }
 
-// TODO: docs
+/**
+ * @brief Dispatch table mapping CommandTypes to their respective Golf handler functions.
+ * * This table links each possible user command (Move, Hint, Help, etc.) to the
+ * specific function responsible for executing that logic within the Golf game context.
+ */
 static const CommandDispatch golf_dispatch[] = {
     {CMD_MOV, golf_handle_move},       {CMD_HNT, default_handle_hint}, {CMD_HLP, golf_handle_help},
     {CMD_RST, default_handle_restart}, {CMD_QUT, default_handle_quit},
