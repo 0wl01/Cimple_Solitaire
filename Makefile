@@ -22,6 +22,7 @@ all: CFLAGS = $(BASE_CFLAGS) -O3 -flto -march=native -DNDEBUG
 
 # Debugging versions (Debug symbols, no optimizations)
 gdb valgrind test: CFLAGS = $(BASE_CFLAGS) -g -O0
+coverage: CFLAGS = $(BASE_CFLAGS) -g -O0 --coverage
 TEST_OBJS = $(filter-out $(BUILD_DIR)/main.o, $(OBJS))
 TEST_BIN = $(BIN_DIR)/test_card
 TEST_GOLF_BIN = $(BIN_DIR)/test_golf
@@ -32,7 +33,7 @@ GOLF_TEST_DEPS = $(BUILD_DIR)/card.o $(BUILD_DIR)/cli.o $(BUILD_DIR)/game.o
 # Dependencias for Simon tests
 SIMON_TEST_DEPS = $(BUILD_DIR)/card.o $(BUILD_DIR)/cli.o $(BUILD_DIR)/game.o
 
-.PHONY: all clean run test gdb valgrind
+.PHONY: all clean run test gdb valgrind coverage
 
 # Default build rule
 all: $(TARGET)
@@ -83,6 +84,11 @@ gdb: all
 valgrind: all
 	@echo "\n--- Analyzing Memory Leaks with Valgrind ---"
 	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./$(TARGET)
+
+coverage: clean
+	@$(MAKE) test CFLAGS="$(BASE_CFLAGS) -g -O0 --coverage" > /dev/null
+	@echo "\n--- Relatório de Cobertura ---"
+	@find . -name "*.gcda" -exec gcov {} \; | grep -A 1 "File"
 
 # Cleanup rule
 clean:
