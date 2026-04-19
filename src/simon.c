@@ -52,10 +52,10 @@ static bool has_won(simon_state *restrict table) {
 /**
  * @brief Scans all columns for a complete sequence (King to Ace of the same suit).
  * If found, moves the entire 13-card sequence to an empty foundation.
- * * @param table Pointer to the current Simple Simon game state.
+ * @param table Pointer to the current Simple Simon game state.
  */
 static void check_and_move_completed_suits(simon_state *restrict table) {
-    for (size_t i = 0; i < SIMON_COLUMNS; ++i) {
+    for (size_t i = 0; i < SIMON_COLUMNS; i++) {
         Deck *col = table->columns[i];
         
         // A complete suit requires exactly 13 cards
@@ -64,12 +64,12 @@ static void check_and_move_completed_suits(simon_state *restrict table) {
             
             // Checks if the last 13 cards are a perfect sequence of the same suit
             if (sequence_is_decreasing_hierarchy(col, start_idx, col->top - 1)) {
-                
+                bool moved = false; 
                 // Finds the first empty foundation to store the completed suit
-                for (size_t f = 0; f < SIMON_FOUNDATIONS; ++f) {
+                for (size_t f = 0; f < SIMON_FOUNDATIONS && !moved; f++) {
                     if (IS_EMPTY(table->foundations[f])) {
                         split_deck(col, table->foundations[f], start_idx);
-                        break; // Suit moved, move on to check the next column
+                        moved = true; // Updates the flag to naturally stop the loop
                     }
                 }
             }
