@@ -333,6 +333,64 @@ void test_shuffle_deck(void) {
     eliminate_deck(&d);
 }
 
+/**
+ * @brief Tests the attempt to split a deck at an invalid position.
+ * * @details Verifies that the `split_deck` function returns false and prevents 
+ * the split when the provided index is greater than the current number 
+ * of cards in the deck (above the `top`).
+ */
+void test_split_deck_invalid_position(void) {
+    Deck *d1 = create_deck(5);
+    Deck *d2 = create_deck(5);
+
+    // Insert exactly 5 cards (values 3, 4, 5, 6, 7)
+    for(uint8_t i = 3; i <= 7; i++) push(d1, (Card){.values = {.value = i}});
+
+    // split attempt above top card
+    CU_ASSERT_FALSE(split_deck(d1, d2, 6));
+
+    eliminate_deck(&d1);
+    eliminate_deck(&d2);
+}
+
+/**
+ * @brief Tests the successful scenario of splitting a deck.
+ * * @details Verifies that, given a valid index, the function correctly divides 
+ * the cards between the two decks and updates their respective tops (`top`) 
+ * to the expected sizes.
+ */
+void test_split_deck_valid(void) {
+    Deck *d1 = create_deck(5);
+    Deck *d2 = create_deck(5);
+
+    for(uint8_t i = 3; i <= 7; i++) push(d1, (Card){.values = {.value = i}});
+
+    CU_ASSERT_TRUE(split_deck(d1, d2, 2));
+    CU_ASSERT_EQUAL(d1->top, 2);
+    CU_ASSERT_EQUAL(d2->top, 3);
+
+    eliminate_deck(&d1);
+    eliminate_deck(&d2);
+}
+
+/**
+ * @brief Tests the overflow protection on the destination deck.
+ * * @details Verifies that the function fails safely when the number of cards 
+ * to be moved exceeds the maximum allocated capacity of the destination deck.
+ */
+void test_split_deck_overflow(void) {
+    Deck *d1 = create_deck(5);
+    Deck *d2 = create_deck(1); // reduced capacity forces overflow
+
+    for(uint8_t i = 3; i <= 7; i++) push(d1, (Card){.values = {.value = i}});
+
+    // too many cards to d2
+    CU_ASSERT_FALSE(split_deck(d1, d2, 2));
+
+    eliminate_deck(&d1);
+    eliminate_deck(&d2);
+}
+
 typedef struct {
     const char *name;
     CU_TestFunc fn;
@@ -352,7 +410,11 @@ static int add_all(CU_pSuite s) {
              {"test of flip_deal", test_flip_deal},
              {"test of get_bigger_deck", test_get_bigger_deck},
              {"test of shuffle_deck", test_shuffle_deck},
-             {"test of flip_all", test_flip_all}};
+             {"test of flip_all", test_flip_all},
+             {"test of an invalid deck split", test_split_deck_invalid_position},
+             {"test of an valid deck split", test_split_deck_valid},
+             {"test of overflow protection", test_split_deck_overflow}
+            };
 
     for (size_t i = 0; i < (sizeof(t) / sizeof(*t)); i++)
         if (!CU_add_test(s, t[i].name, t[i].fn))

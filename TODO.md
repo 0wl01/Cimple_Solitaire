@@ -30,6 +30,6 @@
 - [x] Implementar deteção de vitória (sequência completa de Rei a Ás) e mover para as fundações.
 
 ## Testes & Qualidade (`CUnit` e `gcov`)
-- [ ] Escrever testes unitários para: condições de vitória, derrota e movimentos inválidos.
+- [X] Escrever testes unitários para: condições de vitória, derrota e movimentos inválidos.
 - [ ] Atualizar a `Makefile` para gerar métricas de cobertura de código com `gcov`.
 - [X] Testes precisam ser refatorados para por conta de algumas breaking changes em card.c
