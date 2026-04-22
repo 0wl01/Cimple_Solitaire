@@ -35,3 +35,4 @@
 - [X] Atualizar a `Makefile` para gerar métricas de cobertura de código com `gcov`.
 - [X] Testes precisam ser refatorados para por conta de algumas breaking changes em card.c
 - [ ] CUnit Setup / Teardown refatorar funções de testes que usem instruções para criação de contexto.
+- [ ] FAz testes melhores seu burro
