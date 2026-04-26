@@ -1,12 +1,16 @@
 # TODO
 
 ## Urgente
-- [x] Refator golf.c por causa das breaking changes.
+- [x] Refatorar golf.c por causa das breaking changes.
 - [x] Resolver o loop infinito que ocorre com o end of input (CTRL-D).
 - [X] Segmentation Fault em simon.c
     - check "if (cmd.src_col < 'A' || cmd.src_col > 'Z') return 0;"
 - [X] Criar Função para Mover para as Fundações
     - Senão o jogo vai continuar impossível de ganhar
+
+### Bugs
+- [ ] No simon.c a função que verifica se há movimentos possíveis não considera colunas vazias.
+    - Para resolver isso temos que mudar o card.c one_less para nn verificar cartas vazias e ent modificar o has_play_left para verificar colunas vazias.
 
 ## Documentação
 - [X] Algumas funções novas precisam de documentação.
