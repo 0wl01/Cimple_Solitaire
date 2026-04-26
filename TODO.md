@@ -7,6 +7,7 @@
     - check "if (cmd.src_col < 'A' || cmd.src_col > 'Z') return 0;"
 - [X] Criar Função para Mover para as Fundações
     - Senão o jogo vai continuar impossível de ganhar
+- [ ] alterar o menu de ajuda do Golf
 
 ### Bugs
 - [ ] No simon.c a função que verifica se há movimentos possíveis não considera colunas vazias.
@@ -37,3 +38,5 @@
 - [X] Escrever testes unitários para: condições de vitória, derrota e movimentos inválidos.
 - [X] Atualizar a `Makefile` para gerar métricas de cobertura de código com `gcov`.
 - [X] Testes precisam ser refatorados para por conta de algumas breaking changes em card.c
+- [ ] CUnit Setup / Teardown refatorar funções de testes que usem instruções para criação de contexto.
+- [ ] FAz testes melhores seu burro
