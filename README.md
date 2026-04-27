@@ -14,4 +14,11 @@ João Sá Parreira (a114898)
 
 Pedro Henrique Dos Santos Silva (a112985)
 
+## 👷‍♂️ How to run C-litaire:
+
+- Clone this repository
+
+```sh
+make run
+```
 
