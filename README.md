@@ -1,5 +1,7 @@
 # C-litaire
 
+![C-litaire Logo](assets/C-litaire_logo.png)
+
 A collection of solitaire games recreated in C.
 
 Made for a university project that has the intention of being as fast and small as possible.
