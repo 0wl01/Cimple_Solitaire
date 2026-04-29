@@ -6,14 +6,24 @@
  * @brief Definitions and macros for playing cards and decks.
  */
 
+#include <assert.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
+// TODO Docs
+#define likely(x) __builtin_expect(!!(x), 1)
+#define unlikely(x) __builtin_expect(!!(x), 0)
+
+/**
+ * @brief The biggest size any structure may have in this code.
+ */
+typedef uint16_t size;
+
 /**
  * @brief Suit order constant
  */
-typedef enum { SPADES = 0, HEARTS = 1, DIAMONDS = 2, CLUBS = 3 } Suit;
+typedef enum { SPADES = 0, HEARTS = 1, CLUBS = 2, DIAMONDS = 3 } Suit;
 
 /**
  * @brief Represents a playing card.
@@ -39,8 +49,8 @@ typedef union {
  * @see Card
  */
 typedef struct {
-    size_t top;   /**< Index of the current top, that is, the current number of elements */
-    size_t size;  /**< Max capacity of the stack; this is set at creation */
+    size top;     /**< Index of the current top, that is, the current number of elements */
+    size size;    /**< Max capacity of the stack; this is set at creation */
     Card cards[]; /**< The flexible array that contains all the cards */
 } Deck;
 
@@ -71,14 +81,14 @@ typedef bool (*CardPairPredicate)(const Card, const Card);
 /**
  * @brief Creates a Pointer to a Deck struct allocating memory.
  *
- * The Deck created may only have at maximum size_t elements.
+ * The Deck created may only have at maximum size elements.
  *
  * @param size The size in bytes allocated to the Deck. That is the amount of cards that the deck supports. 
  * @return A pointer to a new empty Deck or NULL if allocation fails.
  *
  * @see Deck
  */
-Deck *create_deck(const size_t size);
+Deck *create_deck(const size size);
 
 /**
  * @brief Free allocated memory for a Deck.
@@ -158,7 +168,7 @@ void shuffle_deck(Deck *restrict deck);
  *
  * @see Deck
  */
-void deal(Deck *restrict d1, Deck *restrict d2, const size_t q, const bool flip);
+void deal(Deck *restrict d1, Deck *restrict d2, const size q, const bool flip);
 
 /**
  * @brief The top Card of a Deck.
@@ -207,7 +217,7 @@ void flip_all(Deck *restrict d1);
  * @pre All elements decks[0...n] must be non NULL 
  * @return Pointer to the Deck with the highest number of cards.
  */
-Deck *get_bigger_deck(Deck *restrict decks[], const size_t n);
+Deck *get_bigger_deck(Deck *restrict decks[], const size n);
 
 /**
  * @brief Splits a deck from a position to the top to another deck.
@@ -217,17 +227,17 @@ Deck *get_bigger_deck(Deck *restrict decks[], const size_t n);
  * @param pos Position to start taking the cards from.
  * @return Returns true if possible and false if not possible.
  */
-bool split_deck(Deck *restrict src, Deck *restrict dest, const size_t pos);
+bool split_deck(Deck *restrict src, Deck *restrict dest, const size pos);
 
 /**
  * @brief Gets a card in a given position of a Deck
  *
  * @param deck Pointer to a Deck.
- * @param pos size_t arg with the position of an element. 0 indexed.
+ * @param pos size arg with the position of an element. 0 indexed.
  *
  * @return The card accessed. if the position is invalid returns the empty card.
  */
-Card peek(Deck *restrict deck, const size_t pos);
+Card peek(Deck *restrict deck, const size pos);
 
 /**
  * @brief Chekcs if two cards share the same suit.
@@ -243,7 +253,7 @@ bool same_suit(const Card a, const Card b);
  * @param start_pos Starting position of the sequence.
  * @param end_pos End position of the sequence.
  */
-bool sequence_same_suit(Deck *restrict deck, const size_t start_pos, const size_t end_pos);
+bool sequence_same_suit(Deck *restrict deck, const size start_pos, const size end_pos);
 
 /**
  * @brief Checks if the hierarchy order is correct (Kings > Queens > ... > Aces)
@@ -261,8 +271,7 @@ bool is_one_less(const Card a, const Card b);
  * 
  * @see is_one_less
  */
-bool sequence_is_decreasing(Deck *restrict deck, const size_t start_pos, const size_t end_pos);
-
+bool sequence_is_decreasing(Deck *restrict deck, const size start_pos, const size end_pos);
 
 /**
  * @brief Given a deck and two indexes, chekcs if the cards follow the stated hierarchy and are all of same suit.
@@ -273,7 +282,7 @@ bool sequence_is_decreasing(Deck *restrict deck, const size_t start_pos, const s
  * 
  * @see one_less_same_suit
  */
-bool sequence_is_decreasing_hierarchy(Deck *restrict deck, const size_t start_pos, const size_t end_pos);
+bool sequence_is_decreasing_hierarchy(Deck *restrict deck, const size start_pos, const size end_pos);
 
 /**
  * @brief Checks if two cards are of same suit and follows the stated hierarchy.

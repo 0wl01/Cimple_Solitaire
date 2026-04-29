@@ -7,12 +7,12 @@
 // lookup tables for card symbols and suits
 // Maybe if the red suits were index 1 and 3 i could use the 2^0 bit to check
 // the color
-const char *const SUIT[] = {"♠", "♥", "♦", "♣"};
+const char *const SUIT[] = {"♠", "♥", "♣", "♦"};
 const char *const CARDS[4][13] = {
     {"🂡", "🂢", "🂣", "🂤", "🂥", "🂦", "🂧", "🂨", "🂩", "🂪", "🂫", "🂭", "🂮"}, // 0: Spades
     {"🂱", "🂲", "🂳", "🂴", "🂵", "🂶", "🂷", "🂸", "🂹", "🂺", "🂻", "🂽", "🂾"}, // 1: Hearts
-    {"🃁", "🃂", "🃃", "🃄", "🃅", "🃆", "🃇", "🃈", "🃉", "🃊", "🃋", "🃍", "🃎"}, // 2: Diamonds
-    {"🃑", "🃒", "🃓", "🃔", "🃕", "🃖", "🃗", "🃘", "🃙", "🃚", "🃛", "🃝", "🃞"}  // 3: Clubs
+    {"🃑", "🃒", "🃓", "🃔", "🃕", "🃖", "🃗", "🃘", "🃙", "🃚", "🃛", "🃝", "🃞"}, // 2: Clubs
+    {"🃁", "🃂", "🃃", "🃄", "🃅", "🃆", "🃇", "🃈", "🃉", "🃊", "🃋", "🃍", "🃎"}, // 3: Diamonds
 };
 
 // TODO: Implement way to paint the card red
@@ -41,8 +41,8 @@ void print_deck(Deck const *deck) {
 // The top card in the columns is not the top card of the stack. This function reverts the stack.
 void print_decks_columns(Deck *restrict decks[], const uint8_t columns) {
     Deck *biggest = get_bigger_deck(decks, columns);
-    for (size_t i = 0; i <= biggest->top; ++i) {
-        for (size_t j = 0; j < columns; ++j) {
+    for (size i = 0; i <= biggest->top; ++i) {
+        for (size j = 0; j < columns; ++j) {
             if (decks[j]->top > i) {
                 print_card(decks[j]->cards[i]);
             } else
@@ -62,7 +62,7 @@ void print_end(const bool win) {
     printf("Do you want to keep playing? (y/n)\n");
 }
 
-void print_golf_table(const size_t qnty_columns, Deck *restrict columns[], Deck *restrict stock, Deck *restrict waste) {
+void print_golf_table(const size qnty_columns, Deck *restrict columns[], Deck *restrict stock, Deck *restrict waste) {
     puts("A B C D E F G\n");
     print_decks_columns(columns, qnty_columns);
     print_card(top_card(stock));
@@ -120,7 +120,7 @@ static CommandType char_to_command(const char c) {
         char key;
         CommandType cmd;
     } map[] = {{'h', CMD_HNT}, {'?', CMD_HLP}, {'r', CMD_RST}, {'q', CMD_QUT}, {'y', CMD_YES}, {'n', CMD_NOT}};
-    for (size_t i = 0; i < sizeof(map) / sizeof(*map); ++i)
+    for (size i = 0; i < sizeof(map) / sizeof(*map); ++i)
         if (map[i].key == c)
             return map[i].cmd;
     return CMD_UNK;
@@ -170,8 +170,8 @@ static void print_column_headers(const uint8_t n_columns) {
  * @param n_columns Total number of columns.
  * @param row The current depth index being printed.
  */
-static void print_column_row(Deck *restrict *columns, const uint8_t n_columns, const size_t row) {
-    printf("%lu ", row);
+static void print_column_row(Deck *restrict *columns, const uint8_t n_columns, const size row) {
+    printf("%hu ", row);
     for (uint8_t j = 0; j < n_columns; ++j) {
         if (columns[j] && columns[j]->top > row)
             print_card(columns[j]->cards[row]);
@@ -187,6 +187,6 @@ void print_table(const TableLayout *restrict t) {
     print_top_row(t);
     print_column_headers(t->n_columns);
     Deck *biggest = get_bigger_deck(t->columns, t->n_columns);
-    for (size_t i = 0; biggest && i < biggest->top; ++i)
+    for (size i = 0; biggest && i < biggest->top; ++i)
         print_column_row(t->columns, t->n_columns, i);
 }

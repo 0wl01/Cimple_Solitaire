@@ -7,9 +7,9 @@
 #include <string.h>
 
 /* Allocates a Deck with a flexible array member for cards. */
-Deck *create_deck(const size_t size) {
+Deck *create_deck(const size size) {
     Deck *deck = malloc(sizeof(Deck) + (sizeof(Card) * size));
-    if (deck == NULL)
+    if (unlikely(deck == NULL))
         return NULL;
     deck->top = 0;
     deck->size = size;
@@ -58,8 +58,8 @@ void populate_deck(Deck *restrict deck) {
 // shuffles the deck array using the Fisher-yater shuffle.
 void shuffle_deck(Deck *restrict deck) {
     assert(deck != NULL);
-    for (size_t i = 1; i < deck->top; ++i) {
-        size_t ran_num = arc4random_uniform(i + 1);
+    for (size i = 1; i < deck->top; ++i) {
+        size ran_num = arc4random_uniform(i + 1);
         // Swap cards
         Card temp = deck->cards[i];
         deck->cards[i] = deck->cards[ran_num];
@@ -69,13 +69,11 @@ void shuffle_deck(Deck *restrict deck) {
 
 // Simple function that takes elements from a deck to another.
 // It inverses position and only takes what is available
-void deal(Deck *restrict d1, Deck *restrict d2, const size_t q, const bool flip) {
+void deal(Deck *restrict d1, Deck *restrict d2, const size q, const bool flip) {
     assert(d1 != NULL && d2 != NULL);
-    if (d1 == d2)
-        return;
-    const size_t available = (d1->top < q) ? d1->top : q;
-    const size_t space_left = d2->size - d2->top;
-    size_t transfer_count = (available < space_left) ? available : space_left;
+    const size available = (d1->top < q) ? d1->top : q;
+    const size space_left = d2->size - d2->top;
+    size transfer_count = (available < space_left) ? available : space_left;
 
     while (transfer_count--) {
         Card temp = d1->cards[--d1->top];
@@ -107,10 +105,10 @@ void flip_all(Deck *restrict d1) {
 }
 
 // Returns the deck with the highest 'top' value from the array.
-Deck *get_bigger_deck(Deck *restrict decks[], const size_t n) {
+Deck *get_bigger_deck(Deck *restrict decks[], const size n) {
     assert(decks != NULL && n > 0);
     Deck *biggest = *decks;
-    for (size_t i = 1; i < n; ++i)
+    for (size i = 1; i < n; ++i)
 
         if (biggest->top < decks[i]->top)
             biggest = decks[i];
@@ -119,9 +117,9 @@ Deck *get_bigger_deck(Deck *restrict decks[], const size_t n) {
 
 // Assuming pos starts at 0
 // calculating src->top - pos twice because I can't use more than two returns.
-bool split_deck(Deck *restrict src, Deck *restrict dest, const size_t pos) {
+bool split_deck(Deck *restrict src, Deck *restrict dest, const size pos) {
     assert(src != NULL && dest != NULL);
-    const size_t cards_to_copy = src->top - pos;
+    const size cards_to_copy = src->top - pos;
     if (pos >= src->top || cards_to_copy > dest->size - dest->top)
         return false;
     memcpy(dest->cards + dest->top, src->cards + pos, sizeof(Card) * (cards_to_copy));
@@ -133,7 +131,7 @@ bool split_deck(Deck *restrict src, Deck *restrict dest, const size_t pos) {
 // given a position returns the card at the position
 // non destructive
 // assumes pos starts at 0
-Card peek(Deck *restrict deck, const size_t pos) {
+Card peek(Deck *restrict deck, const size pos) {
     assert(deck != NULL);
     return pos >= deck->top ? (Card){0} : deck->cards[pos];
 }
@@ -151,7 +149,7 @@ Card peek(Deck *restrict deck, const size_t pos) {
  */
 // basically runs a two cards function to a sequence of cards.
 // a single card sequence always return true.
-static bool all_pairs_match(Deck *restrict deck, size_t start_pos, const size_t end_pos, CardPairPredicate pred) {
+inline static bool all_pairs_match(Deck *restrict deck, size start_pos, const size end_pos, CardPairPredicate pred) {
     assert(deck != NULL && pred != NULL);
     if (end_pos < start_pos || start_pos >= deck->top || end_pos >= deck->top || start_pos == end_pos)
         return start_pos == end_pos;
@@ -164,7 +162,7 @@ static bool all_pairs_match(Deck *restrict deck, size_t start_pos, const size_t 
 bool same_suit(const Card a, const Card b) { return a.values.suit == b.values.suit; }
 
 // will check if a sequence of cards from start_pos to end_pos have equal suits
-bool sequence_same_suit(Deck *restrict deck, const size_t start_pos, const size_t end_pos) {
+bool sequence_same_suit(Deck *restrict deck, const size start_pos, const size end_pos) {
     return all_pairs_match(deck, start_pos, end_pos, same_suit);
 }
 
@@ -172,12 +170,12 @@ bool sequence_same_suit(Deck *restrict deck, const size_t start_pos, const size_
 bool is_one_less(const Card a, const Card b) { return a.values.value == b.values.value + 1 || a.card == 0; }
 
 // basically checks if a sequence of cards is in decreasing order
-bool sequence_is_decreasing(Deck *restrict deck, const size_t start_pos, const size_t end_pos) {
+bool sequence_is_decreasing(Deck *restrict deck, const size start_pos, const size end_pos) {
     return all_pairs_match(deck, start_pos, end_pos, is_one_less);
 }
 
 bool one_less_same_suit(const Card a, const Card b) { return same_suit(a, b) && is_one_less(a, b); }
 
-bool sequence_is_decreasing_hierarchy(Deck *restrict deck, const size_t start_pos, const size_t end_pos) {
+bool sequence_is_decreasing_hierarchy(Deck *restrict deck, const size start_pos, const size end_pos) {
     return all_pairs_match(deck, start_pos, end_pos, one_less_same_suit);
 }
