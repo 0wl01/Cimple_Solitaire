@@ -1,6 +1,7 @@
 # Compiler and Base Flags
 CC = gcc
 BASE_CFLAGS = -Wall -Wextra -pedantic -I include -I src
+LDLIBS = -lncursesw
 
 # Directories
 SRC_DIR = src
@@ -41,7 +42,7 @@ all: $(TARGET)
 # Linking the final executable
 $(TARGET): $(OBJS)
 	@mkdir -p $(BIN_DIR)
-	$(CC) $(CFLAGS) $^ -o $@
+	$(CC) $(CFLAGS) $^ -o $@ $(LDLIBS)
 	@echo "Build successful! Executable generated at $@"
 
 # Compiling individual object files
@@ -61,17 +62,17 @@ test: $(TEST_BIN) $(TEST_GOLF_BIN) $(TEST_SIMON_BIN)
 # Building Card tests
 $(TEST_BIN): $(TEST_OBJS) $(TEST_DIR)/test_card.c
 	@mkdir -p $(BIN_DIR)
-	$(CC) $(CFLAGS) $^ -o $@ -lcunit
+	$(CC) $(CFLAGS) $^ -o $@ -lcunit $(LDLIBS)
 
 # Building Golf tests
 $(TEST_GOLF_BIN): $(GOLF_TEST_DEPS) $(TEST_DIR)/test_golf.c
 	@mkdir -p $(BIN_DIR)
-	$(CC) $(CFLAGS) $^ -o $@ -lcunit
+	$(CC) $(CFLAGS) $^ -o $@ -lcunit $(LDLIBS)
 
 # Building Simon tests
 $(TEST_SIMON_BIN): $(SIMON_TEST_DEPS) $(TEST_DIR)/test_simon.c
 	@mkdir -p $(BIN_DIR)
-	$(CC) $(CFLAGS) $^ -o $@ -lcunit
+	$(CC) $(CFLAGS) $^ -o $@ -lcunit $(LDLIBS)
 
 # Start GNU Debugger
 gdb: all
