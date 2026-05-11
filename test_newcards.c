@@ -20,7 +20,6 @@ const char *const VAL_STR[] = {
     "A ", "2 ", "3 ", "4 ", "5 ", "6 ", "7 ", "8 ", "9 ", "10", "J ", "Q ", "K "
 };
 
-/* Função de renderização adaptada para printf standard */
 void test_print_card(Card c, bool stacked) {
     if (c.values.value < 3) return;
 
