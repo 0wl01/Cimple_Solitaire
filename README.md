@@ -1,6 +1,4 @@
-# C-litaire
-
-![C-litaire Logo](assets/C-litaire_logo.png)
+<img src="assets/C-litaire_logo.png" alt="C-litaire Logo" style="width: 15%; height: auto;">
 
 A collection of solitaire games recreated in C.
 
