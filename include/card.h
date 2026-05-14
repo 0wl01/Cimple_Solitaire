@@ -2,7 +2,7 @@
 #define CARD_H
 
 /**
- * @file 
+ * @file
  * @brief Definitions and macros for playing cards and decks.
  */
 
@@ -10,6 +10,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 // TODO Docs
 #define likely(x) __builtin_expect(!!(x), 1)
@@ -18,41 +19,75 @@
 /**
  * @brief The biggest size any structure may have in this code.
  */
-typedef uint16_t size;
+typedef uint_fast16_t size;
 
 /**
  * @brief Suit order constant
  */
-typedef enum { SPADES = 0, HEARTS = 1, CLUBS = 2, DIAMONDS = 3 } Suit;
+typedef enum { SPADES = 0, HEARTS = 1, CLUBS = 2, DIAMONDS = 3 } suit;
 
 /**
  * @brief Represents a playing card.
  * @details The card value is packed into an 8-bit unsigned int.
- * Because of how a bit field works, it is not possible to strictly know which
- * position each value occupies across different compilers.
  */
-typedef union {
-    uint8_t card; /**< Raw byte repr of the card */
-    struct {
-        uint8_t flip : 1;  /**< This bit stores if the card is flipped down */
-        uint8_t color : 1; /**< Used to check the card color (may be useless if suit order changes) */
-        Suit suit : 2;     /**< 2 bits used to identify the 4 possible suits */
-        uint8_t value : 4; /**< The value of the card (3-15). Values (0-2) aren't used. */
-    } values;              /**< Bitfield struct for easy access of the card properties */
-} Card;
+typedef uint8_t card;
+
+#define make_card(s, v) (((card)(s) << 4) | ((v) & 0x0F))
+
+#define card_value(c) ((c) & 0x0F)
+#define card_suit(c) (((c) & 0x30) >> 4)
+#define card_color(c) (((c) & 0x10) >> 4)
+#define card_flipped(c) (((c) & 0x40) >> 6)
+
+/**
+ * @brief Flips a card.
+ *
+ * Flips the flip bit of a card.
+ *
+ * @param c card to flip.
+ * @return The card flipped.
+ *
+ * @see card
+ */
+#define flip_card(c) ((c) ^= 1 << 6)
+
+#define cards_same_suit(c1, c2) ((((c1) & 0x30) >> 4) == (((c2) & 0x30) >> 4))
+
+#define cards_is_one_less(c1, c2) (((c1) + 1) == (c2))
+#define cards_different_colors(c1, c2) (card_color(c1) ^ card_color(c2))
 
 /**
  * @brief A stack that represents a deck of cards.
  * @details This uses a flexible array member meaning you must allocate memory
  * using @ref create_deck().
  * @see create_deck()
- * @see Card
+ * @see card
  */
 typedef struct {
     size top;     /**< Index of the current top, that is, the current number of elements */
     size size;    /**< Max capacity of the stack; this is set at creation */
-    Card cards[]; /**< The flexible array that contains all the cards */
+    card cards[]; /**< The flexible array that contains all the cards */
 } Deck;
+
+// TODO docs
+#define DEFAULT_DECK_SIZE 52
+#define clear_deck(d) ((d)->top = 0)
+#define deck_count(d) ((d)->top)
+#define deck_top_card(d) ((d)->cards[])
+
+/**
+ * @brief Checks whether a given Deck is empty.
+ * @param deck Pointer to the Deck struct.
+ * @return 1 if empty, or 0 if not empty.
+ */
+#define is_deck_empty(deck) !((deck)->top)
+
+/**
+ * @brief Check whether a given deck is full.
+ * @param deck Pointer to a Deck struct.
+ * @return 1 if full 0 if not full.
+ */
+#define is_deck_full(deck) ((deck)->top == (deck)->size)
 
 /**
  * @brief Typedef for a function pointer that compares two cards.
@@ -60,30 +95,14 @@ typedef struct {
  * @param b The second card.
  * @return true if the cards meet the predicate's condition, false otherwise.
  */
-typedef bool (*CardPairPredicate)(const Card, const Card);
-
-#define DEFAULT_DECK_SIZE 52
-
-/**
- * @brief Checks whether a given Deck is empty.
- * @param deck Pointer to the Deck struct.
- * @return 1 if empty, or 0 if not empty.
- */
-#define IS_EMPTY(deck) !((deck)->top)
-
-/**
- * @brief Check whether a given deck is full.
- * @param deck Pointer to a Deck struct.
- * @return 1 if full 0 if not full.
- */
-#define IS_FULL(deck) ((deck)->top == (deck)->size)
+typedef bool (*CardPairPredicate)(const card, const card);
 
 /**
  * @brief Creates a Pointer to a Deck struct allocating memory.
  *
  * The Deck created may only have at maximum size elements.
  *
- * @param size The size in bytes allocated to the Deck. That is the amount of cards that the deck supports. 
+ * @param size The size in bytes allocated to the Deck. That is the amount of cards that the deck supports.
  * @return A pointer to a new empty Deck or NULL if allocation fails.
  *
  * @see Deck
@@ -97,37 +116,43 @@ Deck *create_deck(const size size);
  *
  * @see Deck
  */
-void eliminate_deck(Deck **deck);
+static inline void eliminate_deck(Deck **deck) {
+    free(*deck);
+    *deck = NULL;
+}
 
 /**
  * @brief Function to remove the last element of a Deck.
  *
- * This pops the top Card of a Deck by decreasing the top var.
+ * This pops the top card of a Deck by decreasing the top var.
  *
  * @param deck A Pointer to a Deck.
- * @return The Card removed if the deck is empty it return an empty card.
+ * @return The card removed if the deck is empty it return an empty card.
  *
- * @see Card
+ * @see card
  * @see Deck
  * @see push()
  */
-Card pop(Deck *restrict deck);
+static inline card pop(Deck *restrict deck) {
+    assert(deck != NULL);
+    return deck->top > 0 ? deck->cards[--deck->top] : (card){0};
+}
 
 /**
- * @brief Inserts a Card in a Deck.
+ * @brief Inserts a card in a Deck.
  *
  * This function will put a card in the top position of a Deck stack that isn't
  * full.
  *
  * @param deck Pointer to deck.
- * @param card A Card to insert in the deck.
+ * @param card A card to insert in the deck.
  *
  * @return Returns 0 if successful.
  *
  * @see Deck
- * @see Card
+ * @see card
  */
-bool push(Deck *restrict deck, const Card card);
+bool push(Deck *restrict deck, const card card);
 
 /**
  * @brief Fills a Deck with cards.
@@ -156,7 +181,7 @@ void shuffle_deck(Deck *restrict deck);
 /**
  * @brief Deals cards from a Deck to another Deck.
  *
- * Deals q Cards from a Deck or every card from the Deck, whichever is smaller.
+ * Deals q cards from a Deck or every card from the Deck, whichever is smaller.
  * Will stop dealing if the destination is full.
  * Flipping an already flipped card will flip it face up.
  * * Dealing cards to itself will result in an error.
@@ -171,28 +196,19 @@ void shuffle_deck(Deck *restrict deck);
 void deal(Deck *restrict d1, Deck *restrict d2, const size q, const bool flip);
 
 /**
- * @brief The top Card of a Deck.
+ * @brief The top card of a Deck.
  *
  * @param d1 Pointer to a Deck.
  *
- * @return The Card at the top of that Deck.
+ * @return The card at the top of that Deck.
  *
  * @see Deck
- * @see Card
+ * @see card
  */
-Card top_card(const Deck *restrict d1);
-
-/**
- * @brief Flips a Card.
- *
- * Flips the flip bit of a Card.
- *
- * @param c Card to flip.
- * @return The Card flipped.
- *
- * @see Card
- */
-Card flip_card(Card c);
+static inline card top_card(const Deck *restrict d1){
+    assert(d1 != NULL);
+    return d1->top ? d1->cards[d1->top - 1] : (card){0};
+}
 
 /**
  * @brief Flips all cards from a Deck.
@@ -214,7 +230,7 @@ void flip_all(Deck *restrict d1);
  * @param n The number of decks to evaluate.
  *
  * @pre n > 0
- * @pre All elements decks[0...n] must be non NULL 
+ * @pre All elements decks[0...n] must be non NULL
  * @return Pointer to the Deck with the highest number of cards.
  */
 Deck *get_bigger_deck(Deck *restrict decks[], const size n);
@@ -237,18 +253,13 @@ bool split_deck(Deck *restrict src, Deck *restrict dest, const size pos);
  *
  * @return The card accessed. if the position is invalid returns the empty card.
  */
-Card peek(Deck *restrict deck, const size pos);
+static inline card peek(Deck *restrict deck, const size pos) {
+    assert(deck != NULL);
+    return pos >= deck->top ? (card){0} : deck->cards[pos];
+}
 
 /**
- * @brief Chekcs if two cards share the same suit.
- * 
- * @param a A card...
- * @param b Another... card...
- */
-bool same_suit(const Card a, const Card b);
-
-/**
- * @brief Checks if a sequence of a certain number of cards are all the same suit 
+ * @brief Checks if a sequence of a certain number of cards are all the same suit
  * @param deck The deck of cards checked,
  * @param start_pos Starting position of the sequence.
  * @param end_pos End position of the sequence.
@@ -256,43 +267,25 @@ bool same_suit(const Card a, const Card b);
 bool sequence_same_suit(Deck *restrict deck, const size start_pos, const size end_pos);
 
 /**
- * @brief Checks if the hierarchy order is correct (Kings > Queens > ... > Aces)
- * @param b Card of bigger value.
- * @param a Card of smaller value.
- */
-bool is_one_less(const Card a, const Card b);
-
-/**
  * @brief Given a deck and two indexes, chekcs if the cards follow the stated hierarchy.
- * 
+ *
  * @param deck Pointer to a Deck.
  * @param start_pos Index from the bottom of the potential sequence.
  * @param end_pos Index from the top of the potential sequence.
- * 
+ *
  * @see is_one_less
  */
 bool sequence_is_decreasing(Deck *restrict deck, const size start_pos, const size end_pos);
 
 /**
  * @brief Given a deck and two indexes, chekcs if the cards follow the stated hierarchy and are all of same suit.
- * 
+ *
  * @param deck Pointer to a Deck.
  * @param start_pos Index from the bottom of the potential sequence.
  * @param end_pos Index from the top of the potential sequence.
- * 
+ *
  * @see one_less_same_suit
  */
 bool sequence_is_decreasing_hierarchy(Deck *restrict deck, const size start_pos, const size end_pos);
-
-/**
- * @brief Checks if two cards are of same suit and follows the stated hierarchy.
- *
- * @param b Card of bigger value and of suit X.
- * @param a Card of smaller value and of suit X.
- * 
- * @see is_one_less
- * @see same_suit 
- */
-bool one_less_same_suit(const Card a, const Card b);
 
 #endif

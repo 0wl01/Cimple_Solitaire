@@ -8,7 +8,7 @@
 
 /* Allocates a Deck with a flexible array member for cards. */
 Deck *create_deck(const size size) {
-    Deck *deck = malloc(sizeof(Deck) + (sizeof(Card) * size));
+    Deck *deck = malloc(sizeof(Deck) + (sizeof(card) * size));
     if (unlikely(deck == NULL))
         return NULL;
     deck->top = 0;
@@ -16,41 +16,24 @@ Deck *create_deck(const size size) {
     return deck;
 }
 
-// A function to free memory of uneeded decks in the game.
-void eliminate_deck(Deck **deck) {
-    free(*deck);
-    *deck = NULL;
-}
-
-// This is a basic pop function to a stack.
-// It returns the card popped.
-Card pop(Deck *restrict deck) {
-    assert(deck != NULL);
-    return deck->top > 0 ? deck->cards[--deck->top] : (Card){0};
-}
-
 // This is a basic push function to a stack.
 // Returns the exit code 0 for sucess.
-bool push(Deck *deck, const Card card) {
+bool push(Deck *restrict deck, const card c) {
     assert(deck != NULL);
-    if (IS_FULL(deck)) {
-        // Deck is full
+    if (unlikely(is_deck_full(deck)))
         return false;
-    }
-    deck->cards[(deck->top++)] = card;
+    deck->cards[(deck->top++)] = c;
     return true;
 }
 
-// Fills a stack of cards with Cards.
+// Fills a stack of cards with cards.
 void populate_deck(Deck *restrict deck) {
     assert(deck != NULL);
     deck->top = 0;
-    for (uint8_t s = 0; s < 4; ++s) {
-        uint8_t is_red = (s == DIAMONDS || s == HEARTS) ? 1 : 0;
-        for (uint8_t v = 3; v <= 15; ++v) {
-            if (deck->top >= deck->size)
+    for (card s = 0; s < 4; ++s) {
+        for (card v = 3; v <= 15; ++v) {
+            if (!push(deck, make_card(s, v)))
                 return;
-            deck->cards[deck->top++] = (Card){.values = {.flip = 0, .color = is_red, .suit = s, .value = v}};
         }
     }
 }
@@ -61,7 +44,7 @@ void shuffle_deck(Deck *restrict deck) {
     for (size i = 1; i < deck->top; ++i) {
         size ran_num = arc4random_uniform(i + 1);
         // Swap cards
-        Card temp = deck->cards[i];
+        card temp = deck->cards[i];
         deck->cards[i] = deck->cards[ran_num];
         deck->cards[ran_num] = temp;
     }
@@ -76,31 +59,17 @@ void deal(Deck *restrict d1, Deck *restrict d2, const size q, const bool flip) {
     size transfer_count = (available < space_left) ? available : space_left;
 
     while (transfer_count--) {
-        Card temp = d1->cards[--d1->top];
-        temp.values.flip ^= flip;
+        card temp = d1->cards[--d1->top];
+        temp ^= flip << 6;
         d2->cards[d2->top++] = temp;
     }
-}
-
-// A function that returns the top card of a card stack
-// or returns 0 if the stack is empty.
-Card top_card(const Deck *restrict d1) {
-    assert(d1 != NULL);
-    return d1->top ? d1->cards[d1->top - 1] : (Card){0};
-}
-
-// Flips a card by changing the flip bit.
-Card flip_card(Card c) {
-    c.values.flip ^= 1;
-    return c;
 }
 
 // flips all cards in a stack.
 void flip_all(Deck *restrict d1) {
     assert(d1 != NULL);
-    Card *end = d1->cards + d1->top;
-    for (Card *c = d1->cards; c < end; ++c) {
-        c->values.flip ^= 1;
+    for (size i = 0; i < d1->top; ++i) {
+        d1->cards[i] ^= 1 << 6;
     }
 }
 
@@ -122,7 +91,7 @@ bool split_deck(Deck *restrict src, Deck *restrict dest, const size pos) {
     const size cards_to_copy = src->top - pos;
     if (pos >= src->top || cards_to_copy > dest->size - dest->top)
         return false;
-    memcpy(dest->cards + dest->top, src->cards + pos, sizeof(Card) * (cards_to_copy));
+    memcpy(dest->cards + dest->top, src->cards + pos, sizeof(card) * (cards_to_copy));
     src->top -= cards_to_copy;
     dest->top += cards_to_copy;
     return true;
@@ -131,25 +100,22 @@ bool split_deck(Deck *restrict src, Deck *restrict dest, const size pos) {
 // given a position returns the card at the position
 // non destructive
 // assumes pos starts at 0
-Card peek(Deck *restrict deck, const size pos) {
-    assert(deck != NULL);
-    return pos >= deck->top ? (Card){0} : deck->cards[pos];
-}
+
 
 /**
  * @brief Runs a function through the whole deck, from top to bottom, testing if one card and the one above fits parameters.
- * 
+ *
  * @param deck A pointer to a Deck.
  * @param start_pos Index from the bottom of the potential sequence.
  * @param end_pos Index from the top of the potential sequence.
  * @param pred funtion that return a bool value, such as is_one_less and one_less_same_suit.
- * 
+ *
  * @see one_less_same_suit
  * @see is_one_less
  */
 // basically runs a two cards function to a sequence of cards.
 // a single card sequence always return true.
-inline static bool all_pairs_match(Deck *restrict deck, size start_pos, const size end_pos, CardPairPredicate pred) {
+static inline bool all_pairs_match(Deck *restrict deck, size start_pos, const size end_pos, CardPairPredicate pred) {
     assert(deck != NULL && pred != NULL);
     if (end_pos < start_pos || start_pos >= deck->top || end_pos >= deck->top || start_pos == end_pos)
         return start_pos == end_pos;
@@ -159,23 +125,59 @@ inline static bool all_pairs_match(Deck *restrict deck, size start_pos, const si
     return start_pos == end_pos;
 }
 
-bool same_suit(const Card a, const Card b) { return a.values.suit == b.values.suit; }
+/**
+ * @brief Chekcs if two cards share the same suit.
+ *
+ * @param a A card...
+ * @param b Another... card...
+ */
+static inline bool same_suit(const card a, const card b) { return cards_same_suit(a, b); }
+
+/**
+ * @brief Checks if the hierarchy order is correct (Kings > Queens > ... > Aces)
+ * @param b card of bigger value.
+ * @param a card of smaller value.
+ */
+static inline bool is_one_less(const card a, const card b) { return cards_is_one_less(a, b); }
+
+/**
+ * @brief Checks if two cards are of same suit and follows the stated hierarchy.
+ *
+ * @param b card of bigger value and of suit X.
+ * @param a card of smaller value and of suit X.
+ *
+ * @see is_one_less
+ * @see same_suit
+ */
+static inline bool one_less_same_suit(const card a, const card b) {
+    return cards_same_suit(a, b) && cards_is_one_less(a, b);
+}
 
 // will check if a sequence of cards from start_pos to end_pos have equal suits
 bool sequence_same_suit(Deck *restrict deck, const size start_pos, const size end_pos) {
     return all_pairs_match(deck, start_pos, end_pos, same_suit);
 }
 
-// The empty card 0 is always one less.
-bool is_one_less(const Card a, const Card b) { return a.values.value == b.values.value + 1 || a.card == 0; }
-
 // basically checks if a sequence of cards is in decreasing order
 bool sequence_is_decreasing(Deck *restrict deck, const size start_pos, const size end_pos) {
     return all_pairs_match(deck, start_pos, end_pos, is_one_less);
 }
 
-bool one_less_same_suit(const Card a, const Card b) { return same_suit(a, b) && is_one_less(a, b); }
-
 bool sequence_is_decreasing_hierarchy(Deck *restrict deck, const size start_pos, const size end_pos) {
     return all_pairs_match(deck, start_pos, end_pos, one_less_same_suit);
+}
+
+size sequence_length(const Deck *restrict deck, const size start_pos, CardPairPredicate pred) {
+    assert(deck != NULL && pred != NULL);
+    size len = 1;
+    const size top = deck->top;
+    const card *const cs = deck->cards;
+
+    if (unlikely(start_pos >= top))
+        return 0;
+    while (start_pos + len < top && pred(cs[start_pos + len - 1], cs[start_pos + len])) {
+        ++len;
+    }
+
+    return len;
 }
