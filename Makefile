@@ -1,6 +1,6 @@
 # Compiler and Base Flags
 CC = gcc
-BASE_CFLAGS = -Wall -Wextra -pedantic -I include -I src
+BASE_CFLAGS = -std=gnu23 -Wall -Wextra -pedantic -I include -I src
 
 # Directories
 SRC_DIR = src

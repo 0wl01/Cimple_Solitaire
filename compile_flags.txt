@@ -1,3 +1,4 @@
--Iinclude 
+-Iinclude
 -Wall
 -Wextra
+-std=gnu23
