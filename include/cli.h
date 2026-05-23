@@ -18,7 +18,7 @@
  * @details Checks the flip state to show either the back or the face.
  * @param card The Card structure to be rendered.
  */
-void print_card(const Card card);
+void print_card(const card card);
 
 /**
  * @brief Prints an error message for invalid column selection.
@@ -56,7 +56,7 @@ void print_unknown_command();
  * the stock pile, and the waste pile.
  * @param table Pointer to the current game state.
  */
-void print_golf_table(const size column_size, Deck *restrict columns[], Deck *restrict stock, Deck *restrict waste);
+void print_golf_table(const card_count column_size, Deck *restrict columns[], Deck *restrict stock, Deck *restrict waste);
 
 /**
  * @brief Displays the command prompt to the user.

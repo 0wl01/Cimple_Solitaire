@@ -44,9 +44,9 @@ static const uint8_t deal_lookup[16] = {
  * @see deal_lookup
  * @see Deck
  */
-static bool can_deal(Deck *restrict d1, Deck *restrict d2) {
-    const uint8_t c2_val = top_card(d2).values.value;
-    const uint8_t possible_stacks = deal_lookup[top_card(d1).values.value];
+static bool can_deal(const Deck *restrict d1, const Deck *restrict d2) {
+    const uint8_t c2_val = card_value(top_card(d2));
+    const uint8_t possible_stacks = deal_lookup[card_value(top_card(d1))];
     return possible_stacks && (c2_val == (possible_stacks & 0x0F) || c2_val == (possible_stacks >> 4));
     ;
 }
@@ -57,7 +57,7 @@ static bool can_deal(Deck *restrict d1, Deck *restrict d2) {
  * @param d1 Source column.
  * @param d2 Destination waste pile.
  */
-static void buy(Deck *restrict d1, Deck *restrict d2) {
+static void buy(const Deck *restrict d1, const Deck *restrict d2) {
     if (can_deal(d1, d2))
         deal(d1, d2, 1, false);
 }

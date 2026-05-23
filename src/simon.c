@@ -10,11 +10,11 @@
 /**
  * @brief Seeks for the index of the bottom of a sequence(of one suit).
  */
-static size sequence_start_pos(const Deck *restrict column) {
-    if (IS_EMPTY(column))
+static card_count sequence_start_pos(const Deck *restrict column) {
+    if (is_deck_empty(column))
         return 0;
-    size i = column->top - 1;
-    while (i > 0 && one_less_same_suit(column->cards[i - 1], column->cards[i]))
+    card_count i = column->top - 1;
+    while (i > 0 && cards_one_less_same_suit(column->cards[i - 1], column->cards[i]))
         i--;
     return i;
 }
@@ -29,13 +29,13 @@ static size sequence_start_pos(const Deck *restrict column) {
  */
 static bool has_play_left(const simon_state *restrict table) {
     bool hope = false;
-    for (size i = 0; i < SIMON_COLUMNS && !hope; ++i) {
+    for (card_count i = 0; i < SIMON_COLUMNS && !hope; ++i) {
         if (table->columns[i]->top > 0) {
             uint8_t bottom_val = table->columns[i]->cards[sequence_start_pos(table->columns[i])].values.value;
             uint8_t top_val = top_card(table->columns[i]).values.value;
-            for (size j = 0; j < SIMON_COLUMNS && !hope; ++j) {
+            for (card_count j = 0; j < SIMON_COLUMNS && !hope; ++j) {
                 uint8_t needed_val = top_card(table->columns[j]).values.value - 1;
-                hope = j != i && (IS_EMPTY(table->columns[j]) || (needed_val >= top_val && needed_val <= bottom_val));
+                hope = j != i && (is_deck_empty(table->columns[j]) || (needed_val >= top_val && needed_val <= bottom_val));
             }
         }
     }
@@ -47,7 +47,7 @@ static bool has_play_left(const simon_state *restrict table) {
  */
 static bool has_won(simon_state *restrict table) {
     bool win = true;
-    for (size i = 0; i < SIMON_FOUNDATIONS; ++i)
+    for (card_count i = 0; i < SIMON_FOUNDATIONS; ++i)
         win = win && IS_FULL(table->foundations[i]);
     return win;
 }
@@ -58,19 +58,19 @@ static bool has_won(simon_state *restrict table) {
  * @param table Pointer to the current Simple Simon game state.
  */
 static void check_and_move_completed_suits(simon_state *restrict table) {
-    for (size i = 0; i < SIMON_COLUMNS; i++) {
+    for (card_count i = 0; i < SIMON_COLUMNS; i++) {
         Deck *col = table->columns[i];
 
         // A complete suit requires exactly 13 cards
         if (col->top >= 13) {
-            size start_idx = col->top - 13;
+            card_count start_idx = col->top - 13;
 
             // Checks if the last 13 cards are a perfect sequence of the same suit
             if (sequence_is_decreasing_hierarchy(col, start_idx, col->top - 1)) {
                 bool moved = false;
                 // Finds the first empty foundation to store the completed suit
-                for (size f = 0; f < SIMON_FOUNDATIONS && !moved; f++) {
-                    if (IS_EMPTY(table->foundations[f])) {
+                for (card_count f = 0; f < SIMON_FOUNDATIONS && !moved; f++) {
+                    if (is_deck_empty(table->foundations[f])) {
                         split_deck(col, table->foundations[f], start_idx);
                         moved = true; // Updates the flag to naturally stop the loop
                     }
@@ -167,7 +167,7 @@ static LoopSignal run_simon(simon_state *restrict table) {
  * @brief Initializes the 4 foundation decks for Simple Simon.
  */
 static void setup_foundations(simon_state *restrict table) {
-    for (size i = 0; i < SIMON_FOUNDATIONS; i++) {
+    for (card_count i = 0; i < SIMON_FOUNDATIONS; i++) {
         table->foundations[i] = create_deck(SIMON_FOUNDATION_SIZE);
     }
 }
@@ -184,7 +184,7 @@ static void setup_columns(simon_state *restrict table) {
     populate_deck(temp_deck);
     shuffle_deck(temp_deck);
 
-    for (size i = 0, cards_to_deal = 8; i < SIMON_COLUMNS; ++i, cards_to_deal = cards_to_deal - (i > 2)) {
+    for (card_count i = 0, cards_to_deal = 8; i < SIMON_COLUMNS; ++i, cards_to_deal = cards_to_deal - (i > 2)) {
         table->columns[i] = create_deck(SIMON_COLUMN_SIZE);
         split_deck(temp_deck, table->columns[i], temp_deck->top - cards_to_deal);
     }
@@ -196,9 +196,9 @@ static void setup_columns(simon_state *restrict table) {
  * @brief Frees the memory at the end of the game.
  */
 static void clean_simon_table(simon_state *restrict table) {
-    for (size i = 0; i < SIMON_COLUMNS; ++i)
+    for (card_count i = 0; i < SIMON_COLUMNS; ++i)
         eliminate_deck(&table->columns[i]);
-    for (size i = 0; i < SIMON_FOUNDATIONS; ++i)
+    for (card_count i = 0; i < SIMON_FOUNDATIONS; ++i)
         eliminate_deck(&table->foundations[i]);
 }
 

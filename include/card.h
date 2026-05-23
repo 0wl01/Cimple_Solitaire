@@ -19,7 +19,7 @@
 /**
  * @brief The biggest size any structure may have in this code.
  */
-typedef uint_fast16_t size;
+typedef uint_fast16_t card_count;
 
 /**
  * @brief Suit order constant
@@ -27,17 +27,26 @@ typedef uint_fast16_t size;
 typedef enum { SPADES = 0, HEARTS = 1, CLUBS = 2, DIAMONDS = 3 } suit;
 
 /**
+ * @brief a default deck size
+ */
+constexpr uint8_t DEFAULT_DECK_SIZE = 52;
+constexpr uint8_t MASK_VALUE = 0x0F;
+constexpr uint8_t MASK_SUIT = 0x30;
+constexpr uint8_t MASK_COLOR = 0x10;
+constexpr uint8_t MASK_FLIPPED = 0x40;
+
+/**
  * @brief Represents a playing card.
  * @details The card value is packed into an 8-bit unsigned int.
  */
 typedef uint8_t card;
 
-#define make_card(s, v) (((card)(s) << 4) | ((v) & 0x0F))
+#define make_card(s, v) (((card)(s) << 4) | ((v) & MASK_VALUE))
 
-#define card_value(c) ((c) & 0x0F)
-#define card_suit(c) (((c) & 0x30) >> 4)
-#define card_color(c) (((c) & 0x10) >> 4)
-#define card_flipped(c) (((c) & 0x40) >> 6)
+#define card_value(c) ((c) & MASK_VALUE)
+#define card_suit(c) (((c) & MASK_SUIT) >> 4)
+#define card_color(c) (((c) & MASK_COLOR) >> 4)
+#define card_flipped(c) (((c) & MASK_FLIPPED) >> 6)
 
 /**
  * @brief Flips a card.
@@ -51,9 +60,10 @@ typedef uint8_t card;
  */
 #define flip_card(c) ((c) ^= 1 << 6)
 
-#define cards_same_suit(c1, c2) ((((c1) & 0x30) >> 4) == (((c2) & 0x30) >> 4))
+#define cards_same_suit(c1, c2) ((((c1) & MASK_SUIT) >> 4) == (((c2) & MASK_SUIT) >> 4))
 
 #define cards_is_one_less(c1, c2) (((c1) + 1) == (c2))
+#define cards_one_less_same_suit(c1, c2) ((cards_is_one_less((c1), (c2))) && (cards_same_suit((c1),(c2))))
 #define cards_different_colors(c1, c2) (card_color(c1) ^ card_color(c2))
 
 /**
@@ -64,16 +74,16 @@ typedef uint8_t card;
  * @see card
  */
 typedef struct {
-    size top;     /**< Index of the current top, that is, the current number of elements */
-    size size;    /**< Max capacity of the stack; this is set at creation */
-    card cards[]; /**< The flexible array that contains all the cards */
+    card_count top;  /**< Index of the current top, that is, the current number of
+                      elements */
+    card_count size; /**< Max capacity of the stack; this is set at creation */
+    card cards[];    /**< The flexible array that contains all the cards */
 } Deck;
 
 // TODO docs
-#define DEFAULT_DECK_SIZE 52
 #define clear_deck(d) ((d)->top = 0)
 #define deck_count(d) ((d)->top)
-#define deck_top_card(d) ((d)->cards[])
+#define deck_top_card(d) ((d)->cards[d->top])
 
 /**
  * @brief Checks whether a given Deck is empty.
@@ -102,12 +112,13 @@ typedef bool (*CardPairPredicate)(const card, const card);
  *
  * The Deck created may only have at maximum size elements.
  *
- * @param size The size in bytes allocated to the Deck. That is the amount of cards that the deck supports.
+ * @param size The size in bytes allocated to the Deck. That is the amount of
+ * cards that the deck supports.
  * @return A pointer to a new empty Deck or NULL if allocation fails.
  *
  * @see Deck
  */
-Deck *create_deck(const size size);
+Deck *create_deck(const card_count size);
 
 /**
  * @brief Free allocated memory for a Deck.
@@ -118,7 +129,7 @@ Deck *create_deck(const size size);
  */
 static inline void eliminate_deck(Deck **deck) {
     free(*deck);
-    *deck = NULL;
+    *deck = nullptr;
 }
 
 /**
@@ -157,8 +168,9 @@ bool push(Deck *restrict deck, const card card);
 /**
  * @brief Fills a Deck with cards.
  *
- * Fills a Deck with cards in order (Spades, Hearts, Diamonds, Clubs) 1-13 (value 3-15).
- * It will fill the Deck till its max capacity. A deck with size 13 will only get the cards of spades.
+ * Fills a Deck with cards in order (Spades, Hearts, Diamonds, Clubs) 1-13
+ * (value 3-15). It will fill the Deck till its max capacity. A deck with size
+ * 13 will only get the cards of spades.
  *
  * @param deck Pointer to a Deck.
  *
@@ -193,7 +205,8 @@ void shuffle_deck(Deck *restrict deck);
  *
  * @see Deck
  */
-void deal(Deck *restrict d1, Deck *restrict d2, const size q, const bool flip);
+void deal(Deck *restrict d1, Deck *restrict d2, const card_count q,
+          const bool flip);
 
 /**
  * @brief The top card of a Deck.
@@ -205,7 +218,7 @@ void deal(Deck *restrict d1, Deck *restrict d2, const size q, const bool flip);
  * @see Deck
  * @see card
  */
-static inline card top_card(const Deck *restrict d1){
+static inline card top_card(const Deck *restrict d1) {
     assert(d1 != NULL);
     return d1->top ? d1->cards[d1->top - 1] : (card){0};
 }
@@ -233,7 +246,7 @@ void flip_all(Deck *restrict d1);
  * @pre All elements decks[0...n] must be non NULL
  * @return Pointer to the Deck with the highest number of cards.
  */
-Deck *get_bigger_deck(Deck *restrict decks[], const size n);
+Deck *get_bigger_deck(Deck *restrict decks[], const card_count n);
 
 /**
  * @brief Splits a deck from a position to the top to another deck.
@@ -243,7 +256,7 @@ Deck *get_bigger_deck(Deck *restrict decks[], const size n);
  * @param pos Position to start taking the cards from.
  * @return Returns true if possible and false if not possible.
  */
-bool split_deck(Deck *restrict src, Deck *restrict dest, const size pos);
+bool split_deck(Deck *restrict src, Deck *restrict dest, const card_count pos);
 
 /**
  * @brief Gets a card in a given position of a Deck
@@ -253,21 +266,24 @@ bool split_deck(Deck *restrict src, Deck *restrict dest, const size pos);
  *
  * @return The card accessed. if the position is invalid returns the empty card.
  */
-static inline card peek(Deck *restrict deck, const size pos) {
+static inline card peek(Deck *restrict deck, const card_count pos) {
     assert(deck != NULL);
     return pos >= deck->top ? (card){0} : deck->cards[pos];
 }
 
 /**
- * @brief Checks if a sequence of a certain number of cards are all the same suit
+ * @brief Checks if a sequence of a certain number of cards are all the same
+ * suit
  * @param deck The deck of cards checked,
  * @param start_pos Starting position of the sequence.
  * @param end_pos End position of the sequence.
  */
-bool sequence_same_suit(Deck *restrict deck, const size start_pos, const size end_pos);
+bool sequence_same_suit(Deck *restrict deck, const card_count start_pos,
+                        const card_count end_pos);
 
 /**
- * @brief Given a deck and two indexes, chekcs if the cards follow the stated hierarchy.
+ * @brief Given a deck and two indexes, chekcs if the cards follow the stated
+ * hierarchy.
  *
  * @param deck Pointer to a Deck.
  * @param start_pos Index from the bottom of the potential sequence.
@@ -275,10 +291,12 @@ bool sequence_same_suit(Deck *restrict deck, const size start_pos, const size en
  *
  * @see is_one_less
  */
-bool sequence_is_decreasing(Deck *restrict deck, const size start_pos, const size end_pos);
+bool sequence_is_decreasing(Deck *restrict deck, const card_count start_pos,
+                            const card_count end_pos);
 
 /**
- * @brief Given a deck and two indexes, chekcs if the cards follow the stated hierarchy and are all of same suit.
+ * @brief Given a deck and two indexes, chekcs if the cards follow the stated
+ * hierarchy and are all of same suit.
  *
  * @param deck Pointer to a Deck.
  * @param start_pos Index from the bottom of the potential sequence.
@@ -286,6 +304,13 @@ bool sequence_is_decreasing(Deck *restrict deck, const size start_pos, const siz
  *
  * @see one_less_same_suit
  */
-bool sequence_is_decreasing_hierarchy(Deck *restrict deck, const size start_pos, const size end_pos);
+bool sequence_is_decreasing_hierarchy(Deck *restrict deck,
+                                      const card_count start_pos,
+                                      const card_count end_pos);
+
+card_count sequence_length(const Deck *restrict deck,
+                           const card_count start_pos, CardPairPredicate pred);
+
+Deck *clone_deck(const Deck *restrict sample);
 
 #endif
