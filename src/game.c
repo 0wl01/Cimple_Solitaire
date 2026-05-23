@@ -2,32 +2,22 @@
 #include "cli.h"
 #include <stddef.h>
 
-LoopSignal default_handle_quit(void *state, const Command cmd) {
-    // TODO remove silencers when logic is implemented
-    (void)state; (void)cmd;
-    return LOOP_QUIT; 
+LoopSignal default_handle_quit(void *__attribute__((unused)) state, const Command __attribute__((unused)) cmd) {
+    return LOOP_QUIT;
 }
-LoopSignal default_handle_restart(void *state, const Command cmd) {
-    // TODO remove silencers when logic is implemented
-    (void)state; (void)cmd;
-    return LOOP_RESTART; 
+LoopSignal default_handle_restart(void *__attribute__((unused)) state, const Command __attribute__((unused)) cmd) {
+    return LOOP_RESTART;
 }
-LoopSignal default_handle_unknown(void *state, const Command cmd) {
-    // TODO remove silencers when logic is implemented
-    (void)state; (void)cmd;
+LoopSignal default_handle_unknown(void *__attribute__((unused)) state, const Command __attribute__((unused)) cmd) {
     print_unknown_command();
     return LOOP_CONTINUE;
 }
-LoopSignal default_handle_help(void *state, const Command cmd) {
-    // TODO remove silencers when logic is implemented
-    (void)state; (void)cmd;
+LoopSignal default_handle_help(void *__attribute__((unused)) state, const Command __attribute__((unused)) cmd) {
     // maybe add default stuff here
     return LOOP_CONTINUE;
 }
 
-LoopSignal default_handle_hint(void *state, const Command cmd) {
-    // TODO remove silencers when logic is implemented
-    (void)state; (void)cmd;
+LoopSignal default_handle_hint(void *__attribute__((unused)) state, const Command __attribute__((unused)) cmd) {
     // maybe add default stuff here
     return LOOP_CONTINUE;
 }
