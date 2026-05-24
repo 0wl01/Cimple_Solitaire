@@ -291,6 +291,113 @@ void test_split_deck_valid(void) {
     CU_ASSERT_EQUAL(std_d2->top, 3);
 }
 
+// TODO: DOC
+void test_unflip_all(void) {
+    std_d1->top = 0;
+    
+    card c_up = make_card(0, 3);
+    card c_down = make_card(0, 4);
+    c_down = flip_card(c_down); // face down card
+
+    push(std_d1, c_up);
+    push(std_d1, c_down);
+
+    CU_ASSERT_FALSE(card_flipped(std_d1->cards[0]));
+    CU_ASSERT_TRUE(card_flipped(std_d1->cards[1]));
+
+    unflip_all(std_d1);
+
+    CU_ASSERT_FALSE(card_flipped(std_d1->cards[0]));
+    CU_ASSERT_FALSE(card_flipped(std_d1->cards[1]));
+}
+
+// TODO: DOC
+void test_peek(void) {
+    std_d1->top = 0;
+    push(std_d1, make_card(2, 5));
+
+    card c1 = peek(std_d1, 0);
+    CU_ASSERT_EQUAL(c1, make_card(2, 5));
+
+    /* Tentar peek acima do top (top = 1) */
+    card c2_invalid = peek(std_d1, 1);
+    CU_ASSERT_EQUAL(c2_invalid, 0); 
+}
+
+// TODO: DOC
+void test_clone_deck(void) {
+    Deck *cloned;
+    int i;
+    std_d1->top = 0;
+    populate_deck(std_d1);
+    
+    cloned = clone_deck(std_d1);
+    
+    CU_ASSERT_PTR_NOT_NULL(cloned);
+    CU_ASSERT_EQUAL(cloned->top, std_d1->top);
+    CU_ASSERT_EQUAL(cloned->size, std_d1->size);
+
+    // Check if cloned is 1 for 1 copy of std_d1
+    for (i = 0; i < std_d1->top; i++) {
+        CU_ASSERT_EQUAL(cloned->cards[i], std_d1->cards[i]);
+    }
+    
+    eliminate_deck(&cloned);
+}
+
+// TODO: DOC
+void test_sequences(void) {
+    std_d1->top = 0;
+    
+    /* Vamos colocar 4 cartas:
+       0: Espadas(0), Valor 5 (Preto)
+       1: Espadas(0), Valor 4 (Preto)
+       2: Copas(1),   Valor 3 (Vermelho)
+       3: Copas(1),   Valor 4 (Vermelho)
+    */
+    push(std_d1, make_card(0, 5));
+    push(std_d1, make_card(0, 4));
+    push(std_d1, make_card(1, 3));
+    push(std_d1, make_card(1, 4));
+
+    /* Teste de Naipes iguais (0 a 1 é True, 0 a 2 é False) */
+    CU_ASSERT_TRUE(sequence_same_suit(std_d1, 0, 1));
+    CU_ASSERT_FALSE(sequence_same_suit(std_d1, 0, 2));
+
+    /* Teste decrescente (5 -> 4 -> 3) */
+    CU_ASSERT_TRUE(sequence_is_decreasing(std_d1, 0, 2));
+    CU_ASSERT_FALSE(sequence_is_decreasing(std_d1, 0, 3));
+
+    /* Teste crescente (3 -> 4) */
+    CU_ASSERT_TRUE(sequence_is_increasing(std_d1, 2, 3));
+
+    /* Decrescente + Mesmo Naipe */
+    CU_ASSERT_TRUE(sequence_is_decreasing_hierarchy(std_d1, 0, 1));
+    CU_ASSERT_FALSE(sequence_is_decreasing_hierarchy(std_d1, 0, 2)); /* Naipe muda */
+
+    /* Mesma cor (0 e 1 são pretas, 2 e 3 são vermelhas) */
+    CU_ASSERT_TRUE(sequence_same_color(std_d1, 0, 1));
+    CU_ASSERT_TRUE(sequence_same_color(std_d1, 2, 3));
+    CU_ASSERT_FALSE(sequence_same_color(std_d1, 1, 2));
+
+    /* Cor e Naipe Alternado (Preto -> Vermelho) */
+    CU_ASSERT_TRUE(sequence_alternating_color(std_d1, 1, 2));
+    CU_ASSERT_TRUE(sequence_alternating_suit(std_d1, 1, 2));
+}
+
+// TODO: DOC
+void test_sequence_length(void) {
+    card_count len;
+    
+    std_d1->top = 0;
+    push(std_d1, make_card(0, 5));
+    push(std_d1, make_card(0, 4));
+    
+    /* 2 cartas em ordem decrescente = comprimento 2 */
+    len = sequence_length(std_d1, 0, cards_is_one_less);
+    CU_ASSERT_EQUAL(len, 2);
+}
+
 /* SUITE 2: OVERFLOW & LIMITS (Small Decks)*/
 
 static Deck *lim_d1 = NULL;
@@ -406,6 +513,39 @@ void test_get_bigger_deck(void) {
     CU_ASSERT_EQUAL(get_bigger_deck(arr_d, 3)->top, 3);
 }
 
+// TODO: DOC
+void test_clone_deck_array(void) {
+    Deck **cloned_arr;
+    int i, j;
+    
+    /* Prepara os 3 baralhos com quantidades diferentes de cartas */
+    for (i = 0; i < 3; i++) {
+        arr_d[i]->top = 0;
+        for (j = 0; j <= i; j++) {
+            push(arr_d[i], make_card(1, 10 + j));
+        }
+    }
+    
+    cloned_arr = clone_deckArray(arr_d, 3);
+    CU_ASSERT_PTR_NOT_NULL(cloned_arr);
+    
+    /* Verifica array a array, e carta a carta! */
+    for (i = 0; i < 3; i++) {
+        CU_ASSERT_PTR_NOT_NULL(cloned_arr[i]);
+        CU_ASSERT_EQUAL(cloned_arr[i]->top, arr_d[i]->top);
+        
+        for (j = 0; j < arr_d[i]->top; j++) {
+            CU_ASSERT_EQUAL(cloned_arr[i]->cards[j], arr_d[i]->cards[j]);
+        }
+    }
+    
+    /* Limpeza de Memória */
+    for (i = 0; i < 3; i++) {
+        eliminate_deck(&cloned_arr[i]);
+    }
+    free(cloned_arr);
+}
+
 /* MAIN RUNNER & REGISTRY */
 typedef struct {
     const char *name;
@@ -437,7 +577,12 @@ int main(void) {
         {"test of flip_deal", test_flip_deal},
         {"test of shuffle_deck", test_shuffle_deck},
         {"test of an invalid deck split", test_split_deck_invalid_position},
-        {"test of an valid deck split", test_split_deck_valid}
+        {"test of an valid deck split", test_split_deck_valid},
+        {"test of unflip_all", test_unflip_all},
+        {"test of peek", test_peek},
+        {"test of clone_deck", test_clone_deck},
+        {"test of sequences", test_sequences},
+        {"test of sequence_length", test_sequence_length}
     };
     if (!s_std || !add_tests(s_std, t_std, sizeof(t_std) / sizeof(t_std[0]))) {
         CU_cleanup_registry();
@@ -459,7 +604,8 @@ int main(void) {
     // SUITE 3: Arrays
     CU_pSuite s_arr = CU_add_suite("Card_Arrays_Suite", init_suite_arrays, clean_suite_arrays);
     T t_arr[] = {
-        {"test of get_bigger_deck", test_get_bigger_deck}
+        {"test of get_bigger_deck", test_get_bigger_deck},
+        {"test of clone_deck_array", test_clone_deck_array}
     };
     if (!s_arr || !add_tests(s_arr, t_arr, sizeof(t_arr) / sizeof(t_arr[0]))) {
         CU_cleanup_registry();
