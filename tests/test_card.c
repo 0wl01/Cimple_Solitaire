@@ -52,7 +52,7 @@ void test_push_normal() {
     // Test successful pushes
     CU_ASSERT_TRUE(push(std_d1, c1));
     CU_ASSERT_EQUAL(std_d1->top, 1);
-    CU_ASSERT_FALSE(IS_EMPTY(std_d1));
+    CU_ASSERT_FALSE(is_deck_empty(std_d1));
 
     card c2 = make_card(2,10);
 

@@ -31,10 +31,12 @@ bool push(Deck *restrict deck, const card c) {
 void populate_deck(Deck *restrict deck) {
     assert(deck != NULL);
     deck->top = 0;
-    for (card s = 0; s < 4; ++s) {
-        for (card v = 3; v <= 15; ++v) {
-            if (!push(deck, make_card(s, v)))
-                return;
+    while (deck->top < deck->size) {
+        for (card s = 0; s < 4; ++s) {
+            for (card v = 3; v <= 15; ++v) {
+                if (!push(deck, make_card(s, v)))
+                    return;
+            }
         }
     }
 }
