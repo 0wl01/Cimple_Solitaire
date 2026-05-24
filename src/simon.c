@@ -31,10 +31,10 @@ static bool has_play_left(const simon_state *restrict table) {
     bool hope = false;
     for (card_count i = 0; i < SIMON_COLUMNS && !hope; ++i) {
         if (table->columns[i]->top > 0) {
-            uint8_t bottom_val = table->columns[i]->cards[sequence_start_pos(table->columns[i])].values.value;
-            uint8_t top_val = top_card(table->columns[i]).values.value;
+            uint8_t bottom_val = card_value(table->columns[i]->cards[sequence_start_pos(table->columns[i])]);
+            uint8_t top_val = card_value(top_card(table->columns[i]));
             for (card_count j = 0; j < SIMON_COLUMNS && !hope; ++j) {
-                uint8_t needed_val = top_card(table->columns[j]).values.value - 1;
+                uint8_t needed_val = card_value(top_card(table->columns[j])) - 1;
                 hope = j != i && (is_deck_empty(table->columns[j]) || (needed_val >= top_val && needed_val <= bottom_val));
             }
         }
@@ -48,7 +48,7 @@ static bool has_play_left(const simon_state *restrict table) {
 static bool has_won(simon_state *restrict table) {
     bool win = true;
     for (card_count i = 0; i < SIMON_FOUNDATIONS; ++i)
-        win = win && IS_FULL(table->foundations[i]);
+        win = win && is_deck_full((table->foundations[i]));
     return win;
 }
 
@@ -108,7 +108,7 @@ static LoopSignal simon_handle_move(void *restrict state, const Command cmd) {
         return 0;
     if (!sequence_is_decreasing_hierarchy(table->columns[src], cmd.index, table->columns[src]->top - 1))
         return 0;
-    if (!is_one_less(top_card(table->columns[dest]), table->columns[src]->cards[cmd.index]))
+    if (!cards_is_one_less(top_card(table->columns[dest]), table->columns[src]->cards[cmd.index]))
         return 0;
     split_deck(table->columns[src], table->columns[dest], cmd.index);
     return 0;

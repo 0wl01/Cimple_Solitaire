@@ -8,10 +8,21 @@
 
 #include "card.h"
 #include "command.h"
-#include "game.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+
+/**
+ * @brief Generic layout structure representing a solitaire game table.
+ */
+typedef struct {
+    Deck *restrict *columns;
+    Deck *restrict *foundations;
+    Deck *restrict stock;
+    Deck *restrict waste;
+    size_t n_columns;
+    size_t n_foundations;
+} TableLayout;
 
 /**
  * @brief Prints a single card to the terminal using Unicode symbols.

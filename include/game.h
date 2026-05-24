@@ -24,18 +24,6 @@ typedef struct {
     CommandHandler handler;
 } CommandDispatch;
 
-/**
- * @brief Generic layout structure representing a solitaire game table.
- */
-typedef struct {
-    Deck *restrict *columns;
-    Deck *restrict *foundations;
-    Deck *restrict stock;
-    Deck *restrict waste;
-    size_t n_columns;
-    size_t n_foundations;
-} TableLayout;
-
 /** @brief Default handler to quit the game. */
 LoopSignal default_handle_quit(void *state, const Command cmd);
 

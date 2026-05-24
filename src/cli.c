@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <sys/types.h>
+#include <inttypes.h>
 
 // lookup tables for card symbols and suits
 // Maybe if the red suits were index 1 and 3 i could use the 2^0 bit to check
@@ -183,9 +184,8 @@ static void print_column_headers(const uint8_t n_columns) {
  * @param n_columns Total number of columns.
  * @param row The current depth index being printed.
  */
-static void print_column_row(Deck *restrict *columns, const uint8_t n_columns,
-                             const card_count row) {
-  printf("%hu ", row);
+static void print_column_row(Deck *restrict *columns, const uint8_t n_columns, const card_count row) {
+  printf("%"PRIuFAST16, row);
   for (uint8_t j = 0; j < n_columns; ++j) {
     if (columns[j] && columns[j]->top > row)
       print_card(columns[j]->cards[row]);

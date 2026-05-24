@@ -57,7 +57,7 @@ static bool can_deal(const Deck *restrict d1, const Deck *restrict d2) {
  * @param d1 Source column.
  * @param d2 Destination waste pile.
  */
-static void buy(const Deck *restrict d1, const Deck *restrict d2) {
+static void buy(Deck *restrict d1, Deck *restrict d2) {
     if (can_deal(d1, d2))
         deal(d1, d2, 1, false);
 }
