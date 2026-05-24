@@ -35,6 +35,11 @@ constexpr uint8_t MASK_SUIT = 0x30;
 constexpr uint8_t MASK_COLOR = 0x10;
 constexpr uint8_t MASK_FLIPPED = 0x40;
 
+constexpr uint8_t CARD_ACE  = 3;
+constexpr uint8_t CARD_JACK = 13;
+constexpr uint8_t CARD_QUEEN = 14;
+constexpr uint8_t CARD_KING = 15;
+
 /**
  * @brief Represents a playing card.
  * @details The card value is packed into an 8-bit unsigned int.
@@ -65,6 +70,11 @@ typedef uint8_t card;
 #define cards_is_one_less(c1, c2) (((c1) + 1) == (c2))
 #define cards_one_less_same_suit(c1, c2) ((cards_is_one_less((c1), (c2))) && (cards_same_suit((c1),(c2))))
 #define cards_different_colors(c1, c2) (card_color(c1) ^ card_color(c2))
+#define cards_same_color(c1, c2) (card_color(c1) == card_color(c2))
+#define cards_same_value(c1, c2) (card_value(c1) == card_value(c2))
+#define cards_one_less_same_color(c1, c2) ((cards_is_one_less((c1), (c2))) && (cards_same_color((c1),(c2))))
+#define cards_is_one_more(c1, c2) (((c2) + 1) == (c1))
+#define cards_one_more_same_color(c1, c2) ((cards_is_one_more((c1), (c2))) && (cards_same_color((c1),(c2))))
 
 /**
  * @brief A stack that represents a deck of cards.
@@ -83,7 +93,7 @@ typedef struct {
 // TODO docs
 #define clear_deck(d) ((d)->top = 0)
 #define deck_count(d) ((d)->top)
-#define deck_top_card(d) ((d)->cards[d->top])
+#define deck_top_card(d) ((d)->cards[(d)->top - 1])
 
 /**
  * @brief Checks whether a given Deck is empty.
@@ -235,6 +245,9 @@ static inline card top_card(const Deck *restrict d1) {
  */
 void flip_all(Deck *restrict d1);
 
+//TODO: docs
+void unflip_all(Deck *restrict d1);
+
 /**
  * @brief Logic for finding the deck with the highest occupancy.
  * This implementation iterates through the provided array and compares
@@ -278,7 +291,7 @@ static inline card peek(Deck *restrict deck, const card_count pos) {
  * @param start_pos Starting position of the sequence.
  * @param end_pos End position of the sequence.
  */
-bool sequence_same_suit(Deck *restrict deck, const card_count start_pos,
+bool sequence_same_suit(const Deck *restrict deck, const card_count start_pos,
                         const card_count end_pos);
 
 /**
@@ -291,7 +304,7 @@ bool sequence_same_suit(Deck *restrict deck, const card_count start_pos,
  *
  * @see is_one_less
  */
-bool sequence_is_decreasing(Deck *restrict deck, const card_count start_pos,
+bool sequence_is_decreasing(const Deck *restrict deck, const card_count start_pos,
                             const card_count end_pos);
 
 /**
@@ -304,7 +317,7 @@ bool sequence_is_decreasing(Deck *restrict deck, const card_count start_pos,
  *
  * @see one_less_same_suit
  */
-bool sequence_is_decreasing_hierarchy(Deck *restrict deck,
+bool sequence_is_decreasing_hierarchy(const Deck *restrict deck,
                                       const card_count start_pos,
                                       const card_count end_pos);
 
@@ -312,5 +325,15 @@ card_count sequence_length(const Deck *restrict deck,
                            const card_count start_pos, CardPairPredicate pred);
 
 Deck *clone_deck(const Deck *restrict sample);
+
+bool sequence_is_increasing(const Deck *restrict deck, const card_count start_pos,
+                            const card_count end_pos);
+bool sequence_same_color(const Deck *restrict deck, const card_count start_pos,
+                         const card_count end_pos);
+bool sequence_alternating_color(const Deck *restrict deck, const card_count start_pos,
+                                const card_count end_pos);
+bool sequence_alternating_suit(const Deck *restrict deck, const card_count start_pos,
+                               const card_count end_pos);
+
 
 #endif

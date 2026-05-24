@@ -47,7 +47,8 @@ typedef struct {
     move_rules *mov_rules;
     auto_rule *auto_rules;
     win_condition *conditions;
-} game;
+} game_cfg;
 
-void scan_game_file(const char *filename);
+void free_game_cfg(game_cfg **Game);
 
+game_cfg* scan_game_file(const char *filename);

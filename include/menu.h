@@ -1,9 +1,13 @@
 #ifndef MENU_H
 #define MENU_H
 #include <stdbool.h>
+#include <stdint.h>
 
 /** @brief Automatically calculates the number of available games based on the games array. */
 #define NUM_GAMES (sizeof(games) / sizeof(games[0]))
+
+constexpr uint8_t MAX_GAMES = 255;
+constexpr char SCRIPT_EXTENSION[] = ".paciencia";
 
 /**
  * @brief Structure to map a games name to its initialization function.
@@ -15,9 +19,9 @@ typedef struct {
 
 /**
  * @brief Starts the interactive main menu for the Cimple Solitaire.
- * * Clears the screen and keeps the user in a continuous loop until 
+ * * Clears the screen and keeps the user in a continuous loop until
  * they explicitly choose to exit the application.
  */
-void show_main_menu(void);
+void show_main_menu(const char *folder);
 
 #endif

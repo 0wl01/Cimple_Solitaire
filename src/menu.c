@@ -1,58 +1,79 @@
 #include "menu.h"
 #include "cli.h"
-#include "golf.h"
-#include "simon.h"
-
+#include <string.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <dirent.h>
+
 
 /**
  * @brief Array containing all available games.
  */
-static const GameOption games[] = {{"Golf", init_golf}, {"Simple Simon", init_simple_simon}};
 
-static void print_menu(const size_t games_length, const GameOption *restrict games) {
-    printf("\n==================================\n");
-    printf("      C-litaire      \n");
-    printf("==================================\n");
+static bool has_script_extension(const char *filename) {
+    size_t flen = strlen(filename);
+    size_t elen = strlen(SCRIPT_EXTENSION);
+    return flen >= elen && strcmp(filename + flen - elen, SCRIPT_EXTENSION) == 0;
+}
 
-    for (size_t i = 0; i < games_length; ++i)
-        printf("  [%zu] %s\n", i + 1, games[i].name);
+
+static uint8_t load_files(const char *folder, char names[MAX_GAMES][256]) {
+    DIR *dir = opendir(folder);
+    if (!dir) { perror(folder); return 0; }
+    uint8_t n = 0;
+    struct dirent *entry;
+    while (n < MAX_GAMES && (entry = readdir(dir)))
+        if (has_script_extension(entry->d_name))
+            strncpy(names[n++], entry->d_name, 255);
+    closedir(dir);
+    return n;
+}
+
+
+
+static void print_menu_page(const char *folder, char names[MAX_GAMES][256],
+                             uint8_t n, uint8_t page) {
+    uint8_t start = page * 8;
+    uint8_t end   = start + 8 < n ? start + 8 : n;
+    printf("\n=== C-litaire (%s) ===\n", folder);
+    for (uint8_t i = start; i < end; ++i)
+        printf("  [%d] %s\n", i - start + 1, names[i]);
+    if (page > 0)  printf("  [0] Previous page\n");
+    if (end < n)   printf("  [9] Next page\n");
     printf("  [q] Exit\n");
-    printf("==================================\n");
-    printf("Pick your game: \n");
 }
 
-/**
- * @brief Processes the user's choice from the main menu.
- * Launches the selected game or triggers the application exit sequence.
- * * @param choice The character inputted by the user.
- * @return false if the user chooses to quit ('q'), true otherwise.
- */
-static bool process_choice(char choice) {
-    if (choice == 'q') {
-        printf("Closing C-litaire! Goodbye!\n");
-        return false;
-    }
-    choice -= '0';
-    if (choice > 0 && (size_t)choice <= NUM_GAMES) {
-        printf("Loading %s...\n", games[choice - 1].name);
-        while (games[choice - 1].init_game_fun())
-            ;
-    }
-
-    // Invalid input
-    else {
-        printf("Invalid option! Try again.\n");
-    }
-    return true;
+static void launch_game(const char *folder, const char *name) {
+    char path[512];
+    snprintf(path, sizeof(path), "%s/%s", folder, name);
+    while (run_dsl_game(path))
+        ;
 }
 
-void show_main_menu() {
-    char choice;
-    do {
-        print_menu(NUM_GAMES, games);
-        choice = menu_get_input();
-    } while (process_choice(choice));
+static void process_choice(char c, const char *folder,
+                            char names[MAX_GAMES][256],
+                            uint8_t n, uint8_t page) {
+    uint8_t idx = page * 8 + (c - '1');
+    if (c >= '1' && c <= '8' && idx < n)
+        launch_game(folder, names[idx]);
+    else
+        printf("Invalid choice.\n");
+}
+
+void show_main_menu(const char *folder) {
+    char (*names)[256] = malloc(MAX_GAMES * sizeof(*names));
+    if (!names) return;
+    uint8_t n    = load_files(folder, names);
+    uint8_t page = 0;
+    char    c    = 0;
+    while (c != 'q') {
+        print_menu_page(folder, names, n, page);
+        print_prompt();
+        c = menu_get_input();
+        if      (c == '9' && (page + 1) * 8 < n) ++page;
+        else if (c == '0' && page > 0)            --page;
+        else if (c != 'q') process_choice(c, folder, names, n, page);
+    }
+    free(names);
 }
