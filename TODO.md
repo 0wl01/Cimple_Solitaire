@@ -11,7 +11,8 @@
     - print_menu_page
     - load_files
     - parse_game_rules
-
+- [ ] Ainda precisamos do SAVE e LOAD
+- [ ] Ainda precisamos do UNDO
 
 ## Bugs
 - [x] No simon.c a função que verifica se há movimentos possíveis não considera colunas vazias.
