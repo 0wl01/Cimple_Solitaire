@@ -128,7 +128,7 @@ static const FlagDispatch flag_table[TABLE_SIZE] = {
 };
 
 static bool check_single_flag(char flag, const Deck *src, const Deck *dest, card_count index) {
-    for(size_t i = 0; i <= TABLE_SIZE; ++i){
+    for(size_t i = 0; i < TABLE_SIZE; ++i){
         if(flag_table[i].flag == flag) return(flag_table[i].check(src, dest, index));
     }
     return true;
