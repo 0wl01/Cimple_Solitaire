@@ -6,9 +6,7 @@
 #include "registry.h"
 #include "dsl.h"
 
-/* ==================================================
-   SUITE: REGISTRY BUILDER
-   ================================================== */
+/* SUITE: REGISTRY BUILDER */
 
 static const char *dummy_file = "test_registry.paciencia";
 
@@ -49,10 +47,6 @@ int clean_suite_registry(void) {
     return 0;
 }
 
-/* ==================================================
-   THE TESTS
-   ================================================== */
-
 /**
  * @brief Tests if the registry correctly allocates memory and builds decks.
  * @details Checks if the number of allocated entries matches the INIT commands,
@@ -83,29 +77,23 @@ void test_build_registry(void) {
 }
 
 /**
- * @brief Tests the find_deck search algorithm.
- * @details Searches for decks by name and index, and tests error handling
- * when searching for non-existent names.
+ * @brief Tests if the registry internal logic (find_type_flags/populate) works.
+ * @details Instead of searching for the deck, we check if the built registry
+ * holds the correct properties and card counts assigned by the new internal logic.
  */
-void test_find_deck(void) {
+void test_registry_internal_logic(void) {
     game_cfg *cfg = scan_game_file(dummy_file);
     deck_registry *reg = build_registry(cfg);
-    deck_entry *entry;
-
+    
     CU_ASSERT_PTR_NOT_NULL_FATAL(reg);
 
-    /* Find the SECOND 'tab' deck (index 1) */
-    entry = find_deck(reg, "tab", 1);
-    CU_ASSERT_PTR_NOT_NULL(entry);
-    CU_ASSERT_STRING_EQUAL(entry->name, "tab");
+    /* 1. Check if 'tab' has the correct flags assigned by find_type_flags */
+    /* Note: In our dummy_file, 'TIPO tab =' means flag '=' */
+    CU_ASSERT_STRING_EQUAL(reg->entries[0].flags, "=");
 
-    /* Try to find a deck that doesn't exist */
-    entry = find_deck(reg, "ghost_deck", 0);
-    CU_ASSERT_PTR_NULL(entry);
-
-    /* Try to find the 5th 'tab' deck (doesn't exist, we only have 2) */
-    entry = find_deck(reg, "tab", 4);
-    CU_ASSERT_PTR_NULL(entry);
+    /* 2. Check if the initial cards were populated (populate_entry) */
+    /* We expect 3 cards in 'tab' as per our INIT command */
+    CU_ASSERT_EQUAL(reg->entries[0].deck->top, 3);
 
     free_registry(&reg);
     free_game_cfg(&cfg);
@@ -148,7 +136,7 @@ int main(void) {
     
     T t_reg[] = {
         {"test build_registry allocation", test_build_registry},
-        {"test find_deck search logic", test_find_deck},
+        {"test registry internal logic (flags/init)", test_registry_internal_logic},
         {"test free_registry safety", test_free_registry_null}
     };
 
