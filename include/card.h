@@ -12,10 +12,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-// TODO Docs
-#define likely(x) __builtin_expect(!!(x), 1)
-#define unlikely(x) __builtin_expect(!!(x), 0)
-
 /**
  * @brief The biggest size any structure may have in this code.
  */

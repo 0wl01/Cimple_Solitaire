@@ -8,8 +8,8 @@
 
 #include "card.h"
 #include "command.h"
+#include "registry.h"
 #include "dsl_game.h"
-#include "game.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>

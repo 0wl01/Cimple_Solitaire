@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include "macros.h"
 
 /* Allocates a Deck with a flexible array member for cards. */
 Deck *create_deck(const card_count size) {
