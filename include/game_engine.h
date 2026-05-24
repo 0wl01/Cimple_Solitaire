@@ -14,6 +14,8 @@ void dsl_post_turn(void *state);
 bool dsl_has_won(void *state);
 bool run_dsl_game(const char *path);
 LoopSignal dsl_handle_move(void *restrict state, Command cmd);
+bool can_move_rule(const move_rules *rule, const deck_entry *src,
+                   const deck_entry *dest, card_count index);
 
 typedef struct {
     deck_registry *reg;

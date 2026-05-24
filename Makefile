@@ -1,6 +1,6 @@
 # Compiler and Base Flags
 CC = gcc
-BASE_CFLAGS = -std=gnu2x -Wall -Wextra -pedantic -I include -I src -Wno-unused-parameter
+BASE_CFLAGS = -std=gnu2x -Wall -Wextra -pedantic -I include -I src
 
 # Directories
 SRC_DIR = src
@@ -55,13 +55,16 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 # --- TEST RULES ---
 
 # Test execution rule
-test: $(TEST_CARD_BIN) $(TEST_DSL_BIN) $(TEST_REG_BIN)
+test: $(TEST_CARD_BIN) $(TEST_DSL_BIN) $(TEST_REG_BIN) $(TEST_GAME_BIN)
 	@echo "\n--- Running Card Tests ---"
 	@./$(TEST_CARD_BIN)
 	@echo "\n--- Running DSL Parser Tests ---"
 	@./$(TEST_DSL_BIN)
 	@echo "\n--- Running Registry Builder Tests ---"
 	@./$(TEST_REG_BIN)
+	@echo "\n--- Running DSL Game Tests ---"
+	@./$(TEST_GAME_BIN)
+	@echo "\nAll tests executed successfully!"
 
 # Building Card tests
 $(TEST_CARD_BIN): $(TEST_OBJS) $(TEST_DIR)/test_card.c
@@ -78,7 +81,7 @@ $(TEST_REG_BIN): $(BUILD_DIR)/registry.o $(TEST_OBJS) $(TEST_DIR)/test_registry.
 	@mkdir -p $(BIN_DIR)
 	$(CC) $(CFLAGS) $^ -o $@ -lcunit
 
-# Building DSL Game tests (TODO)
+# Building DSL Game tests
 $(TEST_GAME_BIN): $(TEST_OBJS) $(TEST_DIR)/test_dsl_game.c
 	@mkdir -p $(BIN_DIR)
 	$(CC) $(CFLAGS) $^ -o $@ -lcunit
