@@ -1,4 +1,6 @@
 #include "cli.h"
+#include "registry.h"
+#include "dsl_game.h"
 #include "card.h"
 #include <assert.h>
 #include <stdio.h>
@@ -101,11 +103,6 @@ void print_invalid_column() { printf("Invalid column!\n"); }
 
 void print_unknown_command() { printf("Unknown command!\n"); }
 
-char menu_get_input() {
-  char buffer[3];
-  return fgets(buffer, sizeof(buffer), stdin) ? buffer[0] : 'q';
-}
-
 /**
  * @brief Parses a move command string into a Command struct.
  * @param buffer The input string (e.g., "m A 5 B").
@@ -139,14 +136,6 @@ static CommandType char_to_command(const char c) {
   return CMD_UNK;
 }
 
-Command game_get_input() {
-  char buffer[32];
-  if (!fgets(buffer, sizeof(buffer), stdin))
-    return (Command){.type = CMD_QUT};
-  return buffer[0] == 'm' ? parse_move(buffer)
-                          : (Command){.type = char_to_command(buffer[0])};
-}
-
 /**
  * @brief Renders the alphabetical column headers (A, B, C...).
  * @param n_columns The number of headers to print.
@@ -170,7 +159,7 @@ static void render_headers(const deck_registry *reg) {
 }
 
 static void render_row(const deck_registry *reg, card_count row) {
-    printf("%"PRIuFAST16, row);
+    printf("%"PRIuFAST16"  ", row);
     for (uint8_t i = 0; i < reg->n_entries; ++i) {
         const deck_entry *e = &reg->entries[i];
         if (e->deck->top > row) print_card(e->deck->cards[row]);
