@@ -19,7 +19,7 @@ static void save_deck(const Deck *deck, FILE *f) {
     putc('\n', f);
 }
 
-bool save_game(const deck_registry *reg, const game_cfg *cfg, const char *dsl_filename) {
+bool save_game(const deck_registry *reg, const game_cfg *cfg UNUSED, const char *dsl_filename) {
     FILE *f = fopen("save.paciencia", "w");
     if (!f)
         return false;
@@ -90,7 +90,8 @@ bool load_game(deck_registry **reg, const game_cfg *cfg, const char *save_path) 
     if (!f) { perror(save_path); return false; }
     char *line cleanup(mfree) = NULL;
     size_t len = 0;
-    getline(&line, &len, f);  // skip dsl filename
+    ssize_t _ignored = getline(&line, &len, f);  // skip dsl filename
+    (void)_ignored;
     free_registry(reg);
     *reg = build_registry(cfg);
     load_decks(*reg, f);

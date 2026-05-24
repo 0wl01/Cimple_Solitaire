@@ -20,38 +20,38 @@ void pop_undo(Saveroom *allsaves){
     allsaves->currTop -= 1;
 }
 
-void push_undo(Saveroom *allsaves, engine_state *newsave){
+void push_undo(Saveroom *allsaves UNUSED, engine_state *newsave){
     for(size_t i = 0; i <= newsave->reg->n_entries; ++i){
         allsaves->currS[allsaves->currTop]->reg->entries[i].deck = clone_deck(newsave->reg->entries[i].deck);
     }
     allsaves->currTop += 1;
 }
-static bool flag_seq_decreasing(const Deck *src, const Deck *UNUSED dest,
+static bool flag_seq_decreasing(const Deck *src, const Deck *dest UNUSED,
                                 card_count index) {
   return sequence_is_decreasing(src, index, src->top - 1);
 }
 
-static bool flag_seq_increasing(const Deck *src, const Deck *UNUSED dest,
+static bool flag_seq_increasing(const Deck *src, const Deck *dest UNUSED,
                                 card_count index) {
   return sequence_is_increasing(src, index, src->top - 1);
 }
 
-static bool flag_seq_same_suit(const Deck *src, const Deck *UNUSED dest,
+static bool flag_seq_same_suit(const Deck *src, const Deck *dest UNUSED,
                                card_count index) {
   return sequence_same_suit(src, index, src->top - 1);
 }
 
-static bool flag_seq_alt_color(const Deck *src, const Deck *UNUSED dest,
+static bool flag_seq_alt_color(const Deck *src, const Deck *dest UNUSED,
                                card_count index) {
   return sequence_alternating_color(src, index, src->top - 1);
 }
 
-static bool flag_seq_alt_suit(const Deck *src, const Deck *UNUSED dest,
+static bool flag_seq_alt_suit(const Deck *src, const Deck *dest UNUSED,
                               card_count index) {
   return sequence_alternating_suit(src, index, src->top - 1);
 }
 
-static bool flag_seq_same_color(const Deck *src, const Deck *UNUSED dest,
+static bool flag_seq_same_color(const Deck *src, const Deck *dest UNUSED,
                                 card_count index) {
   return sequence_same_color(src, index, src->top - 1);
 }
@@ -86,27 +86,27 @@ static bool flag_diff_color_dest(const Deck *src, const Deck *dest,
   return card_color(top_card(src)) != card_color(top_card(dest));
 }
 
-static bool flag_dest_empty(const Deck *UNUSED src, const Deck *dest,
+static bool flag_dest_empty(const Deck *src UNUSED, const Deck *dest,
                             card_count UNUSED index) {
   return is_deck_empty(dest);
 }
 
-static bool flag_top_is_ace(const Deck *src, const Deck *UNUSED dest,
+static bool flag_top_is_ace(const Deck *src, const Deck *dest UNUSED,
                             card_count UNUSED index) {
   return card_value(top_card(src)) == CARD_ACE;
 }
 
-static bool flag_top_is_king(const Deck *src, const Deck *UNUSED dest,
+static bool flag_top_is_king(const Deck *src, const Deck *dest UNUSED,
                              card_count UNUSED index) {
   return card_value(top_card(src)) == CARD_KING;
 }
 
-static bool flag_bottom_is_ace(const Deck *src, const Deck *UNUSED dest,
+static bool flag_bottom_is_ace(const Deck *src, const Deck *dest UNUSED,
                                card_count index) {
   return card_value(src->cards[index]) == CARD_ACE;
 }
 
-static bool flag_bottom_is_king(const Deck *src, const Deck *UNUSED dest,
+static bool flag_bottom_is_king(const Deck *src, const Deck *dest UNUSED,
                                 card_count index) {
   return card_value(src->cards[index]) == CARD_KING;
 }
@@ -115,7 +115,7 @@ static bool flag_tilde(const Deck *src, const Deck *dest, card_count index) {
   return flag_less(src, dest, index) || flag_greater(src, dest, index);
 }
 
-static bool flag_star(const Deck *UNUSED src, const Deck *UNUSED dest,
+static bool flag_star(const Deck *src UNUSED, const Deck *dest UNUSED,
                       card_count UNUSED index) {
   return true;
 }

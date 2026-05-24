@@ -4,27 +4,27 @@
 #include "macros.h"
 #include "input.h"
 
-LoopSignal default_handle_quit(void *UNUSED state,
-                               const Command UNUSED cmd) {
+LoopSignal default_handle_quit(void *state UNUSED,
+                               const Command cmd UNUSED) {
   return LOOP_QUIT;
 }
-LoopSignal default_handle_restart(void *UNUSED state,
-                                  const Command UNUSED cmd) {
+LoopSignal default_handle_restart(void *state UNUSED,
+                                  const Command cmd UNUSED) {
   return LOOP_RESTART;
 }
-LoopSignal default_handle_unknown(void *UNUSED state,
-                                  const Command UNUSED cmd) {
+LoopSignal default_handle_unknown(void *state UNUSED,
+                                  const Command cmd UNUSED) {
   print_unknown_command();
   return LOOP_CONTINUE;
 }
-LoopSignal default_handle_help(void *UNUSED state,
-                               const Command UNUSED cmd) {
+LoopSignal default_handle_help(void *state UNUSED,
+                               const Command cmd UNUSED) {
   // maybe add default stuff here
   return LOOP_CONTINUE;
 }
 
-LoopSignal default_handle_hint(void *UNUSED state,
-                               const Command UNUSED cmd) {
+LoopSignal default_handle_hint(void *state UNUSED,
+                               const Command cmd UNUSED) {
   // maybe add default stuff here
   return LOOP_CONTINUE;
 }
