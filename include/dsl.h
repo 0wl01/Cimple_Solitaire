@@ -1,10 +1,6 @@
 #pragma once
 #include <stdint.h>
 
-#define STR(x) #x
-#define XSTR(x) STR(x)
-#define cleanup(F) __attribute__((__cleanup__(F)))
-
 constexpr uint8_t max_game_name_size = 0xFF;
 constexpr uint8_t max_deck_t_flags_size = 5;
 constexpr uint8_t max_mov_t_flags_size = 21;

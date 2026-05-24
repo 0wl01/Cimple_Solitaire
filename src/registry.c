@@ -5,48 +5,35 @@
 #include <stdlib.h>
 #include <string.h>
 
-deck_entry *find_deck(const deck_registry *reg, const char *name, uint8_t index) {
-    uint8_t seen = 0;
-    for (uint8_t i = 0; i < reg->n_entries; ++i) {
-        if (strcmp(reg->entries[i].name, name) == 0) {
-            if (seen == index)
-                return &reg->entries[i];
-            ++seen;
-        }
-    }
-    return NULL;
+static const char *find_type_flags(const game_cfg *cfg, const char *name) {
+    size_t i = 0;
+    while (strcmp(cfg->deck_types[i].name, name))
+        ++i;
+    return cfg->deck_types[i].flags;
 }
 
-static bool populate_entries(deck_registry *restrict reg, const game_cfg *restrict cfg) {
+static void populate_entry(deck_entry *e, const game_cfg *cfg,
+                            Deck *stock, card_count cap, size_t i) {
+    strncpy(e->flags, find_type_flags(cfg, e->name), max_deck_t_flags_size - 1);
+    bool flipped = strchr(e->flags, '_') || strchr(e->flags, '^');
+    e->deck = create_deck(cap);
+    deal(stock, e->deck, cfg->instances[i].n_cards, flipped);
+    if (strchr(e->flags, '^') && deck_count(e->deck))
+        flip_card(deck_top_card(e->deck));
+}
+
+static bool populate_entries(deck_registry *restrict reg,
+                              const game_cfg *restrict cfg) {
     card_count cap = cfg->bar * DEFAULT_DECK_SIZE;
     Deck *stock = create_deck(cap);
-    if (!stock)
-        return false;
-
-    for (size_t b = 0; b < cfg->bar; ++b)
-        populate_deck(stock);
+    if (!stock) return false;
+    populate_deck(stock);
     shuffle_deck(stock);
-
     for (size_t i = 0; i < cfg->n_instances; ++i) {
         deck_entry *e = &reg->entries[i];
         strncpy(e->name, cfg->instances[i].deck_t, max_game_name_size - 1);
-        size_t type_idx = 0;
-        // This assumes the type is present in the deck types list
-        // if not, type_idx will be out of bounds and cause UB
-        while (strcmp(cfg->deck_types[type_idx].name, e->name))
-            ++type_idx;
-        strncpy(e->flags, cfg->deck_types[type_idx].flags, max_deck_t_flags_size - 1);
-        bool flipped = strchr(e->flags, '_') != NULL || strchr(e->flags, '^') != NULL;
-        e->deck = create_deck(cap);
-        if (!e->deck)
-            abort();
-
-        deal(stock, e->deck, cfg->instances[i].n_cards, flipped);
-
-        if(strchr(e->flags, '^')) flip_card(deck_top_card(e->deck));
-
+        populate_entry(e, cfg, stock, cap, i);
     }
-
     eliminate_deck(&stock);
     return true;
 }
