@@ -1,5 +1,5 @@
 // Error checking and other stuff will be ignored for now as the tests made will be correct
-
+#include "macros.h"
 #include "dsl.h"
 #include <assert.h>
 #include <inttypes.h>
