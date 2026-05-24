@@ -1,6 +1,6 @@
 #include "cli.h"
 #include "registry.h"
-#include "dsl_game.h"
+#include "game_engine.h"
 #include "card.h"
 #include <assert.h>
 #include <stdio.h>
@@ -70,34 +70,7 @@ void print_end(const bool win) {
   printf("Do you want to keep playing? (y/n)\n");
 }
 
-void print_golf_table(const card_count qnty_columns, Deck *restrict columns[],
-                      Deck *restrict stock, Deck *restrict waste) {
-  puts("A B C D E F G\n");
-  print_decks_columns(columns, qnty_columns);
-  print_card(top_card(stock));
-  printf(" ");
-  print_card(top_card(waste));
-  printf("\n");
-}
-
 void print_prompt() { printf("(? for help) ~> "); }
-
-void print_golf_help() {
-  printf(" s - To deal card from the stock\n 1-7 - To deal cards from the "
-         "columns\n q - To quit\n ? - For this "
-         "screen\n");
-}
-
-void print_simon_help() {
-  printf("m -> Columns should be in capital letters that range from A-J and "
-         "positions range from 0 to the column's "
-         "current top card position, no spaces in between.\n"
-         "example: mA6B\n"
-         "h -> Gives you an advice on a command.\n"
-         "? -> Pops this screen.\n"
-         "r -> Creates a new simon table from the beginning.\n"
-         "q -> Quits");
-}
 
 void print_invalid_column() { printf("Invalid column!\n"); }
 

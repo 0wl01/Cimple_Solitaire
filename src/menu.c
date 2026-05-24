@@ -1,11 +1,13 @@
 #include "menu.h"
-#include "cli.h"
+#include "render.h"
 #include <string.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <dirent.h>
-
+#include "input.h"
+#include "macros.h"
+#include "game_engine.h"
 
 /**
  * @brief Array containing all available games.

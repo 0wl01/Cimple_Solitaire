@@ -1,8 +1,9 @@
-#include "cli.h"
+#include "command.h"
+#include "card.h"
 #include <stdio.h>
 
 /**
- * 
+ *
  */
 char menu_get_input() {
   char buffer[3];
@@ -35,7 +36,8 @@ static CommandType char_to_command(const char c) {
     char key;
     CommandType cmd;
   } map[] = {{'h', CMD_HNT}, {'?', CMD_HLP}, {'r', CMD_RST},
-             {'q', CMD_QUT}, {'y', CMD_YES}, {'n', CMD_NOT}};
+             {'q', CMD_QUT}, {'y', CMD_YES}, {'n', CMD_NOT},
+             {'s', CMD_SAV}, {'l', CMD_LOD}};
   for (card_count i = 0; i < sizeof(map) / sizeof(*map); ++i)
     if (map[i].key == c)
       return map[i].cmd;

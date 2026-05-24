@@ -2,14 +2,12 @@
 #define CLI_H
 
 /**
- * @file 
+ * @file
  * @brief Communication between the client and the game
  */
 
 #include "card.h"
 #include "command.h"
-#include "registry.h"
-#include "dsl_game.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -65,7 +63,7 @@ void print_unknown_command();
 
 /**
  * @brief Renders the entire Golf game table.
- * @details Displays the column headers (1-7), the columns themselves, 
+ * @details Displays the column headers (1-7), the columns themselves,
  * the stock pile, and the waste pile.
  * @param table Pointer to the current game state.
  */
@@ -91,7 +89,7 @@ void print_simon_help();
  *
  * If the first character of the input is a 'm' then the output changes depending on what card game you are playing on, since
  * is one command they share but have different output.
- *  
+ *
  * @see Command
  */
 Command game_get_input();
