@@ -278,7 +278,7 @@ bool dsl_can_play(void *state) {
 
 static const CommandDispatch dsl_dispatch[] = {
     {CMD_MOV, dsl_handle_move},        {CMD_HNT, default_handle_hint},
-    {CMD_HLP, default_handle_unknown}, {CMD_RST, default_handle_restart},
+    {CMD_HLP, default_handle_help}, {CMD_RST, default_handle_restart},
     {CMD_QUT, default_handle_quit},
 };
 

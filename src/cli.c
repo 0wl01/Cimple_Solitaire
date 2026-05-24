@@ -103,63 +103,19 @@ void print_invalid_column() { printf("Invalid column!\n"); }
 
 void print_unknown_command() { printf("Unknown command!\n"); }
 
-/**
- * @brief Parses a move command string into a Command struct.
- * @param buffer The input string (e.g., "m A 5 B").
- * @return A populated Command struct, or a CMD_UNK command if parsing fails.
- */
-static Command parse_move(const char *restrict buffer) {
-  Command cmd = {
-      .type = CMD_MOV, .src_col = 0, .index = SIZE_MAX, .dest_col = 0};
-  int result_code =
-      sscanf(buffer, "m %c %zu %c", &cmd.src_col, &cmd.index, &cmd.dest_col);
-  return result_code < 1 ? (Command){.type = CMD_UNK} : cmd;
-}
-
-/**
- * @brief Turns character from an input into a command.
- *
- * @return If input is none of the ones listed in "map" then it returns a
- * unknown command, which does nothing.
- *
- * @see CommandType
- */
-static CommandType char_to_command(const char c) {
-  const struct {
-    char key;
-    CommandType cmd;
-  } map[] = {{'h', CMD_HNT}, {'?', CMD_HLP}, {'r', CMD_RST},
-             {'q', CMD_QUT}, {'y', CMD_YES}, {'n', CMD_NOT}};
-  for (card_count i = 0; i < sizeof(map) / sizeof(*map); ++i)
-    if (map[i].key == c)
-      return map[i].cmd;
-  return CMD_UNK;
-}
-
-/**
- * @brief Renders the alphabetical column headers (A, B, C...).
- * @param n_columns The number of headers to print.
- */
-static void print_column_headers(const uint8_t n_columns) {
-  printf("  ");
-  for (uint8_t i = 0; i < n_columns; ++i)
-    printf("%c ", 'A' + i);
-  putchar('\n');
-}
-
 static char index_to_col(uint8_t i) {
     return i < 26 ? 'a' + i : 'A' + (i - 26);
 }
 
 static void render_headers(const deck_registry *reg) {
-    printf("   ");
+    printf("    ");
     for (uint8_t i = 0; i < reg->n_entries; ++i)
         printf("%c  ", index_to_col(i));
     putchar('\n');
 }
 
 static void render_row(const deck_registry *reg, card_count row) {
-    printf("%"PRIuFAST16"  ", row);
+    printf("%2"PRIuFAST16"  ", row);
     for (uint8_t i = 0; i < reg->n_entries; ++i) {
         const deck_entry *e = &reg->entries[i];
         if (e->deck->top > row) print_card(e->deck->cards[row]);
