@@ -67,13 +67,13 @@ typedef uint8_t card;
 
 #define cards_same_suit(c1, c2) ((((c1) & MASK_SUIT) >> 4) == (((c2) & MASK_SUIT) >> 4))
 
-#define cards_is_one_less(c1, c2) (((c1) + 1) == (c2))
+#define cards_is_one_less(c1, c2) ((card_value(c1) + 1) == card_value(c2))
 #define cards_one_less_same_suit(c1, c2) ((cards_is_one_less((c1), (c2))) && (cards_same_suit((c1),(c2))))
 #define cards_different_colors(c1, c2) (card_color(c1) ^ card_color(c2))
 #define cards_same_color(c1, c2) (card_color(c1) == card_color(c2))
 #define cards_same_value(c1, c2) (card_value(c1) == card_value(c2))
 #define cards_one_less_same_color(c1, c2) ((cards_is_one_less((c1), (c2))) && (cards_same_color((c1),(c2))))
-#define cards_is_one_more(c1, c2) (((c2) + 1) == (c1))
+#define cards_is_one_more(c1, c2) ((card_value(c2) + 1) == card_value(c1))
 #define cards_one_more_same_color(c1, c2) ((cards_is_one_more((c1), (c2))) && (cards_same_color((c1),(c2))))
 
 /**
@@ -334,6 +334,9 @@ bool sequence_alternating_color(const Deck *restrict deck, const card_count star
                                 const card_count end_pos);
 bool sequence_alternating_suit(const Deck *restrict deck, const card_count start_pos,
                                const card_count end_pos);
+
+// TODO: docs
+Deck **clone_deckArray(Deck *sample[], size_t size);
 
 
 #endif

@@ -32,7 +32,7 @@ void test_create_and_eliminate_deck() {
     CU_ASSERT_PTR_NOT_NULL(d);
     CU_ASSERT_EQUAL(d->size, 52);
     CU_ASSERT_EQUAL(d->top, 0);
-    CU_ASSERT_TRUE(IS_EMPTY(d));
+    CU_ASSERT_TRUE(is_deck_empty(d));
 
     eliminate_deck(&d);
 
@@ -198,9 +198,9 @@ void test_flip_all(void) {
  */
 void test_flip_card(void) {
     card c = make_card(1, 10);
-    c = flip_card(c);
+    flip_card(c);
     CU_ASSERT_TRUE(card_flipped(c)); // card is now face down
-    c = flip_card(c);
+    flip_card(c);
     CU_ASSERT_FALSE(card_flipped(c)); // card return to initial state
 }
 
@@ -297,7 +297,7 @@ void test_unflip_all(void) {
     
     card c_up = make_card(0, 3);
     card c_down = make_card(0, 4);
-    c_down = flip_card(c_down); // face down card
+    flip_card(c_down); // face down card
 
     push(std_d1, c_up);
     push(std_d1, c_down);
@@ -327,7 +327,7 @@ void test_peek(void) {
 // TODO: DOC
 void test_clone_deck(void) {
     Deck *cloned;
-    int i;
+    card_count i;
     std_d1->top = 0;
     populate_deck(std_d1);
     
@@ -386,8 +386,8 @@ void test_sequences(void) {
 }
 
 /* Helper function: Transforms an macro into an actual function so we can use it as a pointer */
-static bool test_pred_is_one_less(const card a, const card b) {
-    return cards_is_one_less(a, b);
+static bool test_pred_is_one_more(const card a, const card b) {
+    return cards_is_one_more(a, b);
 }
 // TODO: DOC
 void test_sequence_length(void) {
@@ -397,8 +397,7 @@ void test_sequence_length(void) {
     push(std_d1, make_card(0, 5));
     push(std_d1, make_card(0, 4));
     
-    /* 2 cartas em ordem decrescente = comprimento 2 */
-    len = sequence_length(std_d1, 0, test_pred_is_one_less);
+    len = sequence_length(std_d1, 0, test_pred_is_one_more);
     CU_ASSERT_EQUAL(len, 2);
 }
 
@@ -520,7 +519,7 @@ void test_get_bigger_deck(void) {
 // TODO: DOC
 void test_clone_deck_array(void) {
     Deck **cloned_arr;
-    int i, j;
+    card_count i, j;
     
     /* Prepara os 3 baralhos com quantidades diferentes de cartas */
     for (i = 0; i < 3; i++) {
@@ -557,7 +556,8 @@ typedef struct {
 } T;
 
 static int add_tests(CU_pSuite suite, T *tests, size_t count) {
-    for (int i = 0; i < count; i++)
+    size_t i;
+    for (i = 0; i < count; i++)
         if (!CU_add_test(suite, tests[i].name, tests[i].fn))
             return 0;
     return 1;
