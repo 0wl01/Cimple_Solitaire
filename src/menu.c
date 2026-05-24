@@ -64,11 +64,9 @@ static void process_choice(char c, const char *folder,
 }
 
 void show_main_menu(const char *folder) {
-    char (*names)[256] = malloc(MAX_GAMES * sizeof(*names));
+    char c = 0, (*names)[256] = malloc(MAX_GAMES * sizeof(*names));
     if (!names) return;
-    uint8_t n    = load_files(folder, names);
-    uint8_t page = 0;
-    char    c    = 0;
+    uint8_t n    = load_files(folder, names), page = 0;
     while (c != 'q') {
         print_menu_page(folder, names, n, page);
         print_prompt();

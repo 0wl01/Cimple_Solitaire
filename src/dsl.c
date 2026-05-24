@@ -9,16 +9,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-static inline void close_file(FILE **file) {
-    if (*file)
-        fclose(*file);
-}
-
-static inline void mfree(char **ptr) {
-    if (*ptr)
-        free(*ptr);
-}
-
 // func to remove comments from a line
 static inline void treat_line(char *restrict line, const size_t length) {
     for (size_t i = 0; i < length; ++i) {

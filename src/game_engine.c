@@ -3,12 +3,28 @@
 #include "game.h"
 #include "macros.h"
 #include <assert.h>
+#include <stddef.h>
 #include <string.h>
 #include "registry.h"
 #include "save.h"
 
-void push_undo(Saveroom *allsaves, deck_registry){
-    
+Saveroom *init_saveroom(engine_state *firstTable){
+    Saveroom *saveroom = malloc(sizeof(Saveroom));
+    saveroom->currS[0] = firstTable;
+    saveroom->currTop = 1;
+    return saveroom;
+}
+
+void pop_undo(Saveroom *allsaves){
+    free(allsaves->currS[allsaves->currTop-1]);
+    allsaves->currTop -= 1;
+}
+
+void push_undo(Saveroom *allsaves, engine_state *newsave){
+    for(size_t i = 0; i <= newsave->reg->n_entries; ++i){
+        allsaves->currS[allsaves->currTop]->reg->entries[i].deck = clone_deck(newsave->reg->entries[i].deck);
+    }
+    allsaves->currTop += 1;
 }
 static bool flag_seq_decreasing(const Deck *src, const Deck *UNUSED dest,
                                 card_count index) {
@@ -262,19 +278,28 @@ void dsl_post_turn(void *state) {
         ;
 }
 
+static bool entry_can_reach(const move_rules *rule, const deck_entry *src,
+                             const deck_entry *dst) {
+    card_count k = 0;
+    while (k < src->deck->top && !move_is_valid(rule, src, dst, k))
+        ++k;
+    return k < src->deck->top;
+}
+
+static bool src_can_reach_dst(const move_rules *rule, const deck_entry *src,
+                               const deck_registry *reg) {
+    for (uint8_t j = 0; j < reg->n_entries; ++j)
+        if (strcmp(reg->entries[j].name, rule->deck_dst) == 0
+            && entry_can_reach(rule, src, &reg->entries[j]))
+            return true;
+    return false;
+}
+
 static bool rule_can_apply(const move_rules *rule, const deck_registry *reg) {
-    for (uint8_t i = 0; i < reg->n_entries; ++i) {
-        if (strcmp(reg->entries[i].name, rule->deck_src) != 0)
-            continue;
-        for (uint8_t j = 0; j < reg->n_entries; ++j) {
-            if (strcmp(reg->entries[j].name, rule->deck_dst) != 0)
-                continue;
-            for (card_count k = 0; k < reg->entries[i].deck->top; ++k)
-                if (move_is_valid(rule, &reg->entries[i], &reg->entries[j], k))
-                    return true;
-        }
-        return false;
-    }
+    for (uint8_t i = 0; i < reg->n_entries; ++i)
+        if (strcmp(reg->entries[i].name, rule->deck_src) == 0
+            && src_can_reach_dst(rule, &reg->entries[i], reg))
+            return true;
     return false;
 }
 

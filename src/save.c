@@ -1,3 +1,4 @@
+#include "macros.h"
 #include "save.h"
 #include "dsl.h"
 #include "registry.h"
@@ -30,9 +31,12 @@ bool save_game(const deck_registry *reg, const game_cfg *cfg, const char *dsl_fi
 }
 
 static uint8_t parse_suit(char c) {
-    static const char suits[] = "SHCD";
-    char *ptr = strchr(suits, c);
-    return ptr ? ptr - suits : 0;
+    const struct { char key; uint8_t suit; } map[] = {
+        {'S', SPADES}, {'H', HEARTS}, {'C', CLUBS}, {'D', DIAMONDS}
+    };
+    uint8_t i = 0;
+    while (i < 4 && map[i].key != c) ++i;
+    return i < 4 ? map[i].suit : 0;
 }
 
 static uint8_t parse_value(const char *code, size_t len) {
@@ -53,41 +57,42 @@ static card parse_card_code(const char *token) {
     return make_card(suit, value);
 }
 
-static void load_deck(deck_entry *e, const char *line) {
+static void parse_token(deck_entry *e, const char *token, bool flipped) {
+    card c = parse_card_code(token);
+    if (flipped) flip_card(c);
+    push(e->deck, c);
+}
+
+static void load_deck(deck_entry *e, char *line) {
     clear_deck(e->deck);
-    char token[8];
-    size_t pos = 0;
     bool flipped = strchr(e->flags, '_') != NULL;
-    for (size_t i = 0; i <= strlen(line); ++i) {
-        if (line[i] == ' ' || line[i] == '\n' || line[i] == '\0') {
-            if (pos > 0) {
-                token[pos] = '\0';
-                card c = parse_card_code(token);
-                if (flipped) flip_card(c);
-                push(e->deck, c);
-                pos = 0;
-            }
-        } else {
-            token[pos++] = line[i];
-        }
+    char *token = strtok(line, " \n");
+    while (token) {
+        parse_token(e, token, flipped);
+        token = strtok(NULL, " \n");
     }
     if (strchr(e->flags, '^') && e->deck->top > 0)
         flip_card(e->deck->cards[e->deck->top - 1]);
 }
 
+static void load_decks(deck_registry *reg, FILE *f) {
+    char *line cleanup(mfree) = NULL;
+    size_t len = 0;
+    uint8_t i = 0;
+    while (i < reg->n_entries && getline(&line, &len, f) != -1) {
+        load_deck(&reg->entries[i], line);
+        ++i;
+    }
+}
+
 bool load_game(deck_registry **reg, const game_cfg *cfg, const char *save_path) {
-    FILE *f = fopen(save_path, "r");
+    FILE *f cleanup(close_file) = fopen(save_path, "r");
     if (!f) { perror(save_path); return false; }
-    char *line = NULL;
+    char *line cleanup(mfree) = NULL;
     size_t len = 0;
     getline(&line, &len, f);  // skip dsl filename
     free_registry(reg);
     *reg = build_registry(cfg);
-    for (uint8_t i = 0; i < (*reg)->n_entries; ++i) {
-        if (getline(&line, &len, f) == -1) break;
-        load_deck(&(*reg)->entries[i], line);
-    }
-    free(line);
-    fclose(f);
+    load_decks(*reg, f);
     return true;
 }
