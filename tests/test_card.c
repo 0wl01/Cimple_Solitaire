@@ -2,16 +2,23 @@
 #include <CUnit/CUnit.h>
 #include <stddef.h>
 #include <stdlib.h>
-
-// Include the header from your project's include directory
 #include "card.h"
 
-/* Suite initialization and cleanup functions */
-int init_suite_card(void) { return 0; }
+/* SUITE 1: STANDARD (Normal Deck Manipulation) */
+static Deck *std_d1 = NULL;
+static Deck *std_d2 = NULL;
 
-int clean_suite_card(void) { return 0; }
+int init_suite_std(void) {
+    std_d1 = create_deck(52);
+    std_d2 = create_deck(52);
+    return (!std_d1 || !std_d2) ? -1 : 0;
+}
 
-/* --- TESTS --- */
+int clean_suite_std(void) {
+    eliminate_deck(&std_d1);
+    eliminate_deck(&std_d2);
+    return 0;
+}
 
 /**
  * @brief Tests the allocation and basic initialization of a Deck.
@@ -39,40 +46,18 @@ void test_create_and_eliminate_deck() {
  * * @see push()
  */
 void test_push_normal() {
-    Deck *d = create_deck(2);
-    Card c1 = {.values = {.flip = 0, .color = 1, .suit = 1, .value = 10}};
-    Card c2 = {.values = {.flip = 1, .color = 0, .suit = 0, .value = 14}};
+    std_d1->top = 0;
+    card c1 = make_card(1, 10);
 
     // Test successful pushes
-    CU_ASSERT_TRUE(push(d, c1));
-    CU_ASSERT_EQUAL(d->top, 1);
-    CU_ASSERT_FALSE(IS_EMPTY(d));
+    CU_ASSERT_TRUE(push(std_d1, c1));
+    CU_ASSERT_EQUAL(std_d1->top, 1);
+    CU_ASSERT_FALSE(IS_EMPTY(std_d1));
 
-    CU_ASSERT_TRUE(push(d, c2));
-    CU_ASSERT_EQUAL(d->top, 2);
+    card c2 = make_card(2,10);
 
-    eliminate_deck(&d);
-}
-
-/**
- * @brief Tests pushing a card to a deck that has reached its maximum capacity.
- * * Asserts that the function returns (uint8_t)-1 and that the deck's 
- * top index remains unchanged.
- * * @see push()
- */
-void test_push_full(void) {
-    Deck *d = create_deck(2);
-    Card c1 = {.values = {.flip = 0, .color = 1, .suit = 1, .value = 10}};
-    Card c2 = {.values = {.flip = 1, .color = 0, .suit = 0, .value = 14}};
-
-    push(d, c1);
-    push(d, c2); // deck is now full
-
-    // Test pushing to a full deck
-    Card c3 = {.card = 0xFF};
-    CU_ASSERT_FALSE(push(d, c3));
-
-    eliminate_deck(&d);
+    CU_ASSERT_TRUE(push(std_d1, c2));
+    CU_ASSERT_EQUAL(std_d1->top, 2);
 }
 
 /**
@@ -82,20 +67,17 @@ void test_push_full(void) {
  * * @see pop()
  */
 void test_pop(void) {
-    Deck *d = create_deck(2);
-    Card c1 = {.values = {.flip = 0, .color = 1, .suit = 1, .value = 10}};
-    Card c2 = {.values = {.flip = 1, .color = 0, .suit = 0, .value = 14}};
+    std_d1->top = 0; // deck reset
+    card c1 = make_card(1, 9);
+    card c2 = make_card(1, 10);
 
-    push(d, c1);
-    push(d, c2); // c2 last in and d->top = 2
+    push(std_d1, c1);
+    push(std_d1, c2);
 
     // Test pop (should pop c2 first, LIFO)
-    Card popped = pop(d);
-    CU_ASSERT_EQUAL(popped.card, c2.card);
-    CU_ASSERT_EQUAL(popped.values.flip, 1);
-    CU_ASSERT_EQUAL(d->top, 1);
-
-    eliminate_deck(&d);
+    card popped = pop(std_d1);
+    CU_ASSERT_EQUAL(popped, c2);
+    CU_ASSERT_EQUAL(std_d1->top, 1);
 }
 
 /**
@@ -106,28 +88,23 @@ void test_pop(void) {
  * * @see populate_deck()
  */
 void test_populate_deck(void) {
-    Deck *d = create_deck(52);
-    populate_deck(d);
+    std_d1->top = 0;
+    populate_deck(std_d1);
 
-    CU_ASSERT_EQUAL(d->top, 52);
+    CU_ASSERT_EQUAL(std_d1->top, 52);
 
-    // Test first card (Should be Spades (0), Black (0), Value 3)
-    CU_ASSERT_EQUAL(d->cards[0].values.suit, 0);
-    CU_ASSERT_EQUAL(d->cards[0].values.color, 0);
-    CU_ASSERT_EQUAL(d->cards[0].values.value, 3);
-    CU_ASSERT_EQUAL(d->cards[0].values.flip, 0);
+    // Test first card (Spades (0), Value 3)
+    CU_ASSERT_EQUAL(card_suit(std_d1->cards[0]), 0);
+    CU_ASSERT_EQUAL(card_value(std_d1->cards[0]), 3);
+    CU_ASSERT_FALSE(card_flipped(std_d1->cards[0]));
 
-    // Test a middle card (Should be Hearts (1), Red (1), Value 10)
-    CU_ASSERT_EQUAL(d->cards[22].values.suit, 1);
-    CU_ASSERT_EQUAL(d->cards[22].values.color, 1);
-    CU_ASSERT_EQUAL(d->cards[22].values.value, 12);
+    // Test a middle card (Hearts (1), Value 12) -> index 22
+    CU_ASSERT_EQUAL(card_suit(std_d1->cards[22]), 1);
+    CU_ASSERT_EQUAL(card_value(std_d1->cards[22]), 12);
 
-    // Test last card (Should be Clubs (3), Black (0), Value 15) -> index 51
-    CU_ASSERT_EQUAL(d->cards[51].values.suit, 3);
-    CU_ASSERT_EQUAL(d->cards[51].values.color, 0);
-    CU_ASSERT_EQUAL(d->cards[51].values.value, 15);
-
-    eliminate_deck(&d);
+    // Test last card (Clubs (3), Value 15) -> index 51
+    CU_ASSERT_EQUAL(card_suit(std_d1->cards[51]), 3);
+    CU_ASSERT_EQUAL(card_value(std_d1->cards[51]), 15);
 }
 
 /**
@@ -137,45 +114,19 @@ void test_populate_deck(void) {
  * * @see deal()
  */
 void test_deal_normal(void) {
-    Deck *d1 = create_deck(10);
-    Deck *d2 = create_deck(5);
-
-    populate_deck(d1); // d1 has 10 cards now
+    std_d1->top = 0;
+    std_d2->top = 0;
+    populate_deck(std_d1);
 
     // Deal 3 cards from d1 to d2
-    deal(d1, d2, 3, false);
-    CU_ASSERT_EQUAL(d1->top, 7);
-    CU_ASSERT_EQUAL(d2->top, 3);
+    deal(std_d1, std_d2, 3, false);
+
+    CU_ASSERT_EQUAL(std_d1->top, 49);
+    CU_ASSERT_EQUAL(std_d2->top, 3);
 
     // The top card of d1 (index 9) should now be the bottom card of d2 (index
-    // 0) because dealing flips the order (LIFO stack transfer) d1's original
-    // index 9 was Spades (0), Value 12
-    CU_ASSERT_EQUAL(d2->cards[0].values.suit, 0);
-    CU_ASSERT_EQUAL(d2->cards[0].values.value, 12);
-
-    eliminate_deck(&d1);
-    eliminate_deck(&d2);
-}
-
-/**
- * @brief Tests the deal function's behavior when the destination deck is full.
- * * Ensures that the function only transfers the amount of cards that fit 
- * in the destination, preventing memory corruption.
- * * @see deal()
- */
-void test_deal_overflow(void) {
-    Deck *d1 = create_deck(10);
-    Deck *d2 = create_deck(2);
-
-    populate_deck(d1);
-
-    // Attempt to deal 5 cards (but d2 only has 2 spaces)
-    deal(d1, d2, 5, false);
-    CU_ASSERT_EQUAL(d1->top, 8); // Only 2 cards should be removed
-    CU_ASSERT_EQUAL(d2->top, 2); // d2 should be completely full
-
-    eliminate_deck(&d1);
-    eliminate_deck(&d2);
+    CU_ASSERT_EQUAL(card_suit(std_d2->cards[0]), 3);
+    CU_ASSERT_EQUAL(card_value(std_d2->cards[0]), 15);
 }
 
 /**
@@ -185,13 +136,11 @@ void test_deal_overflow(void) {
  * * @see top_card()
  */
 void test_top_card_empty(void) {
-    Deck *d = create_deck(5);
+    std_d1->top = 0;
 
     // Test empty deck returns {0} safely
-    Card empty_top = top_card(d);
-    CU_ASSERT_EQUAL(empty_top.card, 0);
-
-    eliminate_deck(&d);
+    card empty_top = top_card(std_d1);
+    CU_ASSERT_EQUAL(empty_top, 0);
 }
 
 /**
@@ -201,17 +150,15 @@ void test_top_card_empty(void) {
  * * @see top_card()
  */
 void test_top_card_normal(void) {
-    Deck *d = create_deck(5);
+    std_d1->top = 0;
 
     // Test normal top card
-    Card c1 = {.values = {.value = 7}};
-    push(d, c1);
+    card c1 = make_card(0, 7);
+    push(std_d1, c1);
 
-    Card top = top_card(d);
-    CU_ASSERT_EQUAL(top.card, c1.card);
-    CU_ASSERT_EQUAL(d->top, 1); // Ensure top_card doesn't pop it!
-
-    eliminate_deck(&d);
+    card top = top_card(std_d1);
+    CU_ASSERT_EQUAL(top, c1);
+    CU_ASSERT_EQUAL(std_d1->top, 1); // Ensure top_card doesn't pop it!
 }
 
 /**
@@ -221,22 +168,26 @@ void test_top_card_normal(void) {
  * * @see flip_all()
  */
 void test_flip_all(void) {
-    Deck *d = create_deck(3);
-    populate_deck(d); // Contains 3 unflipped cards
+    std_d1->top = 0;
+    push(std_d1, make_card(0, 3));
+    push(std_d1, make_card(0, 4));
+    push(std_d1, make_card(0, 5));
 
-    CU_ASSERT_EQUAL(d->cards[0].values.flip, 0);
-    CU_ASSERT_EQUAL(d->cards[2].values.flip, 0);
+    CU_ASSERT_FALSE(card_flipped(std_d1->cards[0]));
+    CU_ASSERT_FALSE(card_flipped(std_d1->cards[1]));
+    CU_ASSERT_FALSE(card_flipped(std_d1->cards[2]));
 
-    flip_all(d);
+    flip_all(std_d1);
 
-    CU_ASSERT_EQUAL(d->cards[0].values.flip, 1);
-    CU_ASSERT_EQUAL(d->cards[2].values.flip, 1);
+    CU_ASSERT_TRUE(card_flipped(std_d1->cards[0]));
+    CU_ASSERT_TRUE(card_flipped(std_d1->cards[1]));
+    CU_ASSERT_TRUE(card_flipped(std_d1->cards[2]));
 
     // Test toggle off
-    flip_all(d);
-    CU_ASSERT_EQUAL(d->cards[0].values.flip, 0);
-
-    eliminate_deck(&d);
+    flip_all(std_d1);
+    CU_ASSERT_FALSE(card_flipped(std_d1->cards[0]));
+    CU_ASSERT_FALSE(card_flipped(std_d1->cards[1]));
+    CU_ASSERT_FALSE(card_flipped(std_d1->cards[2]));
 }
 
 /**
@@ -246,13 +197,11 @@ void test_flip_all(void) {
  * * @see flip_card()
  */
 void test_flip_card(void) {
-    Card c = {.values = {.flip = 0, .color = 1, .suit = 1, .value = 10}};
-
+    card c = make_card(1, 10);
     c = flip_card(c);
-    CU_ASSERT_EQUAL(c.values.flip, 1); // card is now face down
-
+    CU_ASSERT_TRUE(card_flipped(c)); // card is now face down
     c = flip_card(c);
-    CU_ASSERT_EQUAL(c.values.flip, 0); // card return to initial state
+    CU_ASSERT_FALSE(card_flipped(c)); // card return to initial state
 }
 
 /**
@@ -262,60 +211,20 @@ void test_flip_card(void) {
  * * @see flip_deal()
  */
 void test_flip_deal(void) {
-    Deck *d1 = create_deck(5);
-    Deck *d2 = create_deck(5);
-
-    Card c = {.values = {.flip = 0, .color = 1, .suit = 1, .value = 10}}; // 2 cards facing up
+    std_d1->top = 0;
+    std_d2->top = 0;
+    card c = make_card(1, 10);
 
     // cards inserted in deck 1
-    push(d1, c);
-    push(d1, c);
+    push(std_d1, c);
+    push(std_d1, c);
 
-    CU_ASSERT_EQUAL(d1->top, 2); // d1 now has 2 cards
-    CU_ASSERT_EQUAL(d2->top, 0);
+    deal(std_d1, std_d2, 2, true); // move to std_d2 while fliping
 
-    deal(d1, d2, 2, true); // move to d2 while fliping
-
-    CU_ASSERT_EQUAL(d1->top, 0);
-    CU_ASSERT_EQUAL(d2->top, 2); // d2 now has 2 cards and they should be flipped
-
-    CU_ASSERT_EQUAL(d2->cards[0].values.flip, 1);
-    CU_ASSERT_EQUAL(d2->cards[1].values.flip, 1);
-
-    eliminate_deck(&d1);
-    eliminate_deck(&d2);
-}
-
-/**
- * @brief Helper function to create and populate 3 decks for testing.
- * @param d Array of 3 Deck pointers to be initialized.
- * @param c The card to push into the decks.
- */
-static void mk(Deck *d[3], Card c) {
-    for (size_t i = 0; i < 3; i++)
-        for (d[i] = create_deck(3); d[i]->top <= i; push(d[i], c));
-}
-
-/**
- * @brief Helper function to safely eliminate an array of 3 decks.
- * @param d Array of 3 Deck pointers to be freed.
- */
-static void rm(Deck *d[3]) {
-    for (size_t i = 0; i < 3; eliminate_deck(&d[i++]));
-}
-/**
- * @brief Tests the logic for identifying the largest deck in a collection.
- * * Compares multiple decks with different card counts to ensure the 
- * function returns the pointer to the one with the highest occupancy.
- * * @see get_bigger_deck()
- */
-void test_get_bigger_deck(void) {
-    Deck *d[3];
-    Card c = {.card = 0xFF};
-    mk(d, c);
-    CU_ASSERT_PTR_EQUAL(get_bigger_deck(d, 3), d[2]);
-    CU_ASSERT_EQUAL(get_bigger_deck(d, 3)->top, 3);
-    rm(d);
+    CU_ASSERT_EQUAL(std_d1->top, 0);
+    CU_ASSERT_EQUAL(std_d2->top, 2); // d2 now has 2 cards and they should be flipped
+    CU_ASSERT_TRUE(card_flipped(std_d2->cards[0]));
+    CU_ASSERT_TRUE(card_flipped(std_d2->cards[1]));
 }
 
 /**
@@ -325,21 +234,19 @@ void test_get_bigger_deck(void) {
  * * @see shuffle_deck()
  */
 void test_shuffle_deck(void) {
-    Deck *d = create_deck(52);
-    populate_deck(d); // Fills deck in order
+    std_d1->top = 0;
+    populate_deck(std_d1); // Fills deck in order
 
-    Card first_before = d->cards[0];
-    Card last_before = d->cards[51];
+    card first_before = std_d1->cards[0];
+    card last_before = std_d1->cards[51];
 
-    shuffle_deck(d);
+    shuffle_deck(std_d1);
 
-    CU_ASSERT_EQUAL(d->top, 52); // Must keep all cards
+    CU_ASSERT_EQUAL(std_d1->top, 52); // Must keep all cards
 
     // Checks if the first or last card changed
     // False Positive very unlikely
-    CU_ASSERT_TRUE(d->cards[0].card != first_before.card || d->cards[51].card != last_before.card);
-
-    eliminate_deck(&d);
+    CU_ASSERT_TRUE(std_d1->cards[0] != first_before || std_d1->cards[51] != last_before);
 }
 
 /**
@@ -349,17 +256,18 @@ void test_shuffle_deck(void) {
  * of cards in the deck (above the `top`).
  */
 void test_split_deck_invalid_position(void) {
-    Deck *d1 = create_deck(5);
-    Deck *d2 = create_deck(5);
+    int i;
+
+    std_d1->top = 0;
+    std_d2->top = 0;
 
     // Insert exactly 5 cards (values 3, 4, 5, 6, 7)
-    for(uint8_t i = 3; i <= 7; i++) push(d1, (Card){.values = {.value = i}});
+    for(i = 3; i <= 7; i++) {
+        push(std_d1, make_card(0, i));
+    }
 
     // split attempt above top card
-    CU_ASSERT_FALSE(split_deck(d1, d2, 6));
-
-    eliminate_deck(&d1);
-    eliminate_deck(&d2);
+    CU_ASSERT_FALSE(split_deck(std_d1, std_d2, 6));
 }
 
 /**
@@ -369,17 +277,71 @@ void test_split_deck_invalid_position(void) {
  * to the expected sizes.
  */
 void test_split_deck_valid(void) {
-    Deck *d1 = create_deck(5);
-    Deck *d2 = create_deck(5);
+    int i;
 
-    for(uint8_t i = 3; i <= 7; i++) push(d1, (Card){.values = {.value = i}});
+    std_d1->top = 0;
+    std_d2->top = 0;
 
-    CU_ASSERT_TRUE(split_deck(d1, d2, 2));
-    CU_ASSERT_EQUAL(d1->top, 2);
-    CU_ASSERT_EQUAL(d2->top, 3);
+    for(i = 3; i <= 7; i++) {
+        push(std_d1, make_card(0, i));
+    }
 
-    eliminate_deck(&d1);
-    eliminate_deck(&d2);
+    CU_ASSERT_TRUE(split_deck(std_d1, std_d2, 2));
+    CU_ASSERT_EQUAL(std_d1->top, 2);
+    CU_ASSERT_EQUAL(std_d2->top, 3);
+}
+
+/* SUITE 2: OVERFLOW & LIMITS (Small Decks)*/
+
+static Deck *lim_d1 = NULL;
+static Deck *lim_d2 = NULL;
+
+int init_suite_limits(void) {
+    lim_d1 = create_deck(5);
+    lim_d2 = create_deck(2);
+    return (!lim_d1 || !lim_d2) ? -1 : 0;
+}
+
+int clean_suite_limits(void) {
+    eliminate_deck(&lim_d1);
+    eliminate_deck(&lim_d2);
+    return 0;
+}
+
+/**
+ * @brief Tests pushing a card to a deck that has reached its maximum capacity.
+ * * Asserts that the function returns (uint8_t)-1 and that the deck's 
+ * top index remains unchanged.
+ * * @see push()
+ */
+void test_push_full(void) {
+    lim_d2-> top = 2; // max capacity
+    push(lim_d2, make_card(1, 10));
+    push(lim_d2, make_card(0, 11)); //deck is now full
+
+    CU_ASSERT_FALSE(push(lim_d2, make_card(2, 3))); // push has to fail
+}
+
+/**
+ * @brief Tests the deal function's behavior when the destination deck is full.
+ * * Ensures that the function only transfers the amount of cards that fit 
+ * in the destination, preventing memory corruption.
+ * * @see deal()
+ */
+void test_deal_overflow(void) {
+    int i;
+
+    lim_d1->top = 0;
+    lim_d2->top = 0;
+
+    for(i = 0; i < 5; i++) {
+        push(lim_d1, make_card(0, i+3));
+    }
+
+    // Attempt to deal 5 cards (but d2 only has 2 spaces)
+    deal(lim_d1, lim_d2, 5, false);
+    CU_ASSERT_EQUAL(lim_d1->top, 3); // Only 2 cards should be removed
+    CU_ASSERT_EQUAL(lim_d2->top, 2); // d2 should be completely full
 }
 
 /**
@@ -388,62 +350,118 @@ void test_split_deck_valid(void) {
  * to be moved exceeds the maximum allocated capacity of the destination deck.
  */
 void test_split_deck_overflow(void) {
-    Deck *d1 = create_deck(5);
-    Deck *d2 = create_deck(1); // reduced capacity forces overflow
+    int i;
 
-    for(uint8_t i = 3; i <= 7; i++) push(d1, (Card){.values = {.value = i}});
+    lim_d1->top = 0;
+    lim_d2->top = 0;
+
+    for(i = 3; i <= 7; i++) {
+        push(lim_d1, make_card(0, i));
+    }
 
     // too many cards to d2
-    CU_ASSERT_FALSE(split_deck(d1, d2, 2));
-
-    eliminate_deck(&d1);
-    eliminate_deck(&d2);
+    CU_ASSERT_FALSE(split_deck(lim_d1, lim_d2, 2));
 }
 
+/* SUITE 3: ARRAYS (test_get_bigger_deck) */
+static Deck *arr_d[3] = {NULL};
+
+int init_suite_arrays(void) {
+    int i;
+    for (i = 0; i < 3; i++) {
+        arr_d[i] = create_deck(5);
+        if (!arr_d[i]) return -1;
+    }
+    return 0;
+}
+
+int clean_suite_arrays(void) {
+    int i;
+    for (i = 0; i < 3; i++) {
+        eliminate_deck(&arr_d[i]);
+    }
+    return 0;
+}
+
+/**
+ * @brief Tests the logic for identifying the largest deck in a collection.
+ * * Compares multiple decks with different card counts to ensure the 
+ * function returns the pointer to the one with the highest occupancy.
+ * * @see get_bigger_deck()
+ */
+void test_get_bigger_deck(void) {
+    int i, j;
+    for(i = 0; i < 3; i++) {
+        arr_d[i]->top = 0;
+    }
+
+    // fills arr_d[0] with 1 card, arr_d[1] with 2 cards and arr_d[2] with 3 cards
+    for(i = 0; i < 3; i++) {
+        for(j = 0; j <= i; j++) {
+            push(arr_d[i], make_card(0, 3));
+        }
+    }
+
+    CU_ASSERT_PTR_EQUAL(get_bigger_deck(arr_d, 3), arr_d[2]);
+    CU_ASSERT_EQUAL(get_bigger_deck(arr_d, 3)->top, 3);
+}
+
+/* MAIN RUNNER & REGISTRY */
 typedef struct {
     const char *name;
     CU_TestFunc fn;
 } T;
 
-static int add_all(CU_pSuite s) {
-    T t[] = {{"test of create/eliminate deck", test_create_and_eliminate_deck},
-             {"test of a normal push", test_push_normal},
-             {"test of push on a full deck", test_push_full},
-             {"test of push and pop", test_pop},
-             {"test of populate_deck", test_populate_deck},
-             {"test of a normal deal", test_deal_normal},
-             {"test of a overflow deal", test_deal_overflow},
-             {"test of top_card on empty deck", test_top_card_empty},
-             {"test of top_card", test_top_card_normal},
-             {"test of flip_card", test_flip_card},
-             {"test of flip_deal", test_flip_deal},
-             {"test of get_bigger_deck", test_get_bigger_deck},
-             {"test of shuffle_deck", test_shuffle_deck},
-             {"test of flip_all", test_flip_all},
-             {"test of an invalid deck split", test_split_deck_invalid_position},
-             {"test of an valid deck split", test_split_deck_valid},
-             {"test of overflow protection", test_split_deck_overflow}
-            };
-
-    for (size_t i = 0; i < (sizeof(t) / sizeof(*t)); i++)
-        if (!CU_add_test(s, t[i].name, t[i].fn))
+static int add_tests(CU_pSuite suite, T *tests, size_t count) {
+    for (int i = 0; i < count; i++)
+        if (!CU_add_test(suite, tests[i].name, tests[i].fn))
             return 0;
-
     return 1;
 }
 
-int setup_card_suite(void) {
-    CU_pSuite s = CU_add_suite("Card_Test_Suite", init_suite_card, clean_suite_card);
-    return s && add_all(s);
-}
-
-/* --- MAIN TEST RUNNER --- */
-
 int main(void) {
-    if (CUE_SUCCESS != CU_initialize_registry())
-        return CU_get_error();
+    if (CUE_SUCCESS != CU_initialize_registry()) return CU_get_error();
 
-    if (!setup_card_suite()) {
+    // SUITE 1: Standard
+    CU_pSuite s_std = CU_add_suite("Card_Standard_Suite", init_suite_std, clean_suite_std);
+    T t_std[] = {
+        {"test of create/eliminate deck", test_create_and_eliminate_deck},
+        {"test of a normal push", test_push_normal},
+        {"test of push and pop", test_pop},
+        {"test of populate_deck", test_populate_deck},
+        {"test of a normal deal", test_deal_normal},
+        {"test of top_card on empty deck", test_top_card_empty},
+        {"test of top_card", test_top_card_normal},
+        {"test of flip_all", test_flip_all},
+        {"test of flip_card", test_flip_card},
+        {"test of flip_deal", test_flip_deal},
+        {"test of shuffle_deck", test_shuffle_deck},
+        {"test of an invalid deck split", test_split_deck_invalid_position},
+        {"test of an valid deck split", test_split_deck_valid}
+    };
+    if (!s_std || !add_tests(s_std, t_std, sizeof(t_std) / sizeof(t_std[0]))) {
+        CU_cleanup_registry();
+        return CU_get_error();
+    }
+
+    // SUITE 2: Limits
+    CU_pSuite s_lim = CU_add_suite("Card_Limits_Suite", init_suite_limits, clean_suite_limits);
+    T t_lim[] = {
+        {"test of push on a full deck", test_push_full},
+        {"test of a overflow deal", test_deal_overflow},
+        {"test of overflow protection", test_split_deck_overflow}
+    };
+    if (!s_lim || !add_tests(s_lim, t_lim, sizeof(t_lim) / sizeof(t_lim[0]))) {
+        CU_cleanup_registry();
+        return CU_get_error();
+    }
+
+    // SUITE 3: Arrays
+    CU_pSuite s_arr = CU_add_suite("Card_Arrays_Suite", init_suite_arrays, clean_suite_arrays);
+    T t_arr[] = {
+        {"test of get_bigger_deck", test_get_bigger_deck}
+    };
+    if (!s_arr || !add_tests(s_arr, t_arr, sizeof(t_arr) / sizeof(t_arr[0]))) {
         CU_cleanup_registry();
         return CU_get_error();
     }
