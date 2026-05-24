@@ -1,6 +1,17 @@
 # TODO
 
 - [ ] Programa deve abortar se por alguma razão alocar memória falhe (tecnicamente impossível em um sistema moderno);
+- [ ] Algumas funções precisam de atenção urgente.
+    - populate_entries
+    - show_main_menu
+    - first_scan
+    - try_auto_rule
+    - check_single_flag
+    - scan_game_file
+    - print_menu_page
+    - load_files
+    - parse_game_rules
+
 
 ## Bugs
 - [x] No simon.c a função que verifica se há movimentos possíveis não considera colunas vazias.
