@@ -190,17 +190,21 @@ bool sequence_same_suit(const Deck *restrict deck, const card_count start_pos, c
     return all_pairs_match(deck, start_pos, end_pos, same_suit);
 }
 
+static inline bool one_more_same_suit(const card a, const card b) {
+    return cards_same_suit(a, b) && cards_is_one_more(a, b);
+}
+
 // basically checks if a sequence of cards is in decreasing order
 bool sequence_is_decreasing(const Deck *restrict deck, const card_count start_pos, const card_count end_pos) {
-    return all_pairs_match(deck, start_pos, end_pos, is_one_less);
+    return all_pairs_match(deck, start_pos, end_pos, is_one_more); 
 }
 
 bool sequence_is_increasing(const Deck *restrict deck, const card_count start_pos, const card_count end_pos) {
-    return all_pairs_match(deck, start_pos, end_pos, is_one_more);
+    return all_pairs_match(deck, start_pos, end_pos, is_one_less); 
 }
 
 bool sequence_is_decreasing_hierarchy(const Deck *restrict deck, const card_count start_pos, const card_count end_pos) {
-    return all_pairs_match(deck, start_pos, end_pos, one_less_same_suit);
+    return all_pairs_match(deck, start_pos, end_pos, one_more_same_suit); 
 }
 
 card_count sequence_length(const Deck *restrict deck, const card_count start_pos, CardPairPredicate pred) {

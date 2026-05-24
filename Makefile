@@ -1,6 +1,6 @@
 # Compiler and Base Flags
 CC = gcc
-BASE_CFLAGS = -std=gnu2x -Wall -Wextra -pedantic -I include -I src
+BASE_CFLAGS = -std=gnu2x -Wall -Wextra -pedantic -I include -I src -Wno-unused-parameter
 
 # Directories
 SRC_DIR = src
@@ -23,15 +23,18 @@ all: CFLAGS = $(BASE_CFLAGS) -O3 -flto -march=native -DNDEBUG
 # Debugging versions (Debug symbols, no optimizations)
 gdb valgrind test: CFLAGS = $(BASE_CFLAGS) -g -O0
 coverage: CFLAGS = $(BASE_CFLAGS) -g -O0 --coverage
-TEST_OBJS = $(filter-out $(BUILD_DIR)/main.o, $(OBJS))
-TEST_BIN = $(BIN_DIR)/test_card
-TEST_GOLF_BIN = $(BIN_DIR)/test_golf
-TEST_SIMON_BIN = $(BIN_DIR)/test_simon
 
-# Dependencies for Golf tests
-GOLF_TEST_DEPS = $(BUILD_DIR)/card.o $(BUILD_DIR)/cli.o $(BUILD_DIR)/game.o
-# Dependencias for Simon tests
-SIMON_TEST_DEPS = $(BUILD_DIR)/card.o $(BUILD_DIR)/cli.o $(BUILD_DIR)/game.o
+# --- TEST CONFIGURATIONS ---
+# Inclui todos os objetos gerados, exceto o main.o (para evitar 2 funções main nos testes)
+TEST_OBJS = $(filter-out $(BUILD_DIR)/main.o, $(OBJS))
+
+# Binários de Teste
+TEST_CARD_BIN = $(BIN_DIR)/test_card
+TEST_DSL_BIN = $(BIN_DIR)/test_dsl
+
+# Já preparados para as Fases 2 e 3
+TEST_REG_BIN = $(BIN_DIR)/test_registry
+TEST_GAME_BIN = $(BIN_DIR)/test_dsl_game
 
 .PHONY: all clean run test gdb valgrind coverage
 
@@ -49,29 +52,38 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 	@mkdir -p $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
+# --- TEST RULES ---
+
 # Test execution rule
-test: $(TEST_BIN) $(TEST_GOLF_BIN) $(TEST_SIMON_BIN)
+test: $(TEST_CARD_BIN) $(TEST_DSL_BIN) $(TEST_REG_BIN)
 	@echo "\n--- Running Card Tests ---"
-	@./$(TEST_BIN)
-	@echo "\n--- Running Golf Rules Tests ---"
-	@./$(TEST_GOLF_BIN)
-	@echo "\n--- Running Simon Rules Tests ---"
-	@./$(TEST_SIMON_BIN)
+	@./$(TEST_CARD_BIN)
+	@echo "\n--- Running DSL Parser Tests ---"
+	@./$(TEST_DSL_BIN)
+	@echo "\n--- Running Registry Builder Tests ---"
+	@./$(TEST_REG_BIN)
 
 # Building Card tests
-$(TEST_BIN): $(TEST_OBJS) $(TEST_DIR)/test_card.c
+$(TEST_CARD_BIN): $(TEST_OBJS) $(TEST_DIR)/test_card.c
 	@mkdir -p $(BIN_DIR)
 	$(CC) $(CFLAGS) $^ -o $@ -lcunit
 
-# Building Golf tests
-$(TEST_GOLF_BIN): $(GOLF_TEST_DEPS) $(TEST_DIR)/test_golf.c
+# Building DSL tests
+$(TEST_DSL_BIN): $(TEST_OBJS) $(TEST_DIR)/test_dsl.c
 	@mkdir -p $(BIN_DIR)
 	$(CC) $(CFLAGS) $^ -o $@ -lcunit
 
-# Building Simon tests
-$(TEST_SIMON_BIN): $(SIMON_TEST_DEPS) $(TEST_DIR)/test_simon.c
+# Building Registry tests
+$(TEST_REG_BIN): $(BUILD_DIR)/registry.o $(TEST_OBJS) $(TEST_DIR)/test_registry.c
 	@mkdir -p $(BIN_DIR)
 	$(CC) $(CFLAGS) $^ -o $@ -lcunit
+
+# Building DSL Game tests (TODO)
+$(TEST_GAME_BIN): $(TEST_OBJS) $(TEST_DIR)/test_dsl_game.c
+	@mkdir -p $(BIN_DIR)
+	$(CC) $(CFLAGS) $^ -o $@ -lcunit
+
+# --- UTILITIES ---
 
 # Start GNU Debugger
 gdb: all
@@ -85,10 +97,11 @@ valgrind: all
 	@echo "\n--- Analyzing Memory Leaks with Valgrind ---"
 	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./$(TARGET)
 
+# Coverage Report
 coverage: clean
 	@$(MAKE) test CFLAGS="$(BASE_CFLAGS) -g -O0 --coverage" > /dev/null
 	@echo "\n--- Relatório de Cobertura ---"
-	@find . -name "*.gcda" -exec gcov {} \; | grep -A 1 "File 'src/card.c'\|File 'src/golf.c'\|File 'src/simon.c'" | grep -v "0.00%"
+	@find . -name "*.gcda" -exec gcov {} \; | grep -A 1 "File 'src/" | grep -v "0.00%"
 
 # Cleanup rule
 clean:

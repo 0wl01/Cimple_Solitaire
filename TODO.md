@@ -22,6 +22,7 @@
 - [X] Algumas funções novas precisam de documentação.
     - Lembrar que funções static tem a documentação escrita no arquivo source (.c) e as outras no header.
 - [ ] Documentar a função de cada arquivo (talvez renomear eles).
+- [ ] Acabar de documentar o test_card.c
 
 ## Geral & Interface
 - [x] Criar menu de seleção de jogo (Golf e Simple Simon).
@@ -41,7 +42,7 @@
 - [X] Testes precisam ser refatorados para por conta de algumas breaking changes em card.c
 - [X] CUnit Setup / Teardown refatorar funções de testes que usem instruções para criação de contexto.
 - [X] FAz testes melhores seu burro
-- [ ] Testar leitura de ficheiros de texti (test_dsl.c)
+- [X] Testar leitura de ficheiros de texti (test_dsl.c)
 - [ ] Testar a alocação (test_registry.c)
 - [ ] Testar a validação de regras (test_dsl_game.c)
 
