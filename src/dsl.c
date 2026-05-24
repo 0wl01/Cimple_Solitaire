@@ -73,18 +73,24 @@ static inline void parse_game_info(const char *line, game_cfg *G) {
 
 static inline void parse_game_rules(const char *line, game_cfg *G, uint_fast16_t *di, uint_fast16_t *wi,
                                     uint_fast16_t *mi, uint_fast16_t *ai, uint_fast16_t *ii) {
-    if (!strncmp(line, "TIPO ", 5))
-        sscanf(line, "TIPO %254s %4s", G->deck_types[*di].name, G->deck_types[(*di)++].flags);
-    else if (!strncmp(line, "WIN ", 4))
-        sscanf(line, "WIN %254s %" SCNu16, G->conditions[*wi].deck_name, &G->conditions[(*wi)++].n);
-    else if (!strncmp(line, "MOV ", 4))
-        sscanf(line, "MOV %254s %254s %20s", G->mov_rules[*mi].deck_dst, G->mov_rules[*mi].deck_src,
-               G->mov_rules[(*mi)++].flags);
-    else if (!strncmp(line, "AUTO ", 5))
-        sscanf(line, "AUTO %254s %254s %20s", G->auto_rules[*ai].deck_dst, G->auto_rules[*ai].deck_src,
-               G->auto_rules[(*ai)++].flags);
-    else if (!strncmp(line, "INIT ", 5))
-        sscanf(line, "INIT %254s %" SCNu16, G->instances[*ii].deck_t, &G->instances[(*ii)++].n_cards);
+    if (!strncmp(line, "TIPO ", 5)) {
+        sscanf(line, "TIPO %254s %4s", G->deck_types[*di].name, G->deck_types[*di].flags);
+        ++(*di);
+    } else if (!strncmp(line, "WIN ", 4)) {
+        sscanf(line, "WIN %254s %" SCNu16, G->conditions[*wi].deck_name, &G->conditions[*wi].n);
+        ++(*wi);
+    } else if (!strncmp(line, "MOV ", 4)) {
+        sscanf(line, "MOV %254s %254s %20s", G->mov_rules[*mi].deck_src, G->mov_rules[*mi].deck_dst,
+               G->mov_rules[*mi].flags);
+        ++(*mi);
+    } else if (!strncmp(line, "AUTO ", 5)) {
+        sscanf(line, "AUTO %254s %254s %20s", G->auto_rules[*ai].deck_src, G->auto_rules[*ai].deck_dst,
+               G->auto_rules[*ai].flags);
+        ++(*ai);
+    } else if (!strncmp(line, "INIT ", 5)) {
+        sscanf(line, "INIT %254s %" SCNu16, G->instances[*ii].deck_t, &G->instances[*ii].n_cards);
+        ++(*ii);
+    }
 }
 
 static inline void second_scan(char **line, size_t *line_length, FILE *f_ptr, game_cfg *Game) {

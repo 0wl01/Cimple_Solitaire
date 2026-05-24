@@ -23,12 +23,12 @@ const char *const CARDS[4][13] = {
 // probably using ansi escape codes
 void print_card(const card c) {
   if (card_flipped(c))
-    printf("\U0001F0A0");
+    printf("\U0001F0A0 ");
   else if (card_value(c) < 3)
     printf(" ");
   else {
     const uint8_t val_idx = card_value(c) - 3;
-    printf("%s", CARDS[card_suit(c)][val_idx]);
+    printf("%s ", CARDS[card_suit(c)][val_idx]);
   }
 }
 
@@ -147,26 +147,6 @@ Command game_get_input() {
 }
 
 /**
- * @brief Renders the top row of the table (Stock, Waste, Foundations).
- * @param t Pointer to the TableLayout.
- */
-static void print_top_row(const TableLayout *t) {
-  if (t->stock) {
-    print_card(top_card(t->stock));
-    printf(" ");
-  }
-  if (t->waste) {
-    print_card(top_card(t->waste));
-    printf(" ");
-  }
-  for (uint8_t i = 0; i < t->n_foundations; ++i) {
-    print_card(top_card(t->foundations[i]));
-    printf(" ");
-  }
-  putchar('\n');
-}
-
-/**
  * @brief Renders the alphabetical column headers (A, B, C...).
  * @param n_columns The number of headers to print.
  */
@@ -177,30 +157,40 @@ static void print_column_headers(const uint8_t n_columns) {
   putchar('\n');
 }
 
-/**
- * @brief Renders a single horizontal row across all vertical columns.
- * @param columns Array of pointers to the table columns.
- * @param n_columns Total number of columns.
- * @param row The current depth index being printed.
- */
-static void print_column_row(Deck *restrict *columns, const uint8_t n_columns,
-                             const card_count row) {
-  printf("%hu ", row);
-  for (uint8_t j = 0; j < n_columns; ++j) {
-    if (columns[j] && columns[j]->top > row)
-      print_card(columns[j]->cards[row]);
-    else
-      printf(" ");
-    printf(" ");
-  }
-  putchar('\n');
+static char index_to_col(uint8_t i) {
+    return i < 26 ? 'a' + i : 'A' + (i - 26);
 }
 
-void print_table(const TableLayout *restrict t) {
-  assert(t != NULL);
-  print_top_row(t);
-  print_column_headers(t->n_columns);
-  Deck *biggest = get_bigger_deck(t->columns, t->n_columns);
-  for (card_count i = 0; biggest && i < biggest->top; ++i)
-    print_column_row(t->columns, t->n_columns, i);
+static void render_headers(const deck_registry *reg) {
+    printf("   ");
+    for (uint8_t i = 0; i < reg->n_entries; ++i)
+        printf("%c  ", index_to_col(i));
+    putchar('\n');
+}
+
+static void render_row(const deck_registry *reg, card_count row) {
+    printf("%2hu ", row);
+    for (uint8_t i = 0; i < reg->n_entries; ++i) {
+        const deck_entry *e = &reg->entries[i];
+        if (e->deck->top > row) print_card(e->deck->cards[row]);
+        else                    printf("  ");
+        printf(" ");
+    }
+    putchar('\n');
+}
+
+static Deck *get_tallest(const deck_registry *reg) {
+    Deck *tallest = reg->entries[0].deck;
+    for (uint8_t i = 1; i < reg->n_entries; ++i)
+        if (reg->entries[i].deck->top > tallest->top)
+            tallest = reg->entries[i].deck;
+    return tallest;
+}
+
+void dsl_render(void *state) {
+    dsl_state *s = state;
+    render_headers(s->reg);
+    Deck *tallest = get_tallest(s->reg);
+    for (card_count i = 0; tallest && i < tallest->top; ++i)
+        render_row(s->reg, i);
 }

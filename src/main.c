@@ -1,6 +1,7 @@
 #include "menu.h"
 
-int main(void) {
-    show_main_menu();
+int main(int argc, char *argv[]) {
+    const char *folder = argc > 1 ? argv[1] : "paciencias";
+    show_main_menu(folder);
     return 0;
 }

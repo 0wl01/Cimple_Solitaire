@@ -8,6 +8,7 @@
 
 #include "card.h"
 #include "command.h"
+#include "dsl_game.h"
 #include "game.h"
 #include <stdbool.h>
 #include <stddef.h>
@@ -94,4 +95,8 @@ char menu_get_input();
  * @param t Pointer to the TableLayout structure containing the game's state.
  */
 void print_table(const TableLayout *restrict t);
+
+
+void dsl_render(void *state);
+
 #endif

@@ -1,9 +1,8 @@
 # TODO
 
-## Urgente
-- [ ] alterar o menu de ajuda do Golf
+- [ ] Programa deve abortar se por alguma razão alocar memória falhe (tecnicamente impossível em um sistema moderno);
 
-### Bugs
+## Bugs
 - [x] No simon.c a função que verifica se há movimentos possíveis não considera colunas vazias.
     - Para resolver isso temos que mudar o card.c one_less para nn verificar cartas vazias e ent modificar o has_play_left para verificar colunas vazias.
 
