@@ -39,8 +39,11 @@
 - [X] Escrever testes unitários para: condições de vitória, derrota e movimentos inválidos.
 - [X] Atualizar a `Makefile` para gerar métricas de cobertura de código com `gcov`.
 - [X] Testes precisam ser refatorados para por conta de algumas breaking changes em card.c
-- [ ] CUnit Setup / Teardown refatorar funções de testes que usem instruções para criação de contexto.
-- [ ] FAz testes melhores seu burro
+- [X] CUnit Setup / Teardown refatorar funções de testes que usem instruções para criação de contexto.
+- [X] FAz testes melhores seu burro
+- [ ] Testar leitura de ficheiros de texti (test_dsl.c)
+- [ ] Testar a alocação (test_registry.c)
+- [ ] Testar a validação de regras (test_dsl_game.c)
 
 ## Otimização
 - [x] Criar tipo próprio **size** como um uint16 para substituir o size_t (economizando 48 bits).

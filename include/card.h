@@ -42,6 +42,10 @@ constexpr uint8_t CARD_KING = 15;
  */
 typedef uint8_t card;
 
+#define MASK_VALUE   0x0F  /* 0000 1111 (4 bits for values 0-15) */
+#define MASK_SUIT    0x30  /* 0011 0000 (2 bits for suits 0-3) */
+#define MASK_FLIPPED 0x40  /* 0100 0000 (1 bit for flip state) */
+
 #define make_card(s, v) (((card)(s) << 4) | ((v) & MASK_VALUE))
 
 #define card_value(c) ((c) & MASK_VALUE)
