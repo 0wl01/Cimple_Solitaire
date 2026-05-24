@@ -42,7 +42,7 @@
 - [X] Testes precisam ser refatorados para por conta de algumas breaking changes em card.c
 - [X] CUnit Setup / Teardown refatorar funções de testes que usem instruções para criação de contexto.
 - [X] FAz testes melhores seu burro
-- [ ] Testar leitura de ficheiros de texti (test_dsl.c)
+- [X] Testar leitura de ficheiros de texti (test_dsl.c)
 - [ ] Testar a alocação (test_registry.c)
 - [ ] Testar a validação de regras (test_dsl_game.c)
 

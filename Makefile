@@ -54,12 +54,14 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 
 # --- TEST RULES ---
 
-# Test execution rule (Atualmente corre o Card e o DSL)
-test: $(TEST_CARD_BIN) $(TEST_DSL_BIN)
+# Test execution rule
+test: $(TEST_CARD_BIN) $(TEST_DSL_BIN) $(TEST_REG_BIN)
 	@echo "\n--- Running Card Tests ---"
 	@./$(TEST_CARD_BIN)
 	@echo "\n--- Running DSL Parser Tests ---"
 	@./$(TEST_DSL_BIN)
+	@echo "\n--- Running Registry Builder Tests ---"
+	@./$(TEST_REG_BIN)
 
 # Building Card tests
 $(TEST_CARD_BIN): $(TEST_OBJS) $(TEST_DIR)/test_card.c
@@ -71,8 +73,8 @@ $(TEST_DSL_BIN): $(TEST_OBJS) $(TEST_DIR)/test_dsl.c
 	@mkdir -p $(BIN_DIR)
 	$(CC) $(CFLAGS) $^ -o $@ -lcunit
 
-# Building Registry tests (TODO)
-$(TEST_REG_BIN): $(TEST_OBJS) $(TEST_DIR)/test_registry.c
+# Building Registry tests
+$(TEST_REG_BIN): $(BUILD_DIR)/registry.o $(TEST_OBJS) $(TEST_DIR)/test_registry.c
 	@mkdir -p $(BIN_DIR)
 	$(CC) $(CFLAGS) $^ -o $@ -lcunit
 
