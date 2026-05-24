@@ -1,11 +1,15 @@
-#include "dsl_game.h"
+#include "game_engine.h"
 #include "card.h"
-#include "cli.h"
 #include "game.h"
 #include "macros.h"
 #include <assert.h>
 #include <string.h>
+#include "registry.h"
+#include "save.h"
 
+void push_undo(Saveroom *allsaves, deck_registry){
+    
+}
 static bool flag_seq_decreasing(const Deck *src, const Deck *UNUSED dest,
                                 card_count index) {
   return sequence_is_decreasing(src, index, src->top - 1);
@@ -104,6 +108,7 @@ static bool check_tipo_flags(const deck_entry *dest) {
   return strchr(dest->flags, '1') ? is_deck_empty(dest->deck) : true;
 }
 
+constexpr uint8_t TABLE_SIZE = 20;
 static const FlagDispatch flag_table[TABLE_SIZE] = {
     {'*', flag_star},
     {'V', flag_dest_empty},
@@ -187,7 +192,7 @@ static int8_t col_to_index(char c) {
 }
 
 LoopSignal dsl_handle_move(void *restrict state, Command cmd) {
-  dsl_state *s = state;
+  engine_state *s = state;
   int8_t src_i = col_to_index(cmd.src_col);
   int8_t dest_i = col_to_index(cmd.dest_col);
   if (src_i < 0 || dest_i < 0 || src_i >= s->reg->n_entries ||
@@ -213,33 +218,37 @@ static bool win_condition_met(const win_condition *cond,
 }
 
 bool dsl_has_won(void *state) {
-  dsl_state *s = state;
+  engine_state *s = state;
   for (uint8_t i = 0; i < s->cfg->n_winconds; ++i)
     if (!win_condition_met(&s->cfg->conditions[i], s->reg))
       return false;
   return true;
 }
 
-static bool try_auto_rule(const auto_rule *rule, deck_registry *reg) {
-  bool triggered = false;
-  for (uint8_t i = 0; i < reg->n_entries; ++i) {
-    if (strcmp(reg->entries[i].name, rule->deck_src) != 0)
-      continue;
+static bool try_auto_src(deck_entry *src, const auto_rule *rule, deck_registry *reg) {
+    bool triggered = false;
     for (uint8_t j = 0; j < reg->n_entries; ++j) {
-      if (strcmp(reg->entries[j].name, rule->deck_dst) != 0)
-        continue;
-      if (!move_is_valid((move_rules *)rule, &reg->entries[i], &reg->entries[j],
-                         reg->entries[i].deck->top - 1))
-        continue;
-      split_deck(reg->entries[i].deck, reg->entries[j].deck,
-                 reg->entries[i].deck->top - 1);
-      triggered = true;
+        if (strcmp(reg->entries[j].name, rule->deck_dst) == 0
+            && move_is_valid((move_rules *)rule, src, &reg->entries[j], src->deck->top - 1)) {
+            split_deck(src->deck, reg->entries[j].deck, src->deck->top - 1);
+            triggered = true;
+        }
     }
-  }
-  return triggered;
+    return triggered;
 }
 
-static bool run_auto_rules_once(dsl_state *s) {
+static bool try_auto_rule(const auto_rule *rule, deck_registry *reg) {
+    bool triggered = false;
+    for (uint8_t i = 0; i < reg->n_entries; ++i) {
+        if (strcmp(reg->entries[i].name, rule->deck_src) == 0)
+            triggered = try_auto_src(&reg->entries[i], rule, reg) || triggered;
+    }
+    return triggered;
+}
+
+
+
+static bool run_auto_rules_once(engine_state *s) {
   bool triggered = false;
   for (uint8_t i = 0; i < s->cfg->n_auto_rules; ++i)
     triggered = try_auto_rule(&s->cfg->auto_rules[i], s->reg) || triggered;
@@ -247,39 +256,52 @@ static bool run_auto_rules_once(dsl_state *s) {
 }
 
 void dsl_post_turn(void *state) {
-  dsl_state *s = state;
-  uint8_t limit = 255; // max autos that can trigger per turn
-  while (run_auto_rules_once(s) && --limit)
-    ;
+    engine_state *s = state;
+    uint8_t limit = 255; // max autos that can trigger per turn
+    while (run_auto_rules_once(s) && --limit)
+        ;
 }
 
 static bool rule_can_apply(const move_rules *rule, const deck_registry *reg) {
-  for (uint8_t i = 0; i < reg->n_entries; ++i) {
-    if (strcmp(reg->entries[i].name, rule->deck_src) != 0)
-      continue;
-    for (uint8_t j = 0; j < reg->n_entries; ++j) {
-      if (strcmp(reg->entries[j].name, rule->deck_dst) != 0)
-        continue;
-      for (card_count k = 0; k < reg->entries[i].deck->top; ++k)
-        if (move_is_valid(rule, &reg->entries[i], &reg->entries[j], k))
-          return true;
+    for (uint8_t i = 0; i < reg->n_entries; ++i) {
+        if (strcmp(reg->entries[i].name, rule->deck_src) != 0)
+            continue;
+        for (uint8_t j = 0; j < reg->n_entries; ++j) {
+            if (strcmp(reg->entries[j].name, rule->deck_dst) != 0)
+                continue;
+            for (card_count k = 0; k < reg->entries[i].deck->top; ++k)
+                if (move_is_valid(rule, &reg->entries[i], &reg->entries[j], k))
+                    return true;
+        }
+        return false;
     }
-  }
-  return false;
+    return false;
 }
 
 bool dsl_can_play(void *state) {
-  dsl_state *s = state;
+  engine_state *s = state;
   for (uint8_t i = 0; i < s->cfg->n_move_rules; ++i)
     if (rule_can_apply(&s->cfg->mov_rules[i], s->reg))
       return true;
   return false;
 }
 
+static LoopSignal handle_save(void *state, const Command UNUSED cmd) {
+    engine_state *s = state;
+    save_game(s->reg, s->cfg, s->dsl_filename);
+    return LOOP_CONTINUE;
+}
+
+static LoopSignal handle_load(void *state, Command UNUSED cmd) {
+    engine_state *s = state;
+    load_game(&s->reg, s->cfg, "save.paciencia");
+    return LOOP_CONTINUE;
+}
+
 static const CommandDispatch dsl_dispatch[] = {
     {CMD_MOV, dsl_handle_move},        {CMD_HNT, default_handle_hint},
     {CMD_HLP, default_handle_help}, {CMD_RST, default_handle_restart},
-    {CMD_QUT, default_handle_quit},
+    {CMD_QUT, default_handle_quit}, {CMD_SAV, handle_save}, {CMD_LOD, handle_load}
 };
 
 bool run_dsl_game(const char *filename) {
@@ -290,13 +312,13 @@ bool run_dsl_game(const char *filename) {
   if (!reg)
     return false;
 
-  dsl_state state = {.reg = reg, .cfg = cfg};
+  engine_state state = {.reg = reg, .cfg = cfg};
 
   const GameRunner runner = {
       .dispatch_table = dsl_dispatch,
       .dispatch_size = sizeof(dsl_dispatch) / sizeof(*dsl_dispatch),
       .can_play = dsl_can_play,
-      .render = dsl_render,
+      .render = print_game_table,
       .post_turn = dsl_post_turn,
       .has_won = dsl_has_won,
   };

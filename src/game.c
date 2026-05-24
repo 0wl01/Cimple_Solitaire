@@ -1,7 +1,8 @@
 #include "game.h"
-#include "cli.h"
+#include "render.h"
 #include <stddef.h>
 #include "macros.h"
+#include "input.h"
 
 LoopSignal default_handle_quit(void *UNUSED state,
                                const Command UNUSED cmd) {
