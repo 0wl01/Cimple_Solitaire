@@ -32,5 +32,5 @@ typedef struct {
 
 typedef struct {
     engine_state *currS[MAX_ROOMS_SAVES];
-    uint8_t currTop;
+    uint8_t currTop; //refers to the next top; starts at 1
 } Saveroom;
