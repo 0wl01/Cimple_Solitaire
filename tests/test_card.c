@@ -385,6 +385,10 @@ void test_sequences(void) {
     CU_ASSERT_TRUE(sequence_alternating_suit(std_d1, 1, 2));
 }
 
+/* Helper function: Transforms an macro into an actual function so we can use it as a pointer */
+static bool test_pred_is_one_less(const card a, const card b) {
+    return cards_is_one_less(a, b);
+}
 // TODO: DOC
 void test_sequence_length(void) {
     card_count len;
@@ -394,7 +398,7 @@ void test_sequence_length(void) {
     push(std_d1, make_card(0, 4));
     
     /* 2 cartas em ordem decrescente = comprimento 2 */
-    len = sequence_length(std_d1, 0, cards_is_one_less);
+    len = sequence_length(std_d1, 0, test_pred_is_one_less);
     CU_ASSERT_EQUAL(len, 2);
 }
 
