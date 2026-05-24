@@ -22,6 +22,7 @@
 - [X] Algumas funções novas precisam de documentação.
     - Lembrar que funções static tem a documentação escrita no arquivo source (.c) e as outras no header.
 - [ ] Documentar a função de cada arquivo (talvez renomear eles).
+- [ ] Acabar de documentar o test_card.c
 
 ## Geral & Interface
 - [x] Criar menu de seleção de jogo (Golf e Simple Simon).
