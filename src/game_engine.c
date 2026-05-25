@@ -319,7 +319,7 @@ static LoopSignal handle_save(void *state, const Command UNUSED cmd) {
 
 static LoopSignal handle_load(void *state, Command UNUSED cmd) {
     engine_state *s = state;
-    load_game(&s->reg, s->cfg, "save.paciencia");
+    load_game(&s->reg, s->cfg, "TROCAR URGENTEMENTE.save");
     return LOOP_CONTINUE;
 }
 
