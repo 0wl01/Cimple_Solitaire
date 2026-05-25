@@ -394,7 +394,7 @@ void test_dsl_handle_move_valid(void) {
  */
 void test_dsl_handle_move_invalid_col(void) {
     game_cfg cfg;
-    memset(&cfg, 0, sizeof(cfg));
+    memset(&cfg, 0, sizeof(cfg)); // limpa preenchendo com zeros
     cfg.n_move_rules = 0;
     cfg.mov_rules = NULL;
 
