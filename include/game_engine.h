@@ -12,7 +12,7 @@ bool dsl_can_play(void *state);
 void print_game_table(void *state);
 void dsl_post_turn(void *state);
 bool dsl_has_won(void *state);
-bool run_dsl_game(const char *path);
+bool run_dsl_game(const char *filename, const char *folder);
 LoopSignal dsl_handle_move(void *restrict state, Command cmd);
 bool can_move_rule(const move_rules *rule, const deck_entry *src,
                    const deck_entry *dest, card_count index);
@@ -20,7 +20,8 @@ bool can_move_rule(const move_rules *rule, const deck_entry *src,
 typedef struct {
     deck_registry *reg;
     game_cfg *cfg;
-    const char *dsl_filename;
+    char dsl_filename[256];
+    const char *folder;
 } engine_state;
 
 typedef bool (*FlagCheck)(const Deck *src, const Deck *dst, card_count index);

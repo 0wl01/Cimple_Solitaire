@@ -43,8 +43,8 @@
 - [X] CUnit Setup / Teardown refatorar funções de testes que usem instruções para criação de contexto.
 - [X] FAz testes melhores seu burro
 - [X] Testar leitura de ficheiros de texti (test_dsl.c)
-- [ ] Testar a alocação (test_registry.c)
-- [ ] Testar a validação de regras (test_dsl_game.c)
+- [X] Testar a alocação (test_registry.c)
+- [X] Testar a validação de regras (test_dsl_game.c)
 
 ## Otimização
 - [x] Criar tipo próprio **size** como um uint16 para substituir o size_t (economizando 48 bits).
@@ -62,3 +62,8 @@
     - check "if (cmd.src_col < 'A' || cmd.src_col > 'Z') return 0;"
 - [X] Criar Função para Mover para as Fundações
     - Senão o jogo vai continuar impossível de ganhar
+
+## Improvments
+- [ ] Seg Fault
+- [ ] Implementar ler save game dado pelo prof
+- [ ] Implementar escolher ficheiro
