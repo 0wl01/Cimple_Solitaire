@@ -315,7 +315,19 @@ static LoopSignal handle_loadfile(void *state, Command cmd) {
     engine_state *s = state;
     char path[512];
     snprintf(path, sizeof(path), "%s/%s", s->folder, cmd.filename);
-    load_game(&s->reg, s->cfg, path);
+
+    game_cfg *new_cfg = scan_game_file(path);
+    if (!new_cfg) return LOOP_CONTINUE;
+
+    deck_registry *new_reg = build_registry(new_cfg);
+    if (!new_reg) { free_game_cfg(&new_cfg); return LOOP_CONTINUE; }
+
+    free_registry(&s->reg);
+    free_game_cfg(&s->cfg);
+
+    s->reg = new_reg;
+    s->cfg = new_cfg;
+    strncpy(s->dsl_filename, cmd.filename, sizeof(s->dsl_filename) - 1);
     return LOOP_CONTINUE;
 }
 
@@ -339,23 +351,31 @@ static const CommandDispatch dsl_dispatch[] = {
 };
 
 bool run_dsl_game(const char *filename, const char *folder) {
-  game_cfg *cfg cleanup(free_game_cfg) = scan_game_file(filename);
-  if (!cfg)
-    return false;
-  deck_registry *reg cleanup(free_registry) = build_registry(cfg);
-  if (!reg)
-    return false;
+    game_cfg *cfg = scan_game_file(filename);   // sem cleanup
+    if (!cfg) return false;
+    deck_registry *reg = build_registry(cfg);   // sem cleanup
+    if (!reg) { free_game_cfg(&cfg); return false; }
+    // iniciamos o state sem o filename
+    engine_state state = {
+        .reg = reg, .cfg = cfg, .folder = folder
+    };
+    // e copiamos o nome do ficheiro
+    strncpy(state.dsl_filename, filename, sizeof(state.dsl_filename) - 1);
+    state.dsl_filename[sizeof(state.dsl_filename) - 1] = '\0';
 
-  engine_state state = {.reg = reg, .cfg = cfg, .folder = folder};
+    const GameRunner runner = {
+        .dispatch_table = dsl_dispatch,
+        .dispatch_size  = sizeof(dsl_dispatch) / sizeof(*dsl_dispatch),
+        .can_play       = dsl_can_play,
+        .render         = print_game_table,
+        .post_turn      = dsl_post_turn,
+        .has_won        = dsl_has_won,
+    };
 
-  const GameRunner runner = {
-      .dispatch_table = dsl_dispatch,
-      .dispatch_size = sizeof(dsl_dispatch) / sizeof(*dsl_dispatch),
-      .can_play = dsl_can_play,
-      .render = print_game_table,
-      .post_turn = dsl_post_turn,
-      .has_won = dsl_has_won,
-  };
+    LoopSignal sig = run_game(&state, &runner);
 
-  return run_game(&state, &runner) == LOOP_RESTART;
+    free_registry(&state.reg);    // liberta o que estiver no state no fim
+    free_game_cfg(&state.cfg);    // (pode ser o original ou um substituído pelo f)
+
+    return sig == LOOP_RESTART;
 }

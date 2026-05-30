@@ -20,7 +20,7 @@ bool can_move_rule(const move_rules *rule, const deck_entry *src,
 typedef struct {
     deck_registry *reg;
     game_cfg *cfg;
-    const char *dsl_filename;
+    char dsl_filename[256];
     const char *folder;
 } engine_state;
 
