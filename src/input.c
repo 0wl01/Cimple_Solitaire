@@ -24,6 +24,17 @@ static Command parse_move(const char *restrict buffer) {
 }
 
 /**
+ * @brief Parses a load-file command string into a Command struct.
+ * @param buffer The input string (e.g., "f golf.paciencia").
+ * @return A populated Command struct with the filename field set.
+ */
+static Command parse_loadfile(const char *restrict buffer) {
+    Command cmd = {.type = CMD_LDF};
+    sscanf(buffer, "f %63s", cmd.filename); // 63 + '\0'
+    return cmd;
+}
+
+/**
  * @brief Turns character from an input into a command.
  *
  * @return If input is none of the ones listed in "map" then it returns a
@@ -45,9 +56,10 @@ static CommandType char_to_command(const char c) {
 }
 
 Command game_get_input() {
-  char buffer[32];
+  char buffer[512]; // too small for "f simon.paciencia"
   if (!fgets(buffer, sizeof(buffer), stdin))
     return (Command){.type = CMD_QUT};
   return buffer[0] == 'm' ? parse_move(buffer)
-                          : (Command){.type = char_to_command(buffer[0])};
+       : buffer[0] == 'f' ? parse_loadfile(buffer)
+       : (Command){.type = char_to_command(buffer[0])};
 }

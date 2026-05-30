@@ -49,8 +49,7 @@ static void print_menu_page(const char *folder, char names[MAX_GAMES][256],
 static void launch_game(const char *folder, const char *name) {
     char path[512];
     snprintf(path, sizeof(path), "%s/%s", folder, name);
-    while (run_dsl_game(path))
-        ;
+    while (run_dsl_game(path, folder));
 }
 
 static void process_choice(char c, const char *folder,

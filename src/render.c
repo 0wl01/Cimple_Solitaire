@@ -46,9 +46,10 @@ void print_game_table(void *state) {
 
 void print_game_help(void) {
     printf("m<src><index><dst> - move cards (e.g. ma3b)\n");
-    printf("s - save game\n");
-    printf("l - load game\n");
-    printf("? - help\n");
-    printf("r - restart\n");
-    printf("q - quit\n");
+    printf("s                  - save game\n");
+    printf("l                  - load game\n");
+    printf("f <ficheiro>       - load any .paciencia file\n");
+    printf("?                  - help\n");
+    printf("r                  - restart\n");
+    printf("q                  - quit\n");
 }

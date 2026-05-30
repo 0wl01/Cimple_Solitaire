@@ -13,7 +13,7 @@
 /**
  * @brief Every command type
  */
-typedef enum { CMD_MOV, CMD_HNT, CMD_HLP, CMD_RST, CMD_QUT, CMD_UNK, CMD_YES, CMD_NOT, CMD_SAV, CMD_LOD} CommandType;
+typedef enum { CMD_MOV, CMD_HNT, CMD_HLP, CMD_RST, CMD_QUT, CMD_UNK, CMD_YES, CMD_NOT, CMD_SAV, CMD_LOD, CMD_LDF} CommandType;
 
 /**
  * @brief Organizes the information from an input.
@@ -25,6 +25,7 @@ typedef struct {
     char src_col;
     size_t index;
     char dest_col;
+    char filename[64];
 } Command;
 
 #endif
