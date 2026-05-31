@@ -21,3 +21,6 @@ static inline void close_file(FILE **file) {
     if (*file)
         fclose(*file);
 }
+
+#define forIncresing(x,start_value,limit) for(size_t x = (start_value); x < (limit); ++x)
+#define forDecreasing(x,start_value,limit) for(size_t x = (start_value); x < (limit); --x) 

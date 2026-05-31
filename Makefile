@@ -1,120 +1,104 @@
-# Compiler and Base Flags
+# Compiler
 CC = gcc
-BASE_CFLAGS = -std=gnu2x -Wall -Wextra -pedantic -I include -I src
 
 # Directories
 SRC_DIR = src
-INC_DIR = include
 BUILD_DIR = build
 BIN_DIR = bin
 TEST_DIR = tests
+INC_DIR = include
 
-# Auto-detects all .c files in the src directory
-SRCS = $(wildcard $(SRC_DIR)/*.c)
-# Translates .c paths into .o paths for the build directory
-OBJS = $(SRCS:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
+# Automatically find all subdirectories in src to add them to the include path
+# This allows you to #include "bitarr.h" anywhere without needing the full "bit_arr/bitarr.h" path
+SRC_SUBDIRS := $(shell find $(SRC_DIR) -type d)
+INC_FLAGS := -I$(INC_DIR) $(addprefix -I,$(SRC_SUBDIRS))
 
-# Target Executable
+BASE_CFLAGS = -std=gnu2x -Wall -Wextra -pedantic $(INC_FLAGS)
+
+# Recursive source discovery
+SRCS := $(shell find $(SRC_DIR) -name '*.c')
+
+# Mirror source tree inside build/
+OBJS := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRCS))
+
+# Main executable
 TARGET = $(BIN_DIR)/c-litaire
 
-# Release version (Performance optimizations)
+# Build configurations
 all: CFLAGS = $(BASE_CFLAGS) -O3 -flto -march=native -DNDEBUG
-
-# Debugging versions (Debug symbols, no optimizations)
 gdb valgrind test: CFLAGS = $(BASE_CFLAGS) -g -O0
 coverage: CFLAGS = $(BASE_CFLAGS) -g -O0 --coverage
 
-# --- TEST CONFIGURATIONS ---
-# Inclui todos os objetos gerados, exceto o main.o (para evitar 2 funções main nos testes)
-TEST_OBJS = $(filter-out $(BUILD_DIR)/main.o, $(OBJS))
+# Test objects (exclude main)
+TEST_OBJS := $(filter-out $(BUILD_DIR)/main.o,$(OBJS))
 
-# Binários de Teste
 TEST_CARD_BIN = $(BIN_DIR)/test_card
 TEST_DSL_BIN = $(BIN_DIR)/test_dsl
-
-# Já preparados para as Fases 2 e 3
 TEST_REG_BIN = $(BIN_DIR)/test_registry
 TEST_GAME_BIN = $(BIN_DIR)/test_dsl_game
 
 .PHONY: all clean run test gdb valgrind coverage
 
-# Default build rule
 all: $(TARGET)
 
-# Linking the final executable
+# Link executable
 $(TARGET): $(OBJS)
 	@mkdir -p $(BIN_DIR)
 	$(CC) $(CFLAGS) $^ -o $@
-	@echo "Build successful! Executable generated at $@"
+	@echo "Build successful!"
 
-# Compiling individual object files
+# Compile source files recursively
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
-	@mkdir -p $(BUILD_DIR)
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# --- TEST RULES ---
+# ---------------- TESTS ----------------
 
-# Test execution rule
 test: $(TEST_CARD_BIN) $(TEST_DSL_BIN) $(TEST_REG_BIN) $(TEST_GAME_BIN)
 	@echo "\n--- Running Card Tests ---"
 	@./$(TEST_CARD_BIN)
-	@echo "\n--- Running DSL Parser Tests ---"
+	@echo "\n--- Running DSL Tests ---"
 	@./$(TEST_DSL_BIN)
-	@echo "\n--- Running Registry Builder Tests ---"
+	@echo "\n--- Running Registry Tests ---"
 	@./$(TEST_REG_BIN)
 	@echo "\n--- Running DSL Game Tests ---"
 	@./$(TEST_GAME_BIN)
-	@echo "\nAll tests executed successfully!"
 
-# Building Card tests
 $(TEST_CARD_BIN): $(TEST_OBJS) $(TEST_DIR)/test_card.c
 	@mkdir -p $(BIN_DIR)
 	$(CC) $(CFLAGS) $^ -o $@ -lcunit
 
-# Building DSL tests
 $(TEST_DSL_BIN): $(TEST_OBJS) $(TEST_DIR)/test_dsl.c
 	@mkdir -p $(BIN_DIR)
 	$(CC) $(CFLAGS) $^ -o $@ -lcunit
 
-# Building Registry tests
-$(TEST_REG_BIN): $(BUILD_DIR)/registry.o $(TEST_OBJS) $(TEST_DIR)/test_registry.c
+$(TEST_REG_BIN): $(TEST_OBJS) $(TEST_DIR)/test_registry.c
 	@mkdir -p $(BIN_DIR)
 	$(CC) $(CFLAGS) $^ -o $@ -lcunit
 
-# Building DSL Game tests
 $(TEST_GAME_BIN): $(TEST_OBJS) $(TEST_DIR)/test_dsl_game.c
 	@mkdir -p $(BIN_DIR)
 	$(CC) $(CFLAGS) $^ -o $@ -lcunit
 
-# --- UTILITIES ---
+# ---------------- UTILITIES ----------------
 
-# Start GNU Debugger
 gdb: all
-	@echo "\n--- Starting GNU Debugger (GDB) ---"
-	@echo "Tip: Type 'run' at the prompt to start execution."
-	@echo "     If a crash occurs, type 'bt' (backtrace) to pinpoint the exact line of failure."
 	gdb ./$(TARGET)
 
-# Start Memory Leaks Tester
 valgrind: all
-	@echo "\n--- Analyzing Memory Leaks with Valgrind ---"
-	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./$(TARGET)
+	valgrind --leak-check=full \
+	         --show-leak-kinds=all \
+	         --track-origins=yes \
+	         ./$(TARGET)
 
-# Coverage Report
 coverage: clean
-	@$(MAKE) test CFLAGS="$(BASE_CFLAGS) -g -O0 --coverage" > /dev/null
-	@echo "\n--- Relatório de Cobertura ---"
-	@find . -name "*.gcda" -exec gcov {} \; | grep -A 1 "File 'src/" | grep -v "0.00%"
+	@$(MAKE) test CFLAGS="$(BASE_CFLAGS) -g -O0 --coverage"
 
-# Cleanup rule
+run: all
+	./$(TARGET)
+
 clean:
 	rm -rf $(BUILD_DIR) $(BIN_DIR)
-	rm -f *.gcov *.gcda *.gcno
 	find . -name "*.gcda" -delete
 	find . -name "*.gcno" -delete
-	@echo "Workspace cleaned successfully!"
-
-# Build and run the main game
-run: all
-	@echo "\nStarting C-litaire...\n"
-	@./$(TARGET)
+	find . -name "*.gcov" -delete

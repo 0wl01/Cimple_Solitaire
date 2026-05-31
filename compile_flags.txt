@@ -1,4 +1,12 @@
 -Iinclude
+-Isrc/engine
+-Isrc/
+-Isrc/dsl
+-Isrc/runner
+-Isrc/bit_arr
+-Isrc/save
+-Isrc/run
+-Isrc/IO
 -Wall
 -Wextra
 -std=gnu23
