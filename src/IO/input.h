@@ -1,3 +1,8 @@
+/**
+ * @file input.h
+ * @brief Header file for the input module, responsible for reading user input.
+ */
+
 #pragma once
 #include "command.h"
 

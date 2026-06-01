@@ -1,3 +1,9 @@
+
+/**
+ * @file bitarr.h
+ * @brief Header file for the bit array module, responsible for bitwise operations on arrays.
+ */
+
 #pragma once
 
 #include <stddef.h>

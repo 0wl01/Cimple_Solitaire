@@ -1,3 +1,8 @@
+/**
+ * @file menu.h
+ * @brief Header file for the menu module, responsible for displaying the main menu.
+ */
+
 #pragma once
 #include <stdbool.h>
 #include <stdint.h>

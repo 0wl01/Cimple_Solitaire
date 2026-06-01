@@ -1,3 +1,9 @@
+
+/**
+ * @file command.h
+ * @brief Header file for the command module, responsible for parsing user input commands.
+ */
+
 #pragma once
 #include <stddef.h>
 

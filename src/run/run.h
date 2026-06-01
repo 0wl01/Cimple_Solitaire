@@ -1,3 +1,10 @@
+
+
+/**
+ * @file run.h
+ * @brief Header file for the run module, responsible for running the game.
+ */
+
 #pragma once
 #include <stdbool.h>
 

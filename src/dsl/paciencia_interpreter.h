@@ -1,3 +1,9 @@
+
+/**
+ * @file paciencia_interpreter.h
+ * @brief Header file for the paciencia interpreter module, responsible for interpreting game commands.
+ */
+
 #pragma once
 #include "bitarr.h"
 #include "card_engine.h"

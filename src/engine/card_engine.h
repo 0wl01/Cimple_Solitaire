@@ -1,3 +1,9 @@
+
+/**
+ * @file card_engine.h
+ * @brief Header file for the card engine module, responsible for managing card decks and operations.
+ */
+
 #pragma once
 
 #include "bitarr.h"

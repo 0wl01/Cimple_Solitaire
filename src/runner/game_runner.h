@@ -1,3 +1,9 @@
+
+/**
+ * @file game_runner.h
+ * @brief Header file for the game runner, responsible for managing game states.
+ */
+
 #pragma once
 
 #include "paciencia_interpreter.h"

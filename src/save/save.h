@@ -1,3 +1,8 @@
+/**
+ * @file save.h
+ * @brief Header file for saving and loading game states.
+ */
+
 #pragma once
 #include "game_runner.h"
 #include <stdbool.h>

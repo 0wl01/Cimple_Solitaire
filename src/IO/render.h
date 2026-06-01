@@ -1,3 +1,9 @@
+
+/**
+ * @file render.h
+ * @brief Header file for the render module, responsible for rendering the game.
+ */
+
 #pragma once
 #include "game_runner.h"
 #include <stdbool.h>
