@@ -158,7 +158,7 @@ static inline void second_pass_read_args(paciencia_game_t *restrict const game, 
 
 paciencia_game_t *scan_paciencia_game_file(const char *restrict const filename) {
     paciencia_game_t *restrict game = calloc(1, sizeof(paciencia_game_t));
-    FILE *restrict const file cleanup(close_file) = fopen(filename, "r");
+    FILE *file cleanup(close_file) = fopen(filename, "r");
     if (likely(game)) {
         if (likely(file)) {
             first_pass_count_args(game, file);

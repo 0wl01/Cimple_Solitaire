@@ -22,7 +22,7 @@ typedef struct {
  * @param rules The rules created by the paciencia interpreter.
  * @return A pointer to a newly allocated game state, or NULL on failure.
  */
-game_state_t *init_game_state(const paciencia_game_t *rules);
+game_state_t *init_game_state(const paciencia_game_t *restrict rules);
 
 /**
  * @brief Safely frees all memory allocated for a game state.
@@ -40,7 +40,7 @@ void free_game_state(game_state_t **state);
  * @param amount Amount of cards being moved.
  * @return true if the move is allowed, false otherwise.
  */
-bool is_move_valid(const game_state_t *state, size_t src_idx, size_t dest_idx, size_t amount);
+bool is_move_valid(const game_state_t *restrict state, const size_t src_idx, const size_t dest_idx, const size_t amount);
 
 /**
  * @brief Executes a move if it is valid.
@@ -51,7 +51,7 @@ bool is_move_valid(const game_state_t *state, size_t src_idx, size_t dest_idx, s
  * @param amount Amount of cards being moved.
  * @return true if move was executed successfully, false otherwise.
  */
-bool execute_move(game_state_t *state, size_t src_idx, size_t dest_idx, size_t amount);
+bool execute_move(const game_state_t *restrict const state, const size_t src_idx, const size_t dest_idx, const size_t amount);
 
 /**
  * @brief Chained execution of all applicable automatic moves.
@@ -60,7 +60,7 @@ bool execute_move(game_state_t *state, size_t src_idx, size_t dest_idx, size_t a
  *
  * @param state Current game state.
  */
-void execute_auto_moves(game_state_t *state);
+void execute_auto_moves(const game_state_t *restrict const state);
 
 /**
  * @brief Evaluates all victory conditions to determine if the game has been won.
@@ -68,4 +68,4 @@ void execute_auto_moves(game_state_t *state);
  * @param state Current game state.
  * @return true if all win conditions are met, false otherwise.
  */
-bool check_win_condition_met(const game_state_t *state);
+bool check_win_condition_met(const game_state_t *restrict const state);

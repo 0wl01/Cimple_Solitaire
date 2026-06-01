@@ -1,11 +1,11 @@
 #include "bitarr.h"
+#include "macros.h"
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
-#include "macros.h"
 
 // size in bits
 bit_arr_t *create_bit_arr(const size_t size) {
@@ -63,9 +63,15 @@ bit_arr_t *copy_bit_arr(const bit_arr_t *restrict const to_copy) {
     return new;
 }
 
-bool xor_bit_arr(bit_arr_t *restrict const dest, const bit_arr_t *restrict const src) { return APPLY_BIT_OP(dest, src, ^); }
-bool and_bit_arr(bit_arr_t *restrict const dest, const bit_arr_t *restrict const src) { return APPLY_BIT_OP(dest, src, &); }
-bool or_bit_arr(bit_arr_t *restrict const dest, const bit_arr_t *restrict const src) { return APPLY_BIT_OP(dest, src, |); }
+bool xor_bit_arr(bit_arr_t *restrict const dest, const bit_arr_t *restrict const src) {
+    return APPLY_BIT_OP(dest, src, ^);
+}
+bool and_bit_arr(bit_arr_t *restrict const dest, const bit_arr_t *restrict const src) {
+    return APPLY_BIT_OP(dest, src, &);
+}
+bool or_bit_arr(bit_arr_t *restrict const dest, const bit_arr_t *restrict const src) {
+    return APPLY_BIT_OP(dest, src, |);
+}
 
 void not_bit_arr(bit_arr_t *restrict const arr) {
     assert(arr != NULL);

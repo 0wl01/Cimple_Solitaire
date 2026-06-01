@@ -1,5 +1,8 @@
 #include "game_runner.h"
 #include "bitarr.h"
+#include "card_engine.h"
+#include "paciencia_interpreter.h"
+#include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -18,6 +21,14 @@ static void deal_initial_cards(const game_state_t *state, deck_t *master) {
         size_t to_deal = state->rules->deck_recipes[i].starting_cards;
         for (size_t j = 0; j < to_deal; ++j) {
             deal(master, state->decks[i]);
+        }
+        if (access_bit_arr(DECK_FLAG_HIDDEN, state->decks[i]->flags) ||
+            access_bit_arr(DECK_FLAG_TOP_VISIBLE, state->decks[i]->flags)) {
+            flip_all_cards(state->decks[i]);
+            if (access_bit_arr(DECK_FLAG_TOP_VISIBLE, state->decks[i]->flags)) {
+                const card_count top = state->decks[i]->top;
+                state->decks[i]->cards[top - 1] = flip_card(state->decks[i]->cards[top - 1]);
+            }
         }
     }
 }
@@ -59,7 +70,7 @@ game_state_t *init_game_state(const paciencia_game_t *rules) {
     if (state && rules) {
         state->rules = rules;
         state->deck_count = rules->decks_to_create;
-        state->decks = calloc(state->deck_count, sizeof(deck_t*));
+        state->decks = calloc(state->deck_count, sizeof(deck_t *));
         if (state->decks && create_state_decks(state)) {
             setup_master_and_deal(state);
         }
@@ -103,23 +114,24 @@ static bool req_diff_suit(const move_rule_t *rule, card b, card d) {
 }
 
 static bool validate_dest_full(const move_rule_t *rule, card b, card d) {
-    bool ok = true;
-    if (ok && !req_less(rule, b, d)) ok = false;
-    if (ok && !req_greater(rule, b, d)) ok = false;
-    if (ok && !req_suit(rule, b, d)) ok = false;
-    if (ok && !req_diff_suit(rule, b, d)) ok = false;
+    bool ok = req_less(rule, b, d) && req_greater(rule, b, d) && req_suit(rule, b, d) && req_diff_suit(rule, b, d);
     if (access_bit_arr(MOV_TOP_ADJACENT, rule->flags)) {
-        if (ok && !cards_are_adjacent(b, d)) ok = false;
+        if (ok && !cards_are_adjacent(b, d))
+            ok = false;
     }
     return ok;
 }
 
 static bool validate_card_props(const move_rule_t *rule, card b, card t) {
     bool ok = true;
-    if (ok && access_bit_arr(MOV_BOT_ACE, rule->flags)) ok = card_is_ace(b);
-    if (ok && access_bit_arr(MOV_BOT_KING, rule->flags)) ok = card_is_king(b);
-    if (ok && access_bit_arr(MOV_TOP_ACE, rule->flags)) ok = card_is_ace(t);
-    if (ok && access_bit_arr(MOV_TOP_KING, rule->flags)) ok = card_is_king(t);
+    if (ok && access_bit_arr(MOV_BOT_ACE, rule->flags))
+        ok = card_is_ace(b);
+    if (ok && access_bit_arr(MOV_BOT_KING, rule->flags))
+        ok = card_is_king(b);
+    if (ok && access_bit_arr(MOV_TOP_ACE, rule->flags))
+        ok = card_is_ace(t);
+    if (ok && access_bit_arr(MOV_TOP_KING, rule->flags))
+        ok = card_is_king(t);
     return ok;
 }
 
@@ -139,10 +151,10 @@ static bool validate_sequence(deck_t *src, size_t amount, seq_check_fn checker) 
     return valid;
 }
 
-static bool check_seq_pair_dec(card u, card l) { return card_value(u) == card_value(l) + 1; }
-static bool check_seq_pair_inc(card u, card l) { return card_value(u) + 1 == card_value(l); }
+static inline bool check_seq_pair_dec(const card u, const card l) { return card_value(u) == card_value(l) + 1; }
+static inline bool check_seq_pair_inc(const card u, const card l) { return card_value(u) + 1 == card_value(l); }
 
-static bool validate_seq_order(move_rule_t *r, deck_t *src, size_t amt, bool ok) {
+static inline bool validate_seq_order(const move_rule_t *restrict const r, deck_t *src, const size_t amt, bool ok) {
     if (ok && access_bit_arr(MOV_SEQ_DEC, r->flags))
         ok = validate_sequence(src, amt, check_seq_pair_dec);
     if (ok && access_bit_arr(MOV_SEQ_INC, r->flags))
@@ -150,7 +162,7 @@ static bool validate_seq_order(move_rule_t *r, deck_t *src, size_t amt, bool ok)
     return ok;
 }
 
-static bool validate_seq_suits(move_rule_t *r, deck_t *src, size_t amt, bool ok) {
+static inline bool validate_seq_suits(const move_rule_t *restrict const r, deck_t *src, const size_t amt, bool ok) {
     if (ok && access_bit_arr(MOV_SEQ_SUIT, r->flags))
         ok = validate_sequence(src, amt, cards_same_suit);
     if (ok && access_bit_arr(MOV_SEQ_ALT_SUIT, r->flags))
@@ -158,7 +170,7 @@ static bool validate_seq_suits(move_rule_t *r, deck_t *src, size_t amt, bool ok)
     return ok;
 }
 
-static bool validate_seq_colors(move_rule_t *r, deck_t *src, size_t amt, bool ok) {
+static inline bool validate_seq_colors(const move_rule_t *restrict const r, deck_t *src, const size_t amt, bool ok) {
     if (ok && access_bit_arr(MOV_SEQ_COLOR, r->flags))
         ok = validate_sequence(src, amt, cards_same_color);
     if (ok && access_bit_arr(MOV_SEQ_ALT_COLOR, r->flags))
@@ -166,67 +178,97 @@ static bool validate_seq_colors(move_rule_t *r, deck_t *src, size_t amt, bool ok
     return ok;
 }
 
-static bool validate_seq_props(move_rule_t *r, deck_t *src, size_t amt) {
+static inline bool validate_seq_props(const move_rule_t *restrict const r, deck_t *src, const size_t amt) {
     bool ok = validate_seq_order(r, src, amt, true);
     ok = validate_seq_suits(r, src, amt, ok);
     return validate_seq_colors(r, src, amt, ok);
 }
 
-static bool validate_amount(move_rule_t *r, size_t amt) {
+static inline bool validate_amount(const move_rule_t *restrict const r, const size_t amt) {
     return (amt > 1) ? access_bit_arr(MOV_SEQUENCE, r->flags) : true;
 }
 
 // ==================== CORE RULE PROCESSOR ====================
 
-static bool is_rule_valid(game_state_t *st, move_rule_t *r, size_t s, size_t d, size_t amt) {
-    deck_t *src = st->decks[s];
-    deck_t *dest = st->decks[d];
-    if (amt == 0 || src->top < amt || !validate_amount(r, amt)) return false;
-    if (access_bit_arr(MOV_ANY, r->flags)) return true;
-
-    bool dest_empty = is_deck_ptr_empty(dest);
-    if (!req_empty(r, dest_empty)) return false;
-
+static inline bool rule_valid_helper(const size_t amt, const move_rule_t *restrict const r, deck_t *restrict const src,
+                                     deck_t *restrict const dest) {
+    bool result_code = true;
     card b_card = src->cards[src->top - amt];
     card t_card = src->cards[src->top - 1];
-    if (!validate_card_props(r, b_card, t_card)) return false;
-
-    if (!dest_empty && !validate_dest_full(r, b_card, dest->cards[dest->top - 1])) {
-        return false;
+    if (!validate_card_props(r, b_card, t_card))
+        result_code = false;
+    else if (!is_deck_ptr_empty(dest) && !validate_dest_full(r, b_card, dest->cards[dest->top - 1]))
+        result_code = false;
+    else {
+        result_code = amt > 1 ? validate_seq_props(r, src, amt) : true;
     }
-    return amt > 1 ? validate_seq_props(r, src, amt) : true;
+    return result_code;
 }
 
-static bool match_rule_ids(game_state_t *st, move_rule_t *r, size_t s, size_t d) {
+static bool is_rule_valid(const game_state_t *restrict const st, const move_rule_t *restrict const r, const size_t s,
+                          const size_t d, const size_t amt) {
+    deck_t *restrict const src = st->decks[s], *restrict const dest = st->decks[d];
+    bool result_code = true;
+    if (amt == 0 || src->top < amt || !validate_amount(r, amt))
+        result_code = false;
+    else if (access_bit_arr(MOV_ANY, r->flags))
+        result_code = true;
+    else {
+
+        if (!req_empty(r, is_deck_ptr_empty(dest)))
+            result_code = false;
+
+        else {
+            result_code = rule_valid_helper(amt, r, src, dest);
+        }
+    }
+    return result_code;
+}
+
+static bool match_rule_ids(const game_state_t *restrict const st, const move_rule_t *restrict const r, const size_t s,
+                           const size_t d) {
     bool src_match = strcmp(st->decks[s]->id, r->src_id) == 0;
     bool dest_match = strcmp(st->decks[d]->id, r->dest_id) == 0;
     return src_match && dest_match;
 }
 
-bool is_move_valid(const game_state_t *state, size_t src_idx, size_t dest_idx, size_t amount) {
+bool is_move_valid(const game_state_t *restrict const state, const size_t src_idx, const size_t dest_idx,
+                   const size_t amount) {
     bool valid = false;
-    for (size_t i = 0; i < state->rules->move_rules_count; ++i) {
-        if (!valid && match_rule_ids(state, &state->rules->move_rules[i], src_idx, dest_idx)) {
-            if (is_rule_valid(state, &state->rules->move_rules[i], src_idx, dest_idx, amount)) {
-                valid = true;
+    if (amount > 0 && src_idx < state->deck_count && dest_idx < state->deck_count) {
+        for (size_t i = 0; i < state->rules->move_rules_count; ++i) {
+            if (!valid && match_rule_ids(state, &state->rules->move_rules[i], src_idx, dest_idx)) {
+                if (is_rule_valid(state, &state->rules->move_rules[i], src_idx, dest_idx, amount)) {
+                    valid = true;
+                }
             }
         }
     }
     return valid;
 }
 
-bool execute_move(game_state_t *state, size_t src_idx, size_t dest_idx, size_t amount) {
+bool execute_move(const game_state_t *restrict const state, const size_t src_idx, const size_t dest_idx,
+                  const size_t amount) {
     bool valid = is_move_valid(state, src_idx, dest_idx, amount);
     if (valid) {
         size_t pos = state->decks[src_idx]->top - amount;
         split_deck(pos, state->decks[src_idx], &state->decks[dest_idx]);
+        unflip_all(state->decks[dest_idx]);
+        if (access_bit_arr(DECK_FLAG_TOP_VISIBLE, state->decks[dest_idx]->flags) ||
+            access_bit_arr(DECK_FLAG_HIDDEN, state->decks[dest_idx]->flags)) {
+            flip_all_cards(state->decks[dest_idx]);
+            if (access_bit_arr(DECK_FLAG_TOP_VISIBLE, state->decks[dest_idx]->flags))
+                state->decks[dest_idx]->cards[state->decks[dest_idx]->top - 1] =
+                    flip_card(state->decks[dest_idx]->cards[state->decks[dest_idx]->top - 1]);
+        }
     }
     return valid;
 }
 
 // ==================== AUTO MOVES & WIN CONDITIONS ====================
 
-static bool check_and_execute_auto(game_state_t *st, move_rule_t *r, size_t s, size_t d) {
+static bool check_and_execute_auto(const game_state_t *restrict const st, const move_rule_t *restrict const r,
+                                   const size_t s, const size_t d) {
     bool moved = false;
     if (match_rule_ids(st, r, s, d)) {
         size_t max_amt = st->decks[s]->top;
@@ -241,7 +283,7 @@ static bool check_and_execute_auto(game_state_t *st, move_rule_t *r, size_t s, s
     return moved;
 }
 
-static bool try_auto_rule(game_state_t *state, move_rule_t *rule) {
+static bool try_auto_rule(const game_state_t *restrict const state, const move_rule_t *restrict const rule) {
     bool moved = false;
     for (size_t s = 0; s < state->deck_count; ++s) {
         for (size_t d = 0; d < state->deck_count; ++d) {
@@ -253,7 +295,7 @@ static bool try_auto_rule(game_state_t *state, move_rule_t *rule) {
     return moved;
 }
 
-void execute_auto_moves(game_state_t *state) {
+void execute_auto_moves(const game_state_t *restrict const state) {
     bool moved = true;
     while (moved) {
         moved = false;
@@ -265,7 +307,7 @@ void execute_auto_moves(game_state_t *state) {
     }
 }
 
-static bool check_win_condition(game_state_t *state, win_condition_t *cond) {
+static bool check_win_condition(const game_state_t *restrict const state, win_condition_t *cond) {
     bool condition_met = true;
     for (size_t i = 0; i < state->deck_count; ++i) {
         if (strcmp(state->decks[i]->id, cond->id) == 0) {
@@ -277,7 +319,7 @@ static bool check_win_condition(game_state_t *state, win_condition_t *cond) {
     return condition_met;
 }
 
-bool check_win_condition_met(const game_state_t *state) {
+bool check_win_condition_met(const game_state_t *restrict const state) {
     bool won = true;
     for (size_t i = 0; i < state->rules->win_conditions_count; ++i) {
         if (!check_win_condition(state, &state->rules->win_conditions[i])) {

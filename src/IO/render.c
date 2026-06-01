@@ -1,8 +1,7 @@
 #include "render.h"
 #include <stdio.h>
 
-static const char *const VALUES[] = {"A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"};
-static const char SUITS[] = "SHCD";
+
 
 void print_card(const card c) {
     if (card_flip(c)) {

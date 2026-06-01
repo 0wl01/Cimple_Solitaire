@@ -156,7 +156,7 @@ void unflip_all(deck_t *restrict const deck_ptr);
  * @param deck_ptr The deck_ptr array to get the bigger deck from.
  * @return A pointer to the deck with the highest top value.
  */
-deck_t *get_bigger_deck(const card_count size, deck_t *restrict const deck_ptr[]);
+deck_t *get_bigger_deck(const card_count size, deck_t *restrict const deck_ptr[size]);
 
 /**
  * @brief Resizes a deck to fit a given size.
