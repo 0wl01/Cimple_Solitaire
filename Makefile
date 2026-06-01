@@ -32,10 +32,13 @@ coverage: CFLAGS = $(BASE_CFLAGS) -g -O0 --coverage
 # Test objects (exclude main)
 TEST_OBJS := $(filter-out $(BUILD_DIR)/main.o,$(OBJS))
 
-TEST_CARD_BIN = $(BIN_DIR)/test_card
-TEST_DSL_BIN = $(BIN_DIR)/test_dsl
-TEST_REG_BIN = $(BIN_DIR)/test_registry
-TEST_GAME_BIN = $(BIN_DIR)/test_dsl_game
+TEST_BITARR_BIN = $(BIN_DIR)/test_bitarr
+TEST_CARDNEGINE_BIN = $(BIN_DIR)/test_card_engine
+TEST_PACIENCINE_BIN = $(BIN_DIR)/test_paciencia_interpreter
+TEST_IO_BIN = $(BIN_DIR)/test_io
+TEST_RUN_BIN = $(BIN_DIR)/test_run
+TEST_RUNNER_BIN = $(BIN_DIR)/test_runner
+TEST_SAVE_BIN = $(BIN_DIR)/test_save
 
 .PHONY: all clean run test gdb valgrind coverage
 
@@ -54,31 +57,50 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 
 # ---------------- TESTS ----------------
 
-test: $(TEST_CARD_BIN) $(TEST_DSL_BIN) $(TEST_REG_BIN) $(TEST_GAME_BIN)
-	@echo "\n--- Running Card Tests ---"
-	@./$(TEST_CARD_BIN)
-	@echo "\n--- Running DSL Tests ---"
-	@./$(TEST_DSL_BIN)
-	@echo "\n--- Running Registry Tests ---"
-	@./$(TEST_REG_BIN)
-	@echo "\n--- Running DSL Game Tests ---"
-	@./$(TEST_GAME_BIN)
+test: $(TEST_BITARR_BIN) $(TEST_CARDNEGINE_BIN) $(TEST_PACIENCINE_BIN) $(TEST_IO_BIN) $(TEST_RUN_BIN) $(TEST_RUNNER_BIN) $(TEST_SAVE_BIN)
+	@echo "\n--- Running Bit_Arr Tests ---"
+	@./$(TEST_BITARR_BIN)
+	@echo "\n--- Running Card Engine Tests ---"
+	@./$(TEST_CARDNEGINE_BIN)
+	@echo "\n--- Running Paciencia Tests ---"
+	@./$(TEST_PACIENCINE_BIN)
+	@echo "\n--- Running IO Tests ---"
+	@./$(TEST_IO_BIN)
+	@echo "\n--- Running Run Tests ---"
+	@./$(TEST_RUN_BIN)
+	@echo "\n--- Running Runner Tests ---"
+	@./$(TEST_RUNNER_BIN)
+	@echo "\n--- Running Save Tests ---"
+	@./$(TEST_SAVE_BIN)
 
-$(TEST_CARD_BIN): $(TEST_OBJS) $(TEST_DIR)/test_card.c
+$(TEST_BITARR_BIN): $(TEST_OBJS) $(TEST_DIR)/test_bitarr.c
 	@mkdir -p $(BIN_DIR)
 	$(CC) $(CFLAGS) $^ -o $@ -lcunit
 
-$(TEST_DSL_BIN): $(TEST_OBJS) $(TEST_DIR)/test_dsl.c
+$(TEST_CARDNEGINE_BIN): $(TEST_OBJS) $(TEST_DIR)/test_card_engine.c
 	@mkdir -p $(BIN_DIR)
 	$(CC) $(CFLAGS) $^ -o $@ -lcunit
 
-$(TEST_REG_BIN): $(TEST_OBJS) $(TEST_DIR)/test_registry.c
+$(TEST_PACIENCINE_BIN): $(TEST_OBJS) $(TEST_DIR)/test_paciencia_interpreter.c
 	@mkdir -p $(BIN_DIR)
 	$(CC) $(CFLAGS) $^ -o $@ -lcunit
 
-$(TEST_GAME_BIN): $(TEST_OBJS) $(TEST_DIR)/test_dsl_game.c
+$(TEST_IO_BIN): $(TEST_OBJS) $(TEST_DIR)/test_IO.c
 	@mkdir -p $(BIN_DIR)
 	$(CC) $(CFLAGS) $^ -o $@ -lcunit
+
+$(TEST_SAVE_BIN): $(TEST_OBJS) $(TEST_DIR)/test_save.c
+	@mkdir -p $(BIN_DIR)
+	$(CC) $(CFLAGS) $^ -o $@ -lcunit
+
+$(TEST_RUN_BIN): $(TEST_OBJS) $(TEST_DIR)/test_run.c
+	@mkdir -p $(BIN_DIR)
+	$(CC) $(CFLAGS) $^ -o $@ -lcunit
+
+$(TEST_RUNNER_BIN): $(TEST_OBJS) $(TEST_DIR)/test_runner.c
+	@mkdir -p $(BIN_DIR)
+	$(CC) $(CFLAGS) $^ -o $@ -lcunit
+
 
 # ---------------- UTILITIES ----------------
 
